@@ -1,1 +1,1 @@
-https://nine-couch-sudoku.pages.dev/
+https://nine-sudoku.ngoldbla.workers.dev/

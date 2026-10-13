@@ -67,7 +67,8 @@ the exact command to the user.
 
 ## Support and privacy pages
 
-`site/` is a static site (index, support, privacy) on Cloudflare Pages;
+`site/` is a static site (index, support, privacy) served by the Cloudflare
+Worker `nine-sudoku` (https://nine-sudoku.ngoldbla.workers.dev);
 `site/deploy.sh` publishes it with wrangler, filling `{{CONTACT_EMAIL}}` from
 `NINE_CONTACT_EMAIL`. Keep the privacy page true to `nine/PrivacyInfo.xcprivacy`
 and the App Privacy label: if the app ever collects data, all three change

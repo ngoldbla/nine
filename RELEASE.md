@@ -80,14 +80,10 @@ platform folder.
 
 Blocking — ASC will refuse submission without these:
 
-- [ ] **Publish the support and privacy pages.** They are `site/` (static
-      HTML), deployed to Cloudflare Pages by
-      `NINE_CONTACT_EMAIL=… site/deploy.sh` as project `nine-couch-sudoku`;
-      the metadata already points at
-      `https://nine-couch-sudoku.pages.dev/{support,privacy}`. If Cloudflare
-      hands out a different subdomain, update `support_url.txt`,
-      `privacy_url.txt` and `marketing_url.txt` to match. Open both URLs before
-      submitting — App Review does.
+- [x] **Support and privacy pages** — live since 2026-10-13 at
+      `https://nine-sudoku.ngoldbla.workers.dev/{support,privacy}`, a
+      static-assets Cloudflare Worker built from `site/`. Redeploy with
+      `NINE_CONTACT_EMAIL=… site/deploy.sh`; the metadata URLs already match.
 - [ ] **App Privacy questionnaire** ("nutrition label") — ASC web → App Privacy →
       *Data Not Collected*. deliver cannot set it.
 - [ ] **Price and availability: $4.99, paid up front** (decided 2026-10-13).
