@@ -20,7 +20,8 @@ xcodegen generate
 open Nine.xcodeproj      # pick a destination — Apple TV, iPhone, iPad, Mac or Watch
 ```
 
-See [BUILD.md](BUILD.md) to build and [TESTFLIGHT.md](TESTFLIGHT.md) to ship.
+See [BUILD.md](BUILD.md) to build, [TESTFLIGHT.md](TESTFLIGHT.md) to ship a build
+and [RELEASE.md](RELEASE.md) to put it on the App Store.
 
 ## Layout
 
@@ -29,7 +30,7 @@ See [BUILD.md](BUILD.md) to build and [TESTFLIGHT.md](TESTFLIGHT.md) to ship.
 | `nine/` | the app — PRDs, `project.yml`, `Sources/{App,Engine,Shared,Watch,Widgets}`, `Tests/` |
 | `nine/scripts/` | the harnesses: `simrig.py`, `ax-snapshot.py`, `contrast-harness.py`, `loc-harness.py`, `shotlist.py`, `strings.py` |
 | `couchkit/` | the shared Swift package Nine is built on — glass, typography, persistence, remote and gamepad input |
-| `fastlane/` | `beta` / `beta_app` / `beta_all` lanes: match → gym → pilot, per platform |
+| `fastlane/` | `beta` / `beta_app` / `beta_all` lanes (match → gym → pilot, per platform), `store_*` / `release` lanes and the store listing in `metadata/` (deliver) |
 | `scripts/` | `testflight.sh` (manual fallback), `generate_brand_assets.swift`, `setup_gamecenter_nine.rb` |
 | `docs/superpowers/` | dated implementation plans and design specs |
 

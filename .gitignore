@@ -66,6 +66,8 @@ fastlane/report.xml
 fastlane/Preview.html
 fastlane/README.md
 fastlane/screenshots/**/*.png
+# `store_pull` output: what App Store Connect held, for diffing against metadata/.
+fastlane/.asc-pull/
 fastlane/test_output
 *.mobileprovision
 *.p12
