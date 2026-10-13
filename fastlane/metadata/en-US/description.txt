@@ -1,10 +1,10 @@
-Nine is sudoku built for wherever you are — the couch, the train, the desk, the wrist. One purchase for iPhone, iPad, Mac and Apple Watch, and your boards follow you between them.
+Nine is sudoku built for wherever you are...on the couch, the train, the desk, or the wrist. One purchase for iPhone, iPad, Mac and Apple Watch, and your boards follow you between them.
 
 FLICK TO PLAY
 Tap a cell and a ring of nine digits blooms around it. Flick toward the one you want. On the Mac it's the arrow keys and the number keys; on Apple Watch it's the Digital Crown.
 
 PUZZLES YOU CAN TRUST
-Every board has exactly one solution and is checked by a logic solver before you see it, so you never need to guess. Three difficulty bands set which techniques a puzzle may ask for — from a relaxed first coffee to a proper fight.
+Every board has exactly one solution and is checked by a logic solver before you see it, so you never need to guess. Three difficulty bands set which techniques a puzzle may ask for... from a relaxed first coffee to a proper fight.
 
 CLASSIC, THERMO AND KILLER
 Turn the page from classic sudoku to Thermo, where digits climb along each thermometer, and Killer, where cages add up to their sums.

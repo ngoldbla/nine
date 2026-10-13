@@ -1,1 +1,1 @@
-Nine: Couch Sudoku
+Nine: Sudoku

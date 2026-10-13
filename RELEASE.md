@@ -40,6 +40,7 @@ different version records. Run it once per platform you are releasing.
 
 ```bash
 set -a && source signing.env && set +a
+export LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8   # store_check crashes on the copy's non-ASCII without it
 bundle install
 
 bundle exec fastlane ios store_check                       # offline: iOS + Mac (platform:all adds tvOS)
@@ -110,15 +111,19 @@ Blocking — ASC will refuse submission without these:
       Set it in the ASC web UI (Pricing and Availability); the covenant (no
       IAP, no ads) holds. The Paid Apps agreement, tax and banking must be
       active under Business before a paid app can go on sale.
-- [ ] **App Review contact** — `fastlane/metadata/review_information/` takes
+- [x] **App Review contact** (2026-10-13: set in ASC on iOS, copied to the Mac
+      version through the API; neither lives in the repo) — `fastlane/metadata/review_information/` takes
       `first_name.txt`, `last_name.txt`, `phone_number.txt`, `email_address.txt`.
       Not committed by default; add them locally or in ASC.
-- [ ] **Age rating** — confirm the answers in `fastlane/rating_config.json`
+- [x] **Age rating** (4+; uploaded by `store_metadata` for iOS and Mac 2026-10-13) — confirm the answers in `fastlane/rating_config.json`
       (all *None* / *No*). `store_metadata` uploads them.
 - [ ] **Screenshots for every required set above** (iPhone 6.9", iPad 13", Mac).
 - [ ] **Leave the Apple TV version unsubmitted.** If ASC created a tvOS version
-      on the record, it can sit in *Prepare for Submission* indefinitely.
-- [ ] **Marketing version** — the lanes read `MARKETING_VERSION` from
+      on the record, it can sit in *Prepare for Submission* indefinitely. (It
+      did: tvOS 1.0 sits there; nothing touches it.)
+- [x] **Marketing version** (2026-10-13: ASC's iOS and Mac versions are both
+      1.1, Prepare for Submission, Manual release; builds 721 iOS / 722 Mac
+      attached) — the lanes read `MARKETING_VERSION` from
       `nine/project.yml` (currently 1.1). If 1.1 is already live, bump it there
       and ship a new build first.
 
@@ -128,13 +133,17 @@ Before release, carried from earlier PRDs:
       schemas do not promote themselves, and library sync silently does nothing
       in a production build without it.
 - [ ] **Game Center** — upload leaderboard and achievement artwork and add Game
-      Center to the version. The live IDs are `GameCenter.ID` in
+      Center to the version. (2026-10-13: Game Center is on the iOS 1.1 version
+      with `points` and the five `solve.*` / `sharp.first` / `swift`
+      achievements attached; none has artwork yet.) The live IDs are `GameCenter.ID` in
       `nine/Sources/App/GameCenter.swift`: the streak boards, streak achievements
       and weekly table stopped receiving submissions with the daily removal
       (#58), so leave them off the version; the per-channel boards
       (`com.couchsuite.nine.points.<channel>`) have no ASC records yet, and
       channel solves submit into silence until they do.
-- [ ] **Copy review** — `fastlane/metadata/en-US/` is a first draft written from
+- [x] **Copy review** (2026-10-13: owner kept the web-UI edits — name "Nine:
+      Sudoku", no em dashes — now in the repo and pushed to iOS + Mac; ASC takes
+      no release notes on a first version) — `fastlane/metadata/en-US/` is a first draft written from
       the README, PRDs and the #58 removal. Read it against the build you are
       shipping; `release_notes.txt` especially is per-release.
 
