@@ -52,7 +52,9 @@ targets:
       # The watch app (PRD-6) rides inside the iOS app, exactly as the widget
       # does and for the same signing reason: it must never enter the tvOS or
       # macOS dependency graph. `xcodebuild -destination generic/platform=tvOS`
-      # is the check that this filter is doing its job.
+      # is the check that this filter is doing its job. Embedded means it ships
+      # with the iOS App Store version, which is why that version needs an
+      # Apple Watch screenshot set (RELEASE.md).
       - target: NineWatch
         embed: true
         destinationFilters: [iOS]

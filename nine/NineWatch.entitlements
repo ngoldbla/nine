@@ -26,8 +26,13 @@
 	       90575. Nothing on the watch would use either.
 	     • App groups. The watch's WidgetKit extension is 6b; it is the thing
 	       that needs a watch-side group, and it can add one when it exists.
-	     • Game Center. The watch reports nothing directly; a solve travels to
-	       the phone as a WatchSolveReport and the phone reports it, so the
-	       entitlement would buy a capability with no caller. -->
+	     Game Center was on this list until 2026-10-13: the watch reports
+	     nothing directly (a solve travels to the phone as a WatchSolveReport
+	     and the phone reports it), so the entitlement had no caller. App Store
+	     Connect does not care: an iOS version with Game Center attached is
+	     refused for review (STATE_ERROR.BUILD_INDICATES_GAME_CENTER_DISABLED)
+	     while its embedded watch binary lacks the key. Build 721 was. -->
+	<key>com.apple.developer.game-center</key>
+	<true/>
 </dict>
 </plist>

@@ -52,6 +52,20 @@ DEVICES = {
                  scale=2),
 }
 
+# The App Store's own sizes, which the two devices above are not: ASC requires
+# a 6.9" iPhone set (1320x2868) and a 13" iPad set (2064x2752), and accepts the
+# smaller displays only as optional extras scaled from those. Kept out of
+# `DEVICES` so `--device both` stays the two-composition critic's run; the
+# `store_screenshots_capture` lane in `fastlane/Fastfile` asks for these by name.
+STORE_DEVICES = {
+    "iphone-store": dict(device_type="iPhone 17 Pro Max", sim_name="Nine-Store-iPhone",
+                         scale=3),
+    "ipad-store": dict(device_type="iPad Pro 13-inch (M5)", sim_name="Nine-Store-iPad",
+                       scale=2),
+}
+
+ALL_DEVICES = dict(DEVICES, **STORE_DEVICES)
+
 APPEARANCES = ("light", "dark")
 
 
@@ -483,7 +497,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--device", default="iphone",
-                        choices=list(DEVICES) + ["both"])
+                        choices=list(ALL_DEVICES) + ["both"])
     parser.add_argument("--appearance", default="dark",
                         choices=list(APPEARANCES) + ["both"])
     parser.add_argument("--scenes", default="all",
@@ -518,7 +532,7 @@ def main():
     written = []
 
     for device_key in devices:
-        spec = DEVICES[device_key]
+        spec = ALL_DEVICES[device_key]
         udid = simrig.prepare_simulator(
             runtime, spec["sim_name"], spec["device_type"],
             erase=not args.no_erase, appearance=appearances[0],

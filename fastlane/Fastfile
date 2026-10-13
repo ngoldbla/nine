@@ -44,6 +44,167 @@ APPS = {
                                   "com.couchsuite.nine.watchkitapp"] }
 }.freeze
 
+# ------------------------------------------------------------- App Store
+#
+# Everything below `beta_all` is the store half: metadata, screenshots, age
+# rating and submission, all through `deliver`. It never uploads a binary —
+# builds reach App Store Connect through `beta` and are *picked* by `release`
+# by number, so the one pipeline that signs is the one that has been proven.
+#
+# Store lanes take the same `platform:` vocabulary as `beta`; deliver calls the
+# same three things ios / appletvos / osx.
+STORE_PLATFORMS = { "ios" => "ios", "tvos" => "appletvos", "mac" => "osx" }.freeze
+# What goes to the App Store this release (owner decision 2026-10-13): iOS with
+# the embedded watch app, and macOS. tvOS still ships to TestFlight through
+# `beta`; it just is not submitted.
+RELEASE_PLATFORMS = %w[ios mac].freeze
+STORE_DIR = File.expand_path(".", __dir__)
+
+# App Store Connect's limits, checked here so a too-long field fails on the
+# laptop instead of halfway through an upload. Keywords are bytes, not
+# characters, which matters the moment a locale is not ASCII.
+STORE_LIMITS = {
+  "name.txt" => 30, "subtitle.txt" => 30, "promotional_text.txt" => 170,
+  "description.txt" => 4000, "release_notes.txt" => 4000
+}.freeze
+STORE_REQUIRED = %w[name.txt description.txt keywords.txt support_url.txt privacy_url.txt].freeze
+
+# The order the store pages show, and where each picture comes from: a
+# `nine/scripts/shotlist.py` scene in one appearance. Dark-first (README rule
+# 5), with one light frame so the page admits light mode exists.
+#
+# No `home` frame: the iOS home shelf carries the Parlor's "Play together"
+# card, and the Parlor is not advertised until the owner says it ships.
+STORE_SHOTS = [
+  %w[game dark], %w[rose dark], %w[channel dark],
+  %w[school dark], %w[game light]
+].freeze
+# Scenes a store device cannot or should not take. The iPad shelf has no
+# "Next channel" pager (the channels are a segmented control), and its channel
+# page is a band of cards over an empty two-thirds of the screen — not a frame
+# the board owns.
+STORE_SHOTS_SKIP = { "ipad-store" => %w[channel] }.freeze
+
+def store_platform!(options, default: "ios")
+  plat = options.fetch(:platform, default).to_s
+  UI.user_error!("platform must be one of #{STORE_PLATFORMS.keys.join(', ')}") unless STORE_PLATFORMS.key?(plat)
+  plat
+end
+
+def marketing_version
+  yml = File.read(File.expand_path("../nine/project.yml", __dir__))
+  yml[/MARKETING_VERSION:\s*"([^"]+)"/, 1] || UI.user_error!("MARKETING_VERSION not found in nine/project.yml")
+end
+
+# Shared by every store lane. `force` skips deliver's HTML preview prompt
+# (these lanes must run unattended); IAP precheck is off because Nine has none
+# and an API key cannot read them anyway.
+def store_options(plat)
+  {
+    api_key: asc_api_key,
+    app_identifier: APPS["nine"][:bundle],
+    platform: STORE_PLATFORMS.fetch(plat),
+    app_version: marketing_version,
+    metadata_path: File.join(STORE_DIR, "metadata"),
+    screenshots_path: File.join(STORE_DIR, "screenshots", plat),
+    app_rating_config_path: File.join(STORE_DIR, "rating_config.json"),
+    skip_binary_upload: true,
+    skip_app_version_update: false,
+    force: true,
+    precheck_include_in_app_purchases: false
+  }
+end
+
+def store_locales
+  meta = File.join(STORE_DIR, "metadata")
+  Dir.children(meta).select { |d| File.directory?(File.join(meta, d)) } -
+    %w[review_information trade_representative_contact_information app_clip_review_information]
+end
+
+# Offline readiness: both return a list of problems rather than raising, so
+# one run reports all of them. Metadata is one tree shared by every platform,
+# so it is checked once; screenshots are per platform.
+def store_metadata_problems
+  problems = []
+  meta = File.join(STORE_DIR, "metadata")
+  locales = store_locales
+  problems << "no locale folders" if locales.empty?
+  locales.each do |loc|
+    dir = File.join(meta, loc)
+    STORE_REQUIRED.each do |f|
+      path = File.join(dir, f)
+      problems << "#{loc}/#{f}: missing or empty" unless File.exist?(path) && !File.read(path).strip.empty?
+    end
+    STORE_LIMITS.each do |f, max|
+      path = File.join(dir, f)
+      next unless File.exist?(path)
+      len = File.read(path, encoding: "UTF-8").strip.length
+      problems << "#{loc}/#{f}: #{len} characters (limit #{max})" if len > max
+    end
+    kw = File.join(dir, "keywords.txt")
+    if File.exist?(kw)
+      text = File.read(kw, encoding: "UTF-8").strip
+      problems << "#{loc}/keywords.txt: #{text.bytesize} bytes (limit 100)" if text.bytesize > 100
+      problems << "#{loc}/keywords.txt: use commas without spaces" if text =~ /,\s/
+    end
+    %w[support_url.txt privacy_url.txt marketing_url.txt].each do |f|
+      path = File.join(dir, f)
+      next unless File.exist?(path)
+      url = File.read(path).strip
+      problems << "#{loc}/#{f}: not an https URL (#{url})" unless url.empty? || url.start_with?("https://")
+    end
+  end
+
+  begin
+    JSON.parse(File.read(File.join(STORE_DIR, "rating_config.json")))
+  rescue StandardError => e
+    problems << "rating_config.json: #{e.message}"
+  end
+  problems
+end
+
+def store_screenshot_problems(plat)
+  problems = []
+  locales = store_locales
+  require "deliver"
+  shots_root = File.join(STORE_DIR, "screenshots", plat)
+  # What ASC refuses to publish without, per platform — each entry a display
+  # type prefix. iOS needs a Watch set because NineWatch is embedded; any
+  # watch size satisfies it (ASC scales the rest).
+  required = {
+    "ios" => %w[APP_IPHONE_67 APP_IPAD_PRO_3GEN_129 APP_WATCH_],
+    "tvos" => %w[APP_APPLE_TV],
+    "mac" => %w[APP_DESKTOP]
+  }.fetch(plat)
+  allowed = {
+    "ios" => %w[APP_IPHONE_ APP_IPAD_ APP_WATCH_],
+    "tvos" => %w[APP_APPLE_TV],
+    "mac" => %w[APP_DESKTOP]
+  }.fetch(plat)
+  locales.each do |loc|
+    pngs = Dir[File.join(shots_root, loc, "*.{png,jpg,jpeg}")].sort
+    found = Hash.new(0)
+    pngs.each do |path|
+      type = Deliver::AppScreenshot.calculate_display_type(path)
+      if type.nil?
+        size = FastImage.size(path)
+        problems << "#{loc}/#{File.basename(path)}: #{size&.join('x') || 'unreadable'} is not an App Store size"
+      elsif !type.to_s.start_with?(*allowed)
+        problems << "#{loc}/#{File.basename(path)}: #{type} does not belong on #{plat}"
+      else
+        found[type.to_s] += 1
+      end
+    end
+    required.each do |type|
+      problems << "#{loc}: no #{type.chomp('_')} set" if found.none? { |t, _| t.start_with?(type) }
+    end
+    found.each do |type, count|
+      problems << "#{loc}: #{count} #{type} shots (limit 10)" if count > 10
+    end
+  end
+  problems
+end
+
 platform :ios do
   desc "Build Nine for one platform and upload to TestFlight (platform:tvos|ios|mac, upload:false = dry run)"
   lane :beta do |options|
@@ -166,5 +327,126 @@ platform :ios do
   desc "Build + upload every platform of every app in APPS (upload:false = dry run)"
   lane :beta_all do |options|
     APPS.each_key { |app_key| beta_app(options.merge(app: app_key)) }
+  end
+
+  # ----------------------------------------------------------- App Store
+
+  desc "Offline store readiness: metadata limits, required fields, rating JSON, screenshot sizes (platform:release|all|ios|tvos|mac, screenshots:false)"
+  lane :store_check do |options|
+    plats = case options.fetch(:platform, "release").to_s
+            when "release" then RELEASE_PLATFORMS
+            when "all" then STORE_PLATFORMS.keys
+            else [store_platform!(options)]
+            end
+    with_shots = options.fetch(:screenshots, true).to_s != "false"
+    report = { "metadata" => store_metadata_problems }
+    plats.each { |plat| report["screenshots/#{plat}"] = store_screenshot_problems(plat) } if with_shots
+    report.each do |plat, problems|
+      if problems.empty?
+        UI.success("#{plat}: ready")
+      else
+        problems.each { |p| UI.error("#{plat}: #{p}") }
+      end
+    end
+    total = report.values.sum(&:size)
+    UI.user_error!("#{total} store problem(s) — see above") unless total.zero?
+  end
+
+  desc "Download what App Store Connect holds now into fastlane/.asc-pull/<platform> (never touches metadata/)"
+  lane :store_pull do |options|
+    plat = store_platform!(options)
+    require "deliver"
+    require "deliver/setup"
+    out = File.join(STORE_DIR, ".asc-pull", plat)
+    FileUtils.rm_rf(out)
+    FileUtils.mkdir_p(out)
+    config = FastlaneCore::Configuration.create(
+      Deliver::Options.available_options,
+      store_options(plat).merge(metadata_path: out).except(:app_version)
+    )
+    Deliver::Runner.new(config) # logs in and resolves the app record
+    app = Deliver.cache[:app]
+    version = app.get_latest_app_store_version(platform: Spaceship::ConnectAPI::Platform.map(config[:platform]))
+    UI.user_error!("No App Store version exists yet for #{plat}") unless version
+    Deliver::Setup.new.generate_metadata_files(app, version, out, config)
+    UI.success("#{plat} #{version.version_string} (#{version.app_store_state}) → #{out}")
+    UI.message("Compare with: diff -ru fastlane/.asc-pull/#{plat} fastlane/metadata")
+  end
+
+  desc "Upload metadata + age rating for one platform; no screenshots, no binary (platform:ios|tvos|mac)"
+  lane :store_metadata do |options|
+    plat = store_platform!(options)
+    store_check(platform: plat, screenshots: false)
+    deliver(store_options(plat).merge(skip_screenshots: true))
+  end
+
+  desc "Capture the iOS store screenshots on 6.9\" iPhone + 13\" iPad simulators via nine/scripts/shotlist.py (macOS only)"
+  lane :store_screenshots_capture do |options|
+    UI.user_error!("Simulator capture needs macOS + Xcode; this host is #{RUBY_PLATFORM}") unless FastlaneCore::Helper.mac?
+    nine = File.expand_path("../nine", __dir__)
+    raw = File.join(nine, ".build", "store-shots")
+    dest = File.join(STORE_DIR, "screenshots", "ios", "en-US")
+    FileUtils.rm_rf(raw)
+    FileUtils.mkdir_p(dest)
+    Dir.chdir(nine) { sh("xcodegen", "generate") } unless options[:no_build]
+    %w[iphone-store ipad-store].each_with_index do |device, i|
+      scenes = (STORE_SHOTS.map(&:first).uniq - STORE_SHOTS_SKIP.fetch(device, [])).join(",")
+      args = ["python3", "scripts/shotlist.py", "--device", device, "--appearance", "both",
+              "--scenes", scenes, "--out", raw]
+      # The second device reuses the first device's build products: the
+      # simulator slice is the same binary.
+      args << "--no-build" if options[:no_build] || i.positive?
+      Dir.chdir(nine) { sh(*args) }
+    end
+    Dir[File.join(dest, "*.png")].each { |f| File.delete(f) }
+    %w[iphone-store ipad-store].each do |device|
+      STORE_SHOTS.each_with_index do |(scene, appearance), i|
+        next if STORE_SHOTS_SKIP.fetch(device, []).include?(scene)
+        src = File.join(raw, "#{device}-#{appearance}-#{scene}.png")
+        UI.user_error!("shotlist did not produce #{src}") unless File.exist?(src)
+        # deliver orders a set by filename and sorts sets by pixel size, so
+        # one folder can hold both devices.
+        FileUtils.cp(src, File.join(dest, format("%02d-%s-%s-%s.png", i + 1, device, scene, appearance)))
+      end
+    end
+    store_check(platform: "ios")
+    UI.success("#{Dir[File.join(dest, '*.png')].size} screenshots in fastlane/screenshots/ios/en-US")
+  end
+
+  desc "Replace the screenshots on App Store Connect with fastlane/screenshots/<platform> (platform:ios|tvos|mac)"
+  lane :store_screenshots do |options|
+    plat = store_platform!(options)
+    store_check(platform: plat)
+    deliver(store_options(plat).merge(skip_metadata: true, overwrite_screenshots: true))
+  end
+
+  desc "Attach an uploaded build, push metadata + screenshots, and (submit:true) send for review (platform:ios|tvos|mac build:<CFBundleVersion>)"
+  lane :release do |options|
+    plat = store_platform!(options)
+    unless RELEASE_PLATFORMS.include?(plat) || options[:force_platform]
+      UI.user_error!("#{plat} is not in this release (RELEASE_PLATFORMS: #{RELEASE_PLATFORMS.join(', ')})")
+    end
+    build = options[:build].to_s
+    # No default on purpose: HEAD's commit count is not the number of the build
+    # that was tested. Name the one TestFlight already has.
+    UI.user_error!("Pass build:<number> — the CFBundleVersion of a build already on TestFlight") if build.empty?
+    store_check(platform: plat)
+    submit = options.fetch(:submit, false) == true || options[:submit].to_s == "true"
+    deliver(store_options(plat).merge(
+      build_number: build,
+      overwrite_screenshots: true,
+      submit_for_review: submit,
+      # Release is a human's button, never an approval's side effect.
+      automatic_release: false,
+      run_precheck_before_submit: submit,
+      submission_information: {
+        add_id_info_uses_idfa: false,
+        # Matches ITSAppUsesNonExemptEncryption: false in nine/project.yml.
+        export_compliance_uses_encryption: false,
+        content_rights_contains_third_party_content: false
+      }
+    ))
+    UI.success(submit ? "#{plat} #{marketing_version} (#{build}) submitted for review" :
+                        "#{plat} #{marketing_version} (#{build}) staged — re-run with submit:true to send for review")
   end
 end
