@@ -84,6 +84,11 @@ xcrun simctl launch Nine-Store-Watch com.couchsuite.nine.watchkitapp
 xcrun simctl io Nine-Store-Watch screenshot ../fastlane/screenshots/ios/en-US/20-watch-board.png
 ```
 
+The store simulators need `com.apple.gamed` if they are `simslim`-slimmed:
+Nine waits on Game Center authentication at launch, and a slim simulator
+without it shows a white screen for over three minutes
+(`simslim on <udid> --keep com.apple.gamed`).
+
 Four frames tell the story: the home list, a board mid-solve, one box zoomed
 in with the Crown dial turning, and the solve celebration. In the Simulator,
 the Crown is the scroll wheel / two-finger scroll over the watch face. Number
@@ -117,7 +122,11 @@ Blocking — ASC will refuse submission without these:
       Not committed by default; add them locally or in ASC.
 - [x] **Age rating** (4+; uploaded by `store_metadata` for iOS and Mac 2026-10-13) — confirm the answers in `fastlane/rating_config.json`
       (all *None* / *No*). `store_metadata` uploads them.
-- [ ] **Screenshots for every required set above** (iPhone 6.9", iPad 13", Mac).
+- [x] **Screenshots for every required set above** (iPhone 6.9", iPad 13", Mac).
+      (2026-10-13: uploaded — iPhone 5, iPad 4, Apple Watch 4, Mac 3. No home
+      frame while the Parlor card is unadvertised; see `STORE_SHOTS` in the
+      Fastfile. Watch frames were driven with `sim-use tap -x -y`, which works
+      on watchOS; `simctl status_bar` does not, so the watch clock is real.)
 - [ ] **Leave the Apple TV version unsubmitted.** If ASC created a tvOS version
       on the record, it can sit in *Prepare for Submission* indefinitely. (It
       did: tvOS 1.0 sits there; nothing touches it.)

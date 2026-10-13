@@ -72,10 +72,18 @@ STORE_REQUIRED = %w[name.txt description.txt keywords.txt support_url.txt privac
 # The order the store pages show, and where each picture comes from: a
 # `nine/scripts/shotlist.py` scene in one appearance. Dark-first (README rule
 # 5), with one light frame so the page admits light mode exists.
+#
+# No `home` frame: the iOS home shelf carries the Parlor's "Play together"
+# card, and the Parlor is not advertised until the owner says it ships.
 STORE_SHOTS = [
   %w[game dark], %w[rose dark], %w[channel dark],
-  %w[school dark], %w[home dark], %w[game light]
+  %w[school dark], %w[game light]
 ].freeze
+# Scenes a store device cannot or should not take. The iPad shelf has no
+# "Next channel" pager (the channels are a segmented control), and its channel
+# page is a band of cards over an empty two-thirds of the screen — not a frame
+# the board owns.
+STORE_SHOTS_SKIP = { "ipad-store" => %w[channel] }.freeze
 
 def store_platform!(options, default: "ios")
   plat = options.fetch(:platform, default).to_s
@@ -381,8 +389,8 @@ platform :ios do
     FileUtils.rm_rf(raw)
     FileUtils.mkdir_p(dest)
     Dir.chdir(nine) { sh("xcodegen", "generate") } unless options[:no_build]
-    scenes = STORE_SHOTS.map(&:first).uniq.join(",")
     %w[iphone-store ipad-store].each_with_index do |device, i|
+      scenes = (STORE_SHOTS.map(&:first).uniq - STORE_SHOTS_SKIP.fetch(device, [])).join(",")
       args = ["python3", "scripts/shotlist.py", "--device", device, "--appearance", "both",
               "--scenes", scenes, "--out", raw]
       # The second device reuses the first device's build products: the
@@ -393,6 +401,7 @@ platform :ios do
     Dir[File.join(dest, "*.png")].each { |f| File.delete(f) }
     %w[iphone-store ipad-store].each do |device|
       STORE_SHOTS.each_with_index do |(scene, appearance), i|
+        next if STORE_SHOTS_SKIP.fetch(device, []).include?(scene)
         src = File.join(raw, "#{device}-#{appearance}-#{scene}.png")
         UI.user_error!("shotlist did not produce #{src}") unless File.exist?(src)
         # deliver orders a set by filename and sorts sets by pixel size, so
@@ -401,7 +410,7 @@ platform :ios do
       end
     end
     store_check(platform: "ios")
-    UI.success("#{STORE_SHOTS.size * 2} screenshots in fastlane/screenshots/ios/en-US")
+    UI.success("#{Dir[File.join(dest, '*.png')].size} screenshots in fastlane/screenshots/ios/en-US")
   end
 
   desc "Replace the screenshots on App Store Connect with fastlane/screenshots/<platform> (platform:ios|tvos|mac)"
