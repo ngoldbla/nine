@@ -2,6 +2,7 @@
 # Publish site/ (Nine's support + privacy pages) to Cloudflare Pages.
 #
 #   NINE_CONTACT_EMAIL=you@example.com site/deploy.sh
+#   NINE_CONTACT_EMAIL=you@example.com site/deploy.sh --build-only   # dist/ + zip, no upload
 #
 # Needs CLOUDFLARE_API_TOKEN (Account → Cloudflare Pages: Edit) and
 # CLOUDFLARE_ACCOUNT_ID in the environment, or a prior `npx wrangler login`.
@@ -16,6 +17,15 @@ trap 'rm -rf "$out"' EXIT
 cp "$here"/*.html "$here"/*.css "$out"/
 sed -i.bak "s/{{CONTACT_EMAIL}}/${NINE_CONTACT_EMAIL}/g" "$out"/*.html && rm -f "$out"/*.bak
 if grep -l "{{" "$out"/*.html; then echo "unfilled placeholder above" >&2; exit 1; fi
+if [ "${1:-}" = "--build-only" ]; then
+  # For a dashboard upload (Workers & Pages → Create → Pages → Upload assets):
+  # the filled-in folder plus a zip of it, beside this script, gitignored.
+  rm -rf "$here/dist" "$here/nine-site.zip"
+  cp -R "$out" "$here/dist"
+  (cd "$here/dist" && zip -qr "$here/nine-site.zip" .)
+  echo "$here/dist"; echo "$here/nine-site.zip"
+  exit 0
+fi
 npx --yes wrangler@4 pages project create "$PROJECT" --production-branch main 2>/dev/null || true
 npx --yes wrangler@4 pages deploy "$out" --project-name "$PROJECT" --branch main --commit-dirty=true
 echo "https://$PROJECT.pages.dev/support"
