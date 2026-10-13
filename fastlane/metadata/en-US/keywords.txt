@@ -1,1 +1,1 @@
-killer,thermo,logic,puzzle,number,grid,brain,hints,techniques,classic,variants,pencil,mac,ipad
+killer,thermo,logic,puzzle,number,grid,brain,hints,techniques,classic,variants,pencil,mac,ipad,watch

@@ -40,10 +40,8 @@ APPS = {
   # mechanism of its own. It needs no `platform:` leg either: a watch app ships
   # *inside* the iOS ipa, so `beta app:nine platform:ios` already carries it.
   "nine"        => { scheme: "Nine",       bundle: "com.couchsuite.nine", ios: true, mac: true,
-                     # The watch app is out of the first App Store release
-                     # (nine/project.yml no longer embeds it). Its id stays in
-                     # the Matchfile; add it back here when it is re-embedded.
-                     extensions: ["com.couchsuite.nine.widgets"] }
+                     extensions: ["com.couchsuite.nine.widgets",
+                                  "com.couchsuite.nine.watchkitapp"] }
 }.freeze
 
 # ------------------------------------------------------------- App Store
@@ -56,8 +54,9 @@ APPS = {
 # Store lanes take the same `platform:` vocabulary as `beta`; deliver calls the
 # same three things ios / appletvos / osx.
 STORE_PLATFORMS = { "ios" => "ios", "tvos" => "appletvos", "mac" => "osx" }.freeze
-# What goes to the App Store this release (owner decision 2026-10-13). tvOS
-# still ships to TestFlight through `beta`; it just is not submitted.
+# What goes to the App Store this release (owner decision 2026-10-13): iOS with
+# the embedded watch app, and macOS. tvOS still ships to TestFlight through
+# `beta`; it just is not submitted.
 RELEASE_PLATFORMS = %w[ios mac].freeze
 STORE_DIR = File.expand_path(".", __dir__)
 
@@ -161,10 +160,11 @@ def store_screenshot_problems(plat)
   locales = store_locales
   require "deliver"
   shots_root = File.join(STORE_DIR, "screenshots", plat)
-  # What ASC refuses to publish without, per platform. Re-embedding NineWatch
-  # adds a required Watch set (APP_WATCH_*) to iOS.
+  # What ASC refuses to publish without, per platform — each entry a display
+  # type prefix. iOS needs a Watch set because NineWatch is embedded; any
+  # watch size satisfies it (ASC scales the rest).
   required = {
-    "ios" => %w[APP_IPHONE_67 APP_IPAD_PRO_3GEN_129],
+    "ios" => %w[APP_IPHONE_67 APP_IPAD_PRO_3GEN_129 APP_WATCH_],
     "tvos" => %w[APP_APPLE_TV],
     "mac" => %w[APP_DESKTOP]
   }.fetch(plat)
@@ -188,7 +188,7 @@ def store_screenshot_problems(plat)
       end
     end
     required.each do |type|
-      problems << "#{loc}: no #{type} set" if found[type].zero?
+      problems << "#{loc}: no #{type.chomp('_')} set" if found.none? { |t, _| t.start_with?(type) }
     end
     found.each do |type, count|
       problems << "#{loc}: #{count} #{type} shots (limit 10)" if count > 10

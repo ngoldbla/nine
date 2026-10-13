@@ -49,17 +49,15 @@ targets:
       - target: NineWidgets
         embed: true
         destinationFilters: [iOS]
-      # The watch app (PRD-6) is NOT embedded for the first App Store release
-      # (owner decision 2026-10-13: ship iOS + macOS first; Apple TV and Watch
-      # later). An embedded watch app ships with the iOS app and makes App Store
-      # Connect require a Watch screenshot set, so un-embedding is what keeps
-      # it out. The NineWatch target below still builds on its own. To ship it,
-      # restore this dependency — inside the iOS app, exactly as the widget,
-      # and for the same signing reason never in the tvOS or macOS graph:
-      #
-      #   - target: NineWatch
-      #     embed: true
-      #     destinationFilters: [iOS]
+      # The watch app (PRD-6) rides inside the iOS app, exactly as the widget
+      # does and for the same signing reason: it must never enter the tvOS or
+      # macOS dependency graph. `xcodebuild -destination generic/platform=tvOS`
+      # is the check that this filter is doing its job. Embedded means it ships
+      # with the iOS App Store version, which is why that version needs an
+      # Apple Watch screenshot set (RELEASE.md).
+      - target: NineWatch
+        embed: true
+        destinationFilters: [iOS]
     settings:
       base:
         SWIFT_VERSION: "6.0"

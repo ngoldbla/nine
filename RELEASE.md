@@ -6,12 +6,11 @@ the submission. It is Sub-projects 3 (`deliver`) and 4 (screenshots) of the
 fastlane roadmap in
 `docs/superpowers/specs/2026-07-12-fastlane-match-subproject-1-design.md`.
 
-**First release scope (owner decision 2026-10-13): iPhone/iPad and Mac, at
-$4.99 paid up front.** Apple TV keeps shipping to TestFlight through `beta` but
-is not submitted; `release` refuses platforms outside `RELEASE_PLATFORMS` in the
-Fastfile. The watch app is not embedded in the iOS app for this release (see
-the comment at the `NineWatch` dependency in `nine/project.yml`), so the store
-asks for no Watch screenshots.
+**First release scope (owner decision 2026-10-13): iPhone/iPad with the Apple
+Watch app, and Mac, at $4.99 paid up front.** Apple TV keeps shipping to
+TestFlight through `beta` but is not submitted; `release` refuses platforms
+outside `RELEASE_PLATFORMS` in the Fastfile. The watch app ships *inside* the
+iOS version, so that version needs an Apple Watch screenshot set.
 
 The binary never goes through these lanes. `beta` uploads it; `release` attaches
 it **by build number**, so the only pipeline that signs is the one already
@@ -65,9 +64,29 @@ the number of the build that was tested. Use the number TestFlight shows
 |---|---|---|---|
 | iOS | 6.9" iPhone | 1320×2868 | `store_screenshots_capture` (iPhone 17 Pro Max simulator) |
 | iOS | 13" iPad | 2064×2752 | `store_screenshots_capture` (iPad Pro 13-inch (M5) simulator) |
+| iOS | Apple Watch | 422×514 (Ultra 3, 49mm) or 416×496 (Series 11, 46mm) | manual — see below |
 | macOS | Mac | 2880×1800 (or 2560×1600, 1440×900, 1280×800) | manual — a 16:10 window capture |
-| *later* iOS | Apple Watch, once NineWatch is re-embedded | 422×514 (Ultra 3) | manual — Watch simulator + `xcrun simctl io <udid> screenshot` |
 | *later* tvOS | Apple TV | 3840×2160 | manual — `.claude/skills/run-nine` + `xcrun simctl io <udid> screenshot` |
+
+**Apple Watch, by hand** (one size is enough; ASC scales it to the others):
+
+```bash
+cd nine && xcodegen generate
+xcrun simctl create Nine-Store-Watch "Apple Watch Ultra 3 (49mm)"   # once; prints a udid
+xcrun simctl boot Nine-Store-Watch && open -a Simulator
+xcodebuild -project Nine.xcodeproj -scheme NineWatch \
+  -destination 'platform=watchOS Simulator,name=Nine-Store-Watch' \
+  -derivedDataPath .build/watch build CODE_SIGNING_ALLOWED=NO
+xcrun simctl install Nine-Store-Watch "$(find .build/watch/Build/Products -name 'NineWatch.app' -maxdepth 3 | head -1)"
+xcrun simctl launch Nine-Store-Watch com.couchsuite.nine.watchkitapp
+# drive it in the Simulator window, then for each frame:
+xcrun simctl io Nine-Store-Watch screenshot ../fastlane/screenshots/ios/en-US/20-watch-board.png
+```
+
+Four frames tell the story: the home list, a board mid-solve, one box zoomed
+in with the Crown dial turning, and the solve celebration. In the Simulator,
+the Crown is the scroll wheel / two-finger scroll over the watch face. Number
+the files `20-…` onward so they sort after the phone and iPad sets.
 
 The iOS capture reuses `nine/scripts/shotlist.py` — the same seeded, frozen
 container the AX, contrast and localization lanes photograph against, status bar

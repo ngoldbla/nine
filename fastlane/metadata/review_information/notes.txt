@@ -1,3 +1,3 @@
 Nine needs no account, no sign-in and no permissions — every feature works offline from first launch. Game Center and iCloud are optional: a reviewer signed out of both still has the full game.
 
-To play: tap any empty cell to open the ring of digits, then tap or flick a digit to place it. On Mac, use the arrow keys and number keys.
+To play: tap any empty cell to open the ring of digits, then tap or flick a digit to place it. On Mac, use the arrow keys and number keys. On Apple Watch, tap a box to zoom in, tap a cell and turn the Digital Crown to choose a digit.

@@ -12,9 +12,9 @@ Two documents are the source of truth; read the one you need before acting:
   (`store_*` and `release` lanes) and the account-side checklist.
 
 **Current scope:** the first App Store release is iOS + macOS at $4.99
-(`RELEASE_PLATFORMS`); Apple TV goes to TestFlight only and the watch app is not
-embedded. Don't put tvOS or Watch features in store copy or screenshots until
-the owner widens that.
+(`RELEASE_PLATFORMS`), with the watch app embedded in the iOS app and shipping
+with it; Apple TV goes to TestFlight only. Don't put tvOS features in store copy
+or screenshots until the owner widens that.
 
 Lanes live in `fastlane/Fastfile` under `platform :ios`, so they are invoked as
 `bundle exec fastlane ios <lane>`. Every lane takes `platform:tvos|ios|mac`.
