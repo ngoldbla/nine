@@ -66,7 +66,7 @@ the number of the build that was tested. Use the number TestFlight shows
 | iOS | 6.9" iPhone | 1320×2868 | `store_screenshots_capture` (iPhone 17 Pro Max simulator) |
 | iOS | 13" iPad | 2064×2752 | `store_screenshots_capture` (iPad Pro 13-inch (M5) simulator) |
 | iOS | Apple Watch | 422×514 (Ultra 3, 49mm) or 416×496 (Series 11, 46mm) | manual — see below |
-| macOS | Mac | 2880×1800 (or 2560×1600, 1440×900, 1280×800) | manual — a 16:10 window capture |
+| macOS | Mac | 2880×1800 (or 2560×1600, 1440×900, 1280×800) | `scripts/mac-store-shots.sh` (Release build, seeded state; park the pointer at the left edge first) |
 | *later* tvOS | Apple TV | 3840×2160 | manual — `.claude/skills/run-nine` + `xcrun simctl io <udid> screenshot` |
 
 **Apple Watch, by hand** (one size is enough; ASC scales it to the others):
