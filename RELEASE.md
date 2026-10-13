@@ -111,7 +111,7 @@ Blocking — ASC will refuse submission without these:
       `NINE_CONTACT_EMAIL=… site/deploy.sh`; the metadata URLs already match.
 - [x] **App Privacy questionnaire** (published 2026-10-13: Data Not Collected; privacy URL set) ("nutrition label") — ASC web → App Privacy →
       *Data Not Collected*. deliver cannot set it.
-- [x] **Price and availability: $4.99, paid up front** (set 2026-10-13; Paid Apps agreement was still pending bank + W-9) (decided 2026-10-13).
+- [x] **Price and availability: $4.99, paid up front** (set 2026-10-13; Paid Apps agreement, bank and W-9 submitted 2026-10-13, awaiting Apple's processing — confirm it reads Active under Business before submitting) (decided 2026-10-13).
       Universal purchase is automatic — one bundle id across iOS and macOS.
       Set it in the ASC web UI (Pricing and Availability); the covenant (no
       IAP, no ads) holds. The Paid Apps agreement, tax and banking must be
