@@ -131,8 +131,10 @@ Blocking — ASC will refuse submission without these:
       on the record, it can sit in *Prepare for Submission* indefinitely. (It
       did: tvOS 1.0 sits there; nothing touches it.)
 - [x] **Marketing version** (2026-10-13: ASC's iOS and Mac versions are both
-      1.1, Prepare for Submission, Manual release; builds 721 iOS / 722 Mac
-      attached) — the lanes read `MARKETING_VERSION` from
+      1.1, Manual release. Submitted for review 2026-10-13: iOS build **861**
+      (721 was refused — its NineWatch lacked the Game Center key) and Mac
+      build 722, after Game Center was enabled on the Mac version too —
+      ASC refuses a build/version mismatch either way round) — the lanes read `MARKETING_VERSION` from
       `nine/project.yml` (currently 1.1). If 1.1 is already live, bump it there
       and ship a new build first.
 
