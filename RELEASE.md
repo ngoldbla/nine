@@ -138,7 +138,10 @@ Blocking — ASC will refuse submission without these:
 
 Before release, carried from earlier PRDs:
 
-- [ ] **Deploy the CloudKit schema to Production** (PRD-7 §5) — development
+- [x] **Deploy the CloudKit schema to Production** (2026-10-13: Development
+      had no record types — no build had ever synced — so `LibraryEntry` and
+      `SolveReplay` were created there by hand from `LibraryCloudStore` and
+      deployed; the deployed schema is `nine/CloudKit/schema.ckdb`) (PRD-7 §5) — development
       schemas do not promote themselves, and library sync silently does nothing
       in a production build without it.
 - [x] **Game Center** — upload leaderboard and achievement artwork and add Game

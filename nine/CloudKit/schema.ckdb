@@ -1,0 +1,36 @@
+// iCloud.com.couchsuite.nine — the schema deployed to Production on 2026-10-13.
+// Mirrors LibraryCloudStore.makeRecord / makeReplayRecord (private database,
+// zone "NineLibrary"). Production fields can never be removed or renamed: new
+// data goes inside `payload`, which is why each type has one blob and only a
+// couple of scalars kept for console debugging.
+DEFINE SCHEMA
+
+    RECORD TYPE LibraryEntry (
+        "___createTime" TIMESTAMP,
+        "___createdBy"  REFERENCE,
+        "___etag"       STRING,
+        "___modTime"    TIMESTAMP,
+        "___modifiedBy" REFERENCE,
+        "___recordID"   REFERENCE,
+        payload         BYTES,
+        status          STRING,
+        updatedAt       TIMESTAMP,
+        GRANT WRITE TO "_creator",
+        GRANT CREATE TO "_icloud",
+        GRANT READ TO "_world"
+    );
+
+    RECORD TYPE SolveReplay (
+        "___createTime" TIMESTAMP,
+        "___createdBy"  REFERENCE,
+        "___etag"       STRING,
+        "___modTime"    TIMESTAMP,
+        "___modifiedBy" REFERENCE,
+        "___recordID"   REFERENCE,
+        band            STRING,
+        payload         BYTES,
+        solvedAt        TIMESTAMP,
+        GRANT WRITE TO "_creator",
+        GRANT CREATE TO "_icloud",
+        GRANT READ TO "_world"
+    );
