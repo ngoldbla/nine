@@ -6,6 +6,13 @@ the submission. It is Sub-projects 3 (`deliver`) and 4 (screenshots) of the
 fastlane roadmap in
 `docs/superpowers/specs/2026-07-12-fastlane-match-subproject-1-design.md`.
 
+**First release scope (owner decision 2026-10-13): iPhone/iPad and Mac, at
+$4.99 paid up front.** Apple TV keeps shipping to TestFlight through `beta` but
+is not submitted; `release` refuses platforms outside `RELEASE_PLATFORMS` in the
+Fastfile. The watch app is not embedded in the iOS app for this release (see
+the comment at the `NineWatch` dependency in `nine/project.yml`), so the store
+asks for no Watch screenshots.
+
 The binary never goes through these lanes. `beta` uploads it; `release` attaches
 it **by build number**, so the only pipeline that signs is the one already
 proven by TestFlight.
@@ -36,7 +43,7 @@ different version records. Run it once per platform you are releasing.
 set -a && source signing.env && set +a
 bundle install
 
-bundle exec fastlane ios store_check                       # offline: limits, required fields, screenshot sizes
+bundle exec fastlane ios store_check                       # offline: iOS + Mac (platform:all adds tvOS)
 bundle exec fastlane ios store_pull platform:ios           # what ASC holds now → fastlane/.asc-pull/ios
 bundle exec fastlane ios store_metadata platform:ios       # text + age rating, no screenshots
 bundle exec fastlane ios store_screenshots_capture         # macOS: simulators → fastlane/screenshots/ios
@@ -58,9 +65,9 @@ the number of the build that was tested. Use the number TestFlight shows
 |---|---|---|---|
 | iOS | 6.9" iPhone | 1320×2868 | `store_screenshots_capture` (iPhone 17 Pro Max simulator) |
 | iOS | 13" iPad | 2064×2752 | `store_screenshots_capture` (iPad Pro 13-inch (M5) simulator) |
-| iOS | Apple Watch (the app embeds NineWatch) | 422×514 (Ultra 3) | manual — Watch simulator + `xcrun simctl io <udid> screenshot` |
-| tvOS | Apple TV | 3840×2160 | manual — `.claude/skills/run-nine` + `xcrun simctl io <udid> screenshot` |
 | macOS | Mac | 2880×1800 (or 2560×1600, 1440×900, 1280×800) | manual — a 16:10 window capture |
+| *later* iOS | Apple Watch, once NineWatch is re-embedded | 422×514 (Ultra 3) | manual — Watch simulator + `xcrun simctl io <udid> screenshot` |
+| *later* tvOS | Apple TV | 3840×2160 | manual — `.claude/skills/run-nine` + `xcrun simctl io <udid> screenshot` |
 
 The iOS capture reuses `nine/scripts/shotlist.py` — the same seeded, frozen
 container the AX, contrast and localization lanes photograph against, status bar
@@ -73,22 +80,29 @@ platform folder.
 
 Blocking — ASC will refuse submission without these:
 
-- [ ] **Support URL and privacy policy URL.** Nine has no website. Create
-      `fastlane/metadata/en-US/support_url.txt` and `privacy_url.txt` (https).
-      The policy is short: Nine collects nothing; boards sync through the
-      player's own iCloud; Game Center is Apple's.
+- [ ] **Publish the support and privacy pages.** They are `site/` (static
+      HTML), deployed to Cloudflare Pages by
+      `NINE_CONTACT_EMAIL=… site/deploy.sh` as project `nine-couch-sudoku`;
+      the metadata already points at
+      `https://nine-couch-sudoku.pages.dev/{support,privacy}`. If Cloudflare
+      hands out a different subdomain, update `support_url.txt`,
+      `privacy_url.txt` and `marketing_url.txt` to match. Open both URLs before
+      submitting — App Review does.
 - [ ] **App Privacy questionnaire** ("nutrition label") — ASC web → App Privacy →
       *Data Not Collected*. deliver cannot set it.
-- [ ] **Price and availability** — PRD-7 planned $4.99 paid up front, universal
-      purchase (automatic: one bundle id across iOS, tvOS and macOS); PROGRAM-2.0
-      deferred the decision. Set it in the ASC web UI; the covenant (no IAP, no
-      ads) holds either way.
+- [ ] **Price and availability: $4.99, paid up front** (decided 2026-10-13).
+      Universal purchase is automatic — one bundle id across iOS and macOS.
+      Set it in the ASC web UI (Pricing and Availability); the covenant (no
+      IAP, no ads) holds. The Paid Apps agreement, tax and banking must be
+      active under Business before a paid app can go on sale.
 - [ ] **App Review contact** — `fastlane/metadata/review_information/` takes
       `first_name.txt`, `last_name.txt`, `phone_number.txt`, `email_address.txt`.
       Not committed by default; add them locally or in ASC.
 - [ ] **Age rating** — confirm the answers in `fastlane/rating_config.json`
       (all *None* / *No*). `store_metadata` uploads them.
-- [ ] **Screenshots for every required set above**, Apple Watch included.
+- [ ] **Screenshots for every required set above** (iPhone 6.9", iPad 13", Mac).
+- [ ] **Leave the Apple TV version unsubmitted.** If ASC created a tvOS version
+      on the record, it can sit in *Prepare for Submission* indefinitely.
 - [ ] **Marketing version** — the lanes read `MARKETING_VERSION` from
       `nine/project.yml` (currently 1.1). If 1.1 is already live, bump it there
       and ship a new build first.

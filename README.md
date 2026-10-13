@@ -31,6 +31,7 @@ and [RELEASE.md](RELEASE.md) to put it on the App Store.
 | `nine/scripts/` | the harnesses: `simrig.py`, `ax-snapshot.py`, `contrast-harness.py`, `loc-harness.py`, `shotlist.py`, `strings.py` |
 | `couchkit/` | the shared Swift package Nine is built on — glass, typography, persistence, remote and gamepad input |
 | `fastlane/` | `beta` / `beta_app` / `beta_all` lanes (match → gym → pilot, per platform), `store_*` / `release` lanes and the store listing in `metadata/` (deliver) |
+| `site/` | the support + privacy pages the App Store listing links to (Cloudflare Pages, `site/deploy.sh`) |
 | `scripts/` | `testflight.sh` (manual fallback), `generate_brand_assets.swift`, `setup_gamecenter_nine.rb` |
 | `docs/superpowers/` | dated implementation plans and design specs |
 

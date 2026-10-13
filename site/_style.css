@@ -1,0 +1,15 @@
+:root{--bg:#000;--fg:#f2f2f2;--muted:#9a9a9a;--rule:#222;--accent:#7fd4ff}
+@media (prefers-color-scheme: light){:root{--bg:#fbfbfb;--fg:#111;--muted:#5c5c5c;--rule:#e2e2e2;--accent:#0a6ea8}}
+*{box-sizing:border-box}
+html{background:var(--bg);color:var(--fg);font:17px/1.6 -apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Arial,sans-serif;-webkit-text-size-adjust:100%}
+body{margin:0;padding:64px 20px 96px;background:var(--bg)}
+main{max-width:640px;margin:0 auto}
+.mark{font:700 15px/1 ui-monospace,"SF Mono",Menlo,monospace;letter-spacing:.3em;color:var(--muted);text-decoration:none}
+h1{font-size:34px;line-height:1.15;margin:28px 0 8px;letter-spacing:-.01em}
+h2{font-size:19px;margin:40px 0 8px}
+p,li{color:var(--fg)}
+.lede{color:var(--muted);margin-top:0}
+a{color:var(--accent)}
+ul{padding-left:1.2em}
+footer{margin-top:64px;padding-top:20px;border-top:1px solid var(--rule);color:var(--muted);font-size:14px}
+footer a{color:var(--muted);margin-right:16px}

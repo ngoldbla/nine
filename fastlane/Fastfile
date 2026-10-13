@@ -40,8 +40,10 @@ APPS = {
   # mechanism of its own. It needs no `platform:` leg either: a watch app ships
   # *inside* the iOS ipa, so `beta app:nine platform:ios` already carries it.
   "nine"        => { scheme: "Nine",       bundle: "com.couchsuite.nine", ios: true, mac: true,
-                     extensions: ["com.couchsuite.nine.widgets",
-                                  "com.couchsuite.nine.watchkitapp"] }
+                     # The watch app is out of the first App Store release
+                     # (nine/project.yml no longer embeds it). Its id stays in
+                     # the Matchfile; add it back here when it is re-embedded.
+                     extensions: ["com.couchsuite.nine.widgets"] }
 }.freeze
 
 # ------------------------------------------------------------- App Store
@@ -54,6 +56,9 @@ APPS = {
 # Store lanes take the same `platform:` vocabulary as `beta`; deliver calls the
 # same three things ios / appletvos / osx.
 STORE_PLATFORMS = { "ios" => "ios", "tvos" => "appletvos", "mac" => "osx" }.freeze
+# What goes to the App Store this release (owner decision 2026-10-13). tvOS
+# still ships to TestFlight through `beta`; it just is not submitted.
+RELEASE_PLATFORMS = %w[ios mac].freeze
 STORE_DIR = File.expand_path(".", __dir__)
 
 # App Store Connect's limits, checked here so a too-long field fails on the
@@ -156,9 +161,8 @@ def store_screenshot_problems(plat)
   locales = store_locales
   require "deliver"
   shots_root = File.join(STORE_DIR, "screenshots", plat)
-  # What ASC refuses to publish without, per platform. A watch set is required
-  # too once NineWatch ships inside the iOS app; it is listed, not enforced,
-  # until there is a lane that captures it.
+  # What ASC refuses to publish without, per platform. Re-embedding NineWatch
+  # adds a required Watch set (APP_WATCH_*) to iOS.
   required = {
     "ios" => %w[APP_IPHONE_67 APP_IPAD_PRO_3GEN_129],
     "tvos" => %w[APP_APPLE_TV],
@@ -319,9 +323,13 @@ platform :ios do
 
   # ----------------------------------------------------------- App Store
 
-  desc "Offline store readiness: metadata limits, required fields, rating JSON, screenshot sizes (platform:all|ios|tvos|mac, screenshots:false)"
+  desc "Offline store readiness: metadata limits, required fields, rating JSON, screenshot sizes (platform:release|all|ios|tvos|mac, screenshots:false)"
   lane :store_check do |options|
-    plats = options.fetch(:platform, "all").to_s == "all" ? STORE_PLATFORMS.keys : [store_platform!(options)]
+    plats = case options.fetch(:platform, "release").to_s
+            when "release" then RELEASE_PLATFORMS
+            when "all" then STORE_PLATFORMS.keys
+            else [store_platform!(options)]
+            end
     with_shots = options.fetch(:screenshots, true).to_s != "false"
     report = { "metadata" => store_metadata_problems }
     plats.each { |plat| report["screenshots/#{plat}"] = store_screenshot_problems(plat) } if with_shots
@@ -406,6 +414,9 @@ platform :ios do
   desc "Attach an uploaded build, push metadata + screenshots, and (submit:true) send for review (platform:ios|tvos|mac build:<CFBundleVersion>)"
   lane :release do |options|
     plat = store_platform!(options)
+    unless RELEASE_PLATFORMS.include?(plat) || options[:force_platform]
+      UI.user_error!("#{plat} is not in this release (RELEASE_PLATFORMS: #{RELEASE_PLATFORMS.join(', ')})")
+    end
     build = options[:build].to_s
     # No default on purpose: HEAD's commit count is not the number of the build
     # that was tested. Name the one TestFlight already has.

@@ -11,6 +11,11 @@ Two documents are the source of truth; read the one you need before acting:
 - `RELEASE.md` — the store: metadata, screenshots, age rating, submission
   (`store_*` and `release` lanes) and the account-side checklist.
 
+**Current scope:** the first App Store release is iOS + macOS at $4.99
+(`RELEASE_PLATFORMS`); Apple TV goes to TestFlight only and the watch app is not
+embedded. Don't put tvOS or Watch features in store copy or screenshots until
+the owner widens that.
+
 Lanes live in `fastlane/Fastfile` under `platform :ios`, so they are invoked as
 `bundle exec fastlane ios <lane>`. Every lane takes `platform:tvos|ios|mac`.
 
@@ -59,6 +64,15 @@ the exact command to the user.
 - A new locale is a new folder named with an ASC locale code (`de-DE`, `ja`,
   `pt-BR`, `zh-Hans` …) holding at least `name.txt`, `description.txt`,
   `keywords.txt`, `support_url.txt`, `privacy_url.txt`.
+
+## Support and privacy pages
+
+`site/` is a static site (index, support, privacy) on Cloudflare Pages;
+`site/deploy.sh` publishes it with wrangler, filling `{{CONTACT_EMAIL}}` from
+`NINE_CONTACT_EMAIL`. Keep the privacy page true to `nine/PrivacyInfo.xcprivacy`
+and the App Privacy label: if the app ever collects data, all three change
+together. Never commit a filled-in contact address you weren't given for that
+purpose.
 
 ## Screenshots
 

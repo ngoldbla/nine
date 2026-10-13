@@ -209,6 +209,10 @@ Verify with `fastlane beta app:nine platform:ios upload:false`.
 
 ## The watch app (Nine iOS, one-time — REQUIRED BEFORE MERGING PRD-6)
 
+> **2026-10-13:** the iOS app no longer embeds `NineWatch` — the first App
+> Store release is iOS + macOS only (see RELEASE.md). The steps below are what
+> re-embedding it needs; the profile already exists in match.
+
 Nine iOS now embeds `NineWatch` (`com.couchsuite.nine.watchkitapp`), whose only
 entitlement is iCloud key-value storage pinned to the *app's* identifier. Same
 hazard as the widget, and the same order — **embedding a new bundle changes the
