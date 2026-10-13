@@ -84,9 +84,9 @@ Blocking — ASC will refuse submission without these:
       `https://nine-sudoku.ngoldbla.workers.dev/{support,privacy}`, a
       static-assets Cloudflare Worker built from `site/`. Redeploy with
       `NINE_CONTACT_EMAIL=… site/deploy.sh`; the metadata URLs already match.
-- [ ] **App Privacy questionnaire** ("nutrition label") — ASC web → App Privacy →
+- [x] **App Privacy questionnaire** (published 2026-10-13: Data Not Collected; privacy URL set) ("nutrition label") — ASC web → App Privacy →
       *Data Not Collected*. deliver cannot set it.
-- [ ] **Price and availability: $4.99, paid up front** (decided 2026-10-13).
+- [x] **Price and availability: $4.99, paid up front** (set 2026-10-13; Paid Apps agreement was still pending bank + W-9) (decided 2026-10-13).
       Universal purchase is automatic — one bundle id across iOS and macOS.
       Set it in the ASC web UI (Pricing and Availability); the covenant (no
       IAP, no ads) holds. The Paid Apps agreement, tax and banking must be
