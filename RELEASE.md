@@ -141,10 +141,11 @@ Before release, carried from earlier PRDs:
 - [ ] **Deploy the CloudKit schema to Production** (PRD-7 §5) — development
       schemas do not promote themselves, and library sync silently does nothing
       in a production build without it.
-- [ ] **Game Center** — upload leaderboard and achievement artwork and add Game
+- [x] **Game Center** — upload leaderboard and achievement artwork and add Game
       Center to the version. (2026-10-13: Game Center is on the iOS 1.1 version
       with `points` and the five `solve.*` / `sharp.first` / `swift`
-      achievements attached; none has artwork yet.) The live IDs are `GameCenter.ID` in
+      achievements attached; artwork from `scripts/gamecenter_art.py`
+      (`fastlane/gamecenter/`, 1024x1024 RGB) uploaded and processed.) The live IDs are `GameCenter.ID` in
       `nine/Sources/App/GameCenter.swift`: the streak boards, streak achievements
       and weekly table stopped receiving submissions with the daily removal
       (#58), so leave them off the version; the per-channel boards
