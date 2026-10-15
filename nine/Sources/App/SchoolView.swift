@@ -225,6 +225,8 @@ struct SchoolView: View {
             .offset(y: dragOffset)
             .padding(Space.l)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
+            // PRD-37: the index in the leading pane; the scrim stays full-screen.
+            .inLeadingFoldPane()
         }
         // The shelf underneath stays on screen and, without this, stays in the
         // accessibility tree: `describe-ui` read the difficulty cards *through*

@@ -607,6 +607,8 @@ struct TutorialView: View {
     @Environment(\.nineTheme) private var theme
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    /// PRD-37: the open iPhone Duo's fold; nil everywhere else.
+    @Environment(\.foldBand) private var foldBand
 
     private var tones: ThemeTones { theme.tones(for: colorScheme) }
     /// Secondary and tertiary text, tinted to the board rather than to the
@@ -625,7 +627,11 @@ struct TutorialView: View {
             let wide = geo.size.width - 2 * Space.l > Self.cardMaxWidth
             ZStack {
                 scrim(geo: geo)
-                card(geo: geo, wide: wide)
+                if let band = foldBand {
+                    spreadCards(geo: geo, band: band)
+                } else {
+                    card(geo: geo, wide: wide)
+                }
             }
         }
         .task { await composePracticeBoard() }
@@ -655,6 +661,39 @@ struct TutorialView: View {
     /// that is genuinely doing compositional work. That is also what makes it a
     /// floating card with equal insets rather than a full-bleed panel with two
     /// voids in it.
+    /// PRD-37: the open iPhone Duo. The practice board on the leading page,
+    /// the words on the trailing one, the fold between them. The board sizes
+    /// itself from its own pane's geometry, exactly as `card` sizes it from
+    /// the window's.
+    private func spreadCards(geo: GeometryProxy, band: FoldBand) -> some View {
+        HStack(spacing: CGFloat(band.width)) {
+            GeometryReader { pane in
+                beat(geo: pane, wide: false)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            }
+            .padding(Space.xl)
+            .learnCard(in: cardShape, tones: tones)
+            .padding(Space.l)
+            .frame(width: CGFloat(band.leading))
+            VStack(alignment: .leading, spacing: 0) {
+                if isTouch {
+                    header.simultaneousGesture(dismissDrag)
+                } else {
+                    header
+                }
+                instruction
+                    .padding(.top, Space.m)
+                Spacer(minLength: Rhythm.cluster)
+                bottomBar
+            }
+            .padding(Space.xl)
+            .learnCard(in: cardShape, tones: tones)
+            .padding(Space.l)
+            .frame(width: geo.size.width - CGFloat(band.trailing))
+        }
+        .offset(y: dragOffset)
+    }
+
     private func card(geo: GeometryProxy, wide: Bool) -> some View {
         VStack(spacing: 0) {
             // The grabber and the title are one unit because the grabber is

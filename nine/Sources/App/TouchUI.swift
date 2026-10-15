@@ -34,6 +34,8 @@ struct TouchHomeView: View {
     /// mirror, decision 3 of PRD-20 — a pager genuinely should. See
     /// `pageTurnGesture`.
     @Environment(\.layoutDirection) private var layoutDirection
+    /// PRD-37: the open iPhone Duo's fold; nil everywhere else.
+    @Environment(\.foldBand) private var foldBand
 
     /// The accent resolved for the theme's leaning (themes pin the scheme).
     private var accent: Color { model.prefs.accent.color(isLight: colorScheme == .light) }
@@ -70,7 +72,7 @@ struct TouchHomeView: View {
                 // question; `theTableIsAlwaysAlsoAShelfPair` pins that the two
                 // can still never disagree in the direction that would matter.
                 let shelf = BoardCompositionRules.resolveShelf(
-                    width: Double(geo.size.width), height: Double(geo.size.height))
+                    width: Double(geo.size.width), height: Double(geo.size.height), fold: foldBand)
                 ScrollView {
                     if let pair = shelf.pair {
                         shelfPair(pair)
@@ -97,7 +99,10 @@ struct TouchHomeView: View {
                 // shelf there was nothing on screen naming the app or saying
                 // which channel page you were on.
                 .safeAreaInset(edge: .top, spacing: 0) {
-                    shelfBar(width: CGFloat(shelf.contentWidth))
+                    shelfBar(width: CGFloat(shelf.contentWidth),
+                             // PRD-37: on the open Duo the pager stays in the
+                             // left column instead of centring on the crease.
+                             pagerWidth: foldBand == nil ? nil : shelf.pair.map { CGFloat($0.columnWidth) })
                 }
                 // Above the `ScrollView`'s own content and simultaneous with it, so
                 // the shelf still scrolls vertically and the six cards still take
@@ -209,10 +214,11 @@ struct TouchHomeView: View {
     /// number and the cards to another, which is two of the "three competing
     /// alignment origins in the top 300pt" the audit measured; now the wordmark
     /// and the first card share one leading margin by construction.
-    private func shelfBar(width: CGFloat) -> some View {
+    private func shelfBar(width: CGFloat, pagerWidth: CGFloat? = nil) -> some View {
         VStack(spacing: Space.m) {
             header
             ChannelPagerRail(model: model, accent: accent)
+                .modifier(LeadingPaneWidth(width: pagerWidth))
         }
         .padding(.horizontal, CGFloat(BoardCompositionRules.shelfOuterPadding))
         .padding(.bottom, Space.m)
@@ -317,6 +323,9 @@ struct TouchHomeView: View {
     /// `testTheShelfPairFitsAndStopsGrowing` sweeps every window for it.
     private func shelfPair(_ pair: ShelfPair) -> some View {
         let column = CGFloat(pair.columnWidth)
+        // PRD-37: the second column's width. Equal to `column` everywhere
+        // except the open Duo, where each column fills its own pane.
+        let trailing = CGFloat(pair.trailingColumnWidth)
         let gutter = CGFloat(pair.gutter)
         return VStack(spacing: gutter) {
             if let ledgered = model.channel.ledgered {
@@ -332,7 +341,7 @@ struct TouchHomeView: View {
                         .frame(width: column, alignment: .top)
                     VStack(spacing: Space.xxl) { learnRow }
                         .fixedSize(horizontal: false, vertical: true)
-                        .frame(width: column, alignment: .top)
+                        .frame(width: trailing, alignment: .top)
                 }
             } else {
                 HStack(alignment: .top, spacing: gutter) {
@@ -355,7 +364,7 @@ struct TouchHomeView: View {
                         parlorCard
                     }
                     .fixedSize(horizontal: false, vertical: true)
-                    .frame(width: column, alignment: .top)
+                    .frame(width: trailing, alignment: .top)
                 }
             }
         }
@@ -4056,6 +4065,21 @@ private struct RightPanePanel: ViewModifier {
                 .padding(.trailing, CGFloat(FoldRules.panelInset))
         } else {
             content.padding(.horizontal, fallbackPadding)
+        }
+    }
+}
+/// PRD-37: hold a full-width shelf element to the open Duo's left column.
+/// Without a width this is no modifier at all.
+private struct LeadingPaneWidth: ViewModifier {
+    let width: CGFloat?
+
+    func body(content: Content) -> some View {
+        if let width {
+            content
+                .frame(width: width)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        } else {
+            content
         }
     }
 }

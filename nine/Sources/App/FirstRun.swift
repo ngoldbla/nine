@@ -67,6 +67,7 @@ struct FirstRunFlow: View {
             switch stage {
             case .welcome:
                 WelcomeCard(accent: accent, tones: tones, onBegin: finishWelcome)
+                    .inLeadingFoldPane()
                     .transition(.opacity)
             case .flick:
                 FirstFlickBeat(accent: accent, tones: tones, onFinish: finishBeat)
@@ -225,28 +226,61 @@ private struct FirstFlickBeat: View {
     @State private var exitTask: Task<Void, Never>?
     /// PRD-22: the petal lens is motion, so Reduce Motion keeps the material.
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    /// PRD-37: the open iPhone Duo's fold; nil everywhere else.
+    @Environment(\.foldBand) private var foldBand
 
     private var targetDigit: Int {
         game?.puzzle.solution.cells[targetCell] ?? 7
     }
 
-    var body: some View {
-        GeometryReader { geo in
+    /// PRD-37: the open iPhone Duo as a book — the practice board on the
+    /// leading page, the words on the trailing one. The board sizes itself from
+    /// its own pane's geometry, exactly as the card sizes it from the window's.
+    private func spread(geo: GeometryProxy, band: FoldBand) -> some View {
+        let panel = RoundedRectangle(cornerRadius: Radius.sheet, style: .continuous)
+        return HStack(spacing: CGFloat(band.width)) {
+            GeometryReader { pane in
+                boardArea(geo: pane)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            }
+            .padding(Space.xxl)
+            .couchGlassElevated(in: panel, isLight: tones.isLight)
+            .padding(Space.xl)
+            .frame(width: CGFloat(band.leading))
             VStack(spacing: Space.l) {
                 header
                 instruction
-                boardArea(geo: geo)
+                Spacer(minLength: 0)
                 footer
             }
-            // The same two rungs the welcome card uses, in the same order. See
-            // `WelcomeCard.body`: these are siblings and they now measure alike.
             .padding(Space.xxl)
-            .frame(maxWidth: 560)
-            .couchGlassElevated(
-                in: RoundedRectangle(cornerRadius: Radius.sheet, style: .continuous),
-                isLight: tones.isLight)
+            .couchGlassElevated(in: panel, isLight: tones.isLight)
             .padding(Space.xl)
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .frame(width: geo.size.width - CGFloat(band.trailing))
+        }
+    }
+
+    var body: some View {
+        GeometryReader { geo in
+            if let band = foldBand {
+                spread(geo: geo, band: band)
+            } else {
+                VStack(spacing: Space.l) {
+                    header
+                    instruction
+                    boardArea(geo: geo)
+                    footer
+                }
+                // The same two rungs the welcome card uses, in the same order. See
+                // `WelcomeCard.body`: these are siblings and they now measure alike.
+                .padding(Space.xxl)
+                .frame(maxWidth: 560)
+                .couchGlassElevated(
+                    in: RoundedRectangle(cornerRadius: Radius.sheet, style: .continuous),
+                    isLight: tones.isLight)
+                .padding(Space.xl)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            }
         }
         .task { await composeBoard() }
         .onDisappear { exitTask?.cancel() }
