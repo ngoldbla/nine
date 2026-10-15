@@ -10,6 +10,7 @@
 // while the hinge is bent (measured, contrary to the API text), and the spread
 // is the same composition flat or bent.
 import SwiftUI
+import CouchKit
 
 private struct FoldBandKey: EnvironmentKey {
     static let defaultValue: FoldBand? = nil
@@ -33,6 +34,11 @@ private struct FoldReader: ViewModifier {
     func body(content: Content) -> some View {
         content
             .environment(\.foldBand, state.band)
+            // CouchKit's GlassSheet sizes its trailing panel from this; on the
+            // open Duo that is the right pane, 339.5pt, leading edge at 511.5.
+            .environment(\.couchPanelWidth, state.band.map {
+                CGFloat(FoldRules.panelWidth(width: state.width, band: $0))
+            })
             #if os(iOS) && !targetEnvironment(macCatalyst) && canImport(SwiftUI, _version: 8.0.85.29)
             .background { FoldProbe(state: $state) }
             #endif
