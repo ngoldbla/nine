@@ -1,0 +1,372 @@
+<title>Nine on iPhone Duo</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: control strip, then the device at true point scale beside a readout of what the selected surface does there. */
+:root {
+  --bg: #0b0c10;
+  --panel: #14161d;
+  --line: #2a2e3a;
+  --fg: #e7e9f0;
+  --muted: #8b90a2;
+  --accent: #7fb6ff;
+  --ok: #6fd3a0;
+  --warn: #f2b45a;
+  --bad: #ff7a7a;
+  --font-ui: "Schibsted Grotesk", "Helvetica Neue", Arial, sans-serif;
+  --font-num: "JetBrains Mono", ui-monospace, Menlo, monospace;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --bg: #f3f4f7; --panel: #ffffff; --line: #d9dce5; --fg: #161821; --muted: #5d6275;
+    --accent: #1f5fbf; --ok: #1d8a55; --warn: #a86500; --bad: #c0392b; color-scheme: light;
+  }
+}
+:root[data-theme="light"] {
+  --bg: #f3f4f7; --panel: #ffffff; --line: #d9dce5; --fg: #161821; --muted: #5d6275;
+  --accent: #1f5fbf; --ok: #1d8a55; --warn: #a86500; --bad: #c0392b; color-scheme: light;
+}
+body { background: var(--bg); color: var(--fg); font-family: var(--font-ui); font-size: 15px; line-height: 1.5; }
+.wrap { max-width: 1240px; margin: 0 auto; padding-block: 28px 56px; padding-inline: 20px; display: grid; gap: 20px; }
+h1 { font-size: 26px; margin: 0; letter-spacing: -0.01em; text-wrap: balance; }
+.lede { color: var(--muted); max-width: 72ch; margin: 4px 0 0; }
+.controls { display: grid; gap: 14px; }
+.group { display: grid; gap: 6px; }
+.group > span { font-size: 11px; text-transform: uppercase; letter-spacing: 0.09em; color: var(--muted); }
+.seg { display: inline-flex; flex-wrap: wrap; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: var(--panel); width: fit-content; max-width: 100%; }
+.seg button { font: 600 14px var(--font-ui); color: var(--fg); background: transparent; border: 0; padding: 8px 13px; cursor: pointer; border-right: 1px solid var(--line); }
+.seg button:last-child { border-right: 0; }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--bg); }
+.seg button:focus-visible { outline: 2px solid var(--accent); outline-offset: -3px; }
+.row { display: flex; flex-wrap: wrap; gap: 14px 28px; }
+.stage { display: grid; grid-template-columns: minmax(0, 1fr) 330px; gap: 20px; align-items: start; }
+@media (max-width: 900px) { .stage { grid-template-columns: minmax(0, 1fr); } }
+.device { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 16px; min-width: 0; }
+.device svg { width: 100%; height: auto; display: block; max-height: 640px; }
+.readout { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 18px; display: grid; gap: 12px; min-width: 0; }
+.readout h2 { margin: 0; font-size: 18px; }
+.readout p { margin: 0; color: var(--muted); }
+.verdicts { display: grid; gap: 8px; }
+.verdicts div { display: flex; gap: 10px; align-items: baseline; }
+.pill { flex: none; display: inline-block; font: 600 12px var(--font-ui); padding: 1px 9px; border-radius: 999px; border: 1px solid currentColor; }
+.pill.ok { color: var(--ok); } .pill.warn { color: var(--warn); } .pill.bad { color: var(--bad); } .pill.new { color: var(--accent); }
+.legend { display: flex; flex-wrap: wrap; gap: 8px 18px; color: var(--muted); font-size: 13px; }
+.legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -1px; margin-right: 6px; }
+.sources { color: var(--muted); font-size: 13px; max-width: 92ch; }
+.sources h2 { color: var(--fg); font-size: 15px; margin: 0 0 6px; }
+.sources ul { margin: 0; padding-left: 18px; display: grid; gap: 4px; }
+code { font-family: var(--font-num); font-size: 0.92em; }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Nine on iPhone Duo, surface by surface</h1>
+    <p class="lede">Every rectangle is drawn at its measured size in points: the Duo's window, safe area, status pill and fold band from the iOS 27.1 simulator, and Nine's sizes from its own layout rules. "Today" is what the current build draws on an open Duo. "Proposed" is the design under review.</p>
+  </header>
+
+  <div class="controls">
+    <div class="group"><span>Surface</span>
+      <div class="seg" id="surface">
+        <button type="button" data-v="game" aria-pressed="true">Game</button>
+        <button type="button" data-v="sheet">Game + Preferences</button>
+        <button type="button" data-v="coach">Game + coach card</button>
+        <button type="button" data-v="debrief">Game + debrief</button>
+        <button type="button" data-v="shelf">Home shelf</button>
+        <button type="button" data-v="channel">Channel page</button>
+        <button type="button" data-v="welcome">First run</button>
+        <button type="button" data-v="tutorial">Tutorial</button>
+        <button type="button" data-v="school">Technique School</button>
+      </div>
+    </div>
+    <div class="row">
+      <div class="group"><span>Posture</span>
+        <div class="seg" id="posture">
+          <button type="button" data-v="folded">Folded</button>
+          <button type="button" data-v="flat" aria-pressed="true">Open flat · 180°</button>
+          <button type="button" data-v="bent">Open bent · 128°</button>
+        </div>
+      </div>
+      <div class="group"><span>Version</span>
+        <div class="seg" id="version">
+          <button type="button" data-v="today">Today</button>
+          <button type="button" data-v="proposed" aria-pressed="true">Proposed</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="stage">
+    <div class="device">
+      <svg id="svg" role="img" aria-label="Duo screen mockup"></svg>
+      <div class="legend" style="margin-top:10px">
+        <span><i style="background:rgba(242,180,90,0.5)"></i>fold band (40 pt, crease at its centre)</span>
+        <span><i style="background:rgba(255,122,122,0.55)"></i>crosses the crease</span>
+        <span><i style="background:rgba(127,182,255,0.35)"></i>glass chrome</span>
+      </div>
+    </div>
+    <aside class="readout" id="readout"></aside>
+  </div>
+
+  <section class="sources">
+    <h2>Measured facts behind the drawing</h2>
+    <ul>
+      <li>Folded: 466×678 window, safe area right 84 (vertical status pill) and bottom 34. Every surface keeps today's iPhone layout here.</li>
+      <li>Open: 951×669 window, the same safe insets, for both a portrait-only app (Nine) and one that declares every orientation. Flat and bent report the same size.</li>
+      <li>Fold region: x 455.5–495.5 with 20 pt margins each side, crease at x 475.5. Inactive when flat, active when bent.</li>
+      <li>Game board: 550.5 pt, the largest board with the crease on the rule after column 6 that still leaves the 60 pt control column on the left and 44 pt-wide digit keys on the right.</li>
+      <li>Sheet panel today: <code>GlassSheet</code>'s regular-width panel, 380 wide with 16 pt padding, so its left edge sits at x 471, 4.5 pt over the crease.</li>
+    </ul>
+  </section>
+</div>
+
+<script>
+(() => {
+  const OPEN = { w: 951, h: 669, sw: 867, sh: 635 };
+  const FOLD = { w: 466, h: 678, sw: 382, sh: 644 };
+  const BAND = { x0: 455.5, x1: 495.5, c: 475.5 };
+  const LPANE = [0, 455.5], RPANE = [495.5, 867];
+  const BIG = { s: 550.5, left: 108.5, top: (635 - 550.5) / 2 };
+  const GIVENS = "53..7....6..195....98....6.8...6...34..8.3..17...2...6.6....28....419..5....8..79";
+  const ENTRIES = { 2: 4, 12: 2, 20: 1, 30: 9, 41: 7, 58: 3 };
+  const state = { surface: "game", posture: "flat", version: "proposed" };
+  const NS = "http://www.w3.org/2000/svg";
+  let svg, crossings;
+
+  function el(tag, a, p) { const n = document.createElementNS(NS, tag); for (const k in a) n.setAttribute(k, a[k]); (p || svg).appendChild(n); return n; }
+  function text(x, y, s, size, fill, anchor, weight) {
+    const t = el("text", { x, y, "font-size": size, fill: fill || "#e9ecf5", "text-anchor": anchor || "start", "font-family": "Schibsted Grotesk, sans-serif", "font-weight": weight || 400 });
+    t.textContent = s; return t;
+  }
+  // A glass rectangle. Anything that is not the board and spans the crease is flagged.
+  function glass(x, y, w, h, r, opts) {
+    opts = opts || {};
+    const open = state.posture !== "folded";
+    const spans = open && x < BAND.c && x + w > BAND.c && !opts.allowCrease;
+    if (spans) crossings.push(opts.name || "a surface");
+    el("rect", { x, y, width: w, height: h, rx: r == null ? 22 : r,
+      fill: spans ? "rgba(255,122,122,0.16)" : (opts.fill || "rgba(127,182,255,0.10)"),
+      stroke: spans ? "rgba(255,122,122,0.75)" : "rgba(170,200,255,0.30)" });
+  }
+  function lines(x, y, w, n, gap) { for (let i = 0; i < n; i++) el("rect", { x, y: y + i * (gap || 16), width: w * (i === n - 1 ? 0.6 : 1), height: 7, rx: 3.5, fill: "rgba(255,255,255,0.20)" }); }
+
+  function board(left, top, s, opts) {
+    opts = opts || {};
+    const cell = s / 9;
+    el("rect", { x: left - 8, y: top - 8, width: s + 16, height: s + 16, rx: 18, fill: "rgba(255,255,255,0.06)", stroke: "rgba(255,255,255,0.18)" });
+    const bent = state.posture === "bent";
+    for (let i = 0; i < 81; i++) {
+      const r = Math.floor(i / 9), c = i % 9, x = left + c * cell, y = top + r * cell;
+      const inBand = bent && x + cell > BAND.x0 && x < BAND.x1;
+      const midCrease = state.posture !== "folded" && x < BAND.c - 0.5 && x + cell > BAND.c + 0.5;
+      let fill = "#10131b";
+      if (midCrease) fill = "rgba(255,122,122,0.22)";
+      else if (inBand) fill = "rgba(242,180,90,0.16)";
+      if (opts.hint === i) fill = "rgba(127,182,255,0.45)";
+      el("rect", { x, y, width: cell, height: cell, fill });
+      const v = GIVENS[i] !== "." ? GIVENS[i] : ENTRIES[i];
+      if (v) { const t = text(x + cell / 2, y + cell * 0.68, v, cell * 0.56, GIVENS[i] !== "." ? "#e9ecf5" : "#8fc1ff", "middle", GIVENS[i] !== "." ? 600 : 400); }
+    }
+    for (let k = 0; k <= 9; k++) {
+      const w = k % 3 === 0 ? 2.4 : 0.8, col = k % 3 === 0 ? "#9aa3bb" : "#353a4a";
+      el("line", { x1: left + k * cell, y1: top, x2: left + k * cell, y2: top + s, stroke: col, "stroke-width": w });
+      el("line", { x1: left, y1: top + k * cell, x2: left + s, y2: top + k * cell, stroke: col, "stroke-width": w });
+    }
+    if (state.posture !== "folded" && left < BAND.c && left + s > BAND.c) {
+      const onRule = Math.abs(((BAND.c - left) / cell) % 3) < 0.01;
+      if (!onRule) crossings.push("the board (mid-cell)");
+    }
+  }
+  function pad(x, y, w, h, cols) {
+    glass(x, y, w, h, 22, { name: "the digit pad" });
+    const rows = Math.ceil(9 / cols), g = 4, p = 12;
+    const kw = (w - 2 * p - (cols - 1) * g) / cols, kh = (h - 2 * p - (rows - 1) * g) / rows;
+    for (let i = 0; i < 9; i++) {
+      const r = Math.floor(i / cols), q = i % cols, kx = x + p + q * (kw + g), ky = y + p + r * (kh + g);
+      el("rect", { x: kx, y: ky, width: kw, height: kh, rx: 12, fill: "rgba(255,255,255,0.10)" });
+      text(kx + kw / 2, ky + kh / 2 + 7, i + 1, Math.min(22, kh * 0.42), "#e9ecf5", "middle", 600);
+    }
+  }
+  function capsule(x, y, w, name) { glass(x, y, w, 44, 22, { name }); const n = Math.max(3, Math.min(6, Math.floor(w / 64))); for (let i = 0; i < n; i++) el("circle", { cx: x + (i + 0.5) * w / n, cy: y + 22, r: 9, fill: "rgba(255,255,255,0.28)" }); }
+  function column(x, y, h) { glass(x, y, 60, h, 30, { name: "the control column" }); for (let i = 0; i < 5; i++) el("circle", { cx: x + 30, cy: y + 34 + i * 58, r: 11, fill: "rgba(255,255,255,0.28)" }); }
+  function chip(cx, y, w, label) { glass(cx - w / 2, y, w, 30, 15, { name: "a header chip" }); text(cx, y + 20, label, 13, "#cfd6e8", "middle", 600); }
+  function card(x, y, w, h, title, name) { glass(x, y, w, h, 24, { name, fill: "rgba(127,182,255,0.16)" }); text(x + 18, y + 32, title, 17, "#e9ecf5", "start", 700); lines(x + 18, y + 52, w - 36, Math.max(1, Math.floor((h - 70) / 16))); }
+  function scrim(w, h) { el("rect", { x: 0, y: 0, width: w, height: h, fill: "rgba(0,0,0,0.45)" }); }
+
+  // ---- Surfaces. Each draws in safe-area points and returns its readout.
+  const S = {};
+
+  S.game = (v, open) => {
+    if (!open) { iphoneGame(); return { title: "Game screen", text: "Today's iPhone column: header, 350 pt board, three-row pad, toolbar.", notes: [["ok", "Unchanged from today"]] }; }
+    if (v === "today") {
+      const s = 425, left = (867 - s) / 2;
+      capsule(left - 8, 8, s + 16, "the header"); board(left, 48, s); pad(left, 48 + s + 20, s, 84, 9); capsule(left - 8, 635 - 52, s + 16, "the toolbar");
+      return { title: "Game screen", text: "The phone column centred in the 867 pt safe area. The crease runs through column 6 of the board.", notes: [] };
+    }
+    gameSpread();
+    return { title: "Game screen", text: "550.5 pt board with the crease on the thick rule after column 6. Control column on the left, 3×3 digit pad on the right, header chips over box columns 1–6.", notes: [["new", "Cells 61.2 pt, 52% larger than the iPhone 17 Pro's 40.2 pt cells"]] };
+  };
+
+  function gameSpread(opts) {
+    opts = opts || {};
+    chip(BIG.left + (BAND.c - BIG.left) / 2, 6, 150, "Steady · 4:12");
+    board(BIG.left, BIG.top, BIG.s, opts);
+    column(16, (635 - 310) / 2, 310);
+    const padX = BIG.left + BIG.s + 28;
+    pad(padX, (635 - 206) / 2, 867 - 16 - padX, 206, 3);
+  }
+
+  function iphoneGame() {
+    capsule(16, 8, 350, "the header"); board(24, 48, 334); pad(24, 404, 334, 170, 3); capsule(16, 644 - 56, 350, "the toolbar");
+  }
+
+  S.sheet = (v, open) => {
+    if (!open) { iphoneGame(); scrim(382, 644); glass(0, 644 * 0.28, 382, 644 * 0.72 + 34, 38, { fill: "rgba(40,44,58,0.92)" }); text(22, 644 * 0.28 + 44, "Preferences", 20, "#e9ecf5", "start", 700); lines(22, 644 * 0.28 + 70, 330, 14, 22);
+      return { title: "Preferences sheet", text: "Folded, GlassSheet uses the system sheet at the 0.72 detent, as on every iPhone.", notes: [["ok", "Unchanged from today"]] }; }
+    if (v === "today") {
+      const s = 425, left = (867 - s) / 2;
+      capsule(left - 8, 8, s + 16, "the header"); board(left, 48, s); pad(left, 48 + s + 20, s, 84, 9); capsule(left - 8, 635 - 52, s + 16, "the toolbar");
+      scrim(867, 635); glass(867 - 16 - 380, 16, 380, 603, 28, { name: "the Preferences panel", fill: "rgba(40,44,58,0.92)" });
+      text(867 - 16 - 380 + 22, 52, "Preferences", 20, "#e9ecf5", "start", 700); lines(867 - 16 - 380 + 22, 80, 330, 22, 22);
+      return { title: "Preferences sheet", text: "GlassSheet's regular-width trailing panel: 380 wide, 16 pt from the edge. Its left edge lands at x 471, 4.5 pt over the crease.", notes: [] };
+    }
+    gameSpread(); scrim(867, 635);
+    const x = RPANE[0] + 16, w = RPANE[1] - 16 - x;
+    glass(x, 16, w, 603, 28, { name: "the Preferences panel", fill: "rgba(40,44,58,0.92)" });
+    text(x + 22, 52, "Preferences", 20, "#e9ecf5", "start", 700); lines(x + 22, 80, w - 44, 22, 22);
+    return { title: "Preferences sheet", text: "The same panel, sized to the right pane: x 511.5–851, 339.5 wide. Box columns 1–6 of the board stay visible beside it.", notes: [["new", "One rule in CouchKit's GlassSheet also covers History and the Boards sheet"], ["warn", "The panel is 40.5 pt narrower than on iPad (339.5 against 380)"]] };
+  };
+
+  S.coach = (v, open) => {
+    const hint = 3 * 9 + 1;
+    if (!open) { iphoneGame(); card(16, 300, 350, 120, "Hint", "the coach card");
+      return { title: "Coach card", text: "Folded: today's card over the lower board.", notes: [["ok", "Unchanged from today"]] }; }
+    if (v === "today") {
+      const s = 425, left = (867 - s) / 2;
+      capsule(left - 8, 8, s + 16, "the header"); board(left, 48, s, { hint }); pad(left, 48 + s + 20, s, 84, 9); capsule(left - 8, 635 - 52, s + 16, "the toolbar");
+      card((867 - 360) / 2, 300, 360, 130, "Hint", "the coach card");
+      return { title: "Coach card", text: "Today the 360 pt card centres over the board, on the crease.", notes: [] };
+    }
+    gameSpread({ hint });
+    card(RPANE[0] + 16, 420, RPANE[1] - RPANE[0] - 32, 150, "Hint", "the coach card");
+    return { title: "Coach card", text: "The hinted cell (row 4, column 2, highlighted) is in the left pane, so the card goes to the right pane. If the hint were in columns 7–9, the card would move to the left pane.", notes: [["new", "The card never covers the cell it is talking about"], ["warn", "In the right pane it covers part of box columns 7–9 and the digit pad while it is up"]] };
+  };
+
+  S.debrief = (v, open) => {
+    if (!open) { iphoneGame(); glass(16, 330, 350, 300, 28, { fill: "rgba(40,44,58,0.92)" }); text(34, 366, "Solved · 6:48", 18, "#e9ecf5", "start", 700); lines(34, 392, 310, 12, 18);
+      return { title: "Debrief", text: "Folded: today's pull-up panel.", notes: [["ok", "Unchanged from today"]] }; }
+    if (v === "today") {
+      const s = 425, left = (867 - s) / 2;
+      capsule(left - 8, 8, s + 16, "the header"); board(left, 48, s); capsule(left - 8, 635 - 52, s + 16, "the toolbar");
+      glass(left - 8, 300, s + 16, 330, 28, { name: "the debrief panel", fill: "rgba(40,44,58,0.92)" }); text(left + 14, 336, "Solved · 6:48", 18, "#e9ecf5", "start", 700); lines(left + 14, 362, s - 30, 13, 18);
+      return { title: "Debrief", text: "The post-solve panel pulls up over the board, across the crease.", notes: [] };
+    }
+    gameSpread();
+    const x = RPANE[0] + 16, w = RPANE[1] - 16 - x;
+    glass(x, 16, w, 603, 28, { name: "the debrief panel", fill: "rgba(40,44,58,0.92)" });
+    text(x + 22, 52, "Solved · 6:48", 18, "#e9ecf5", "start", 700); lines(x + 22, 80, w - 44, 26, 20);
+    return { title: "Debrief", text: "The debrief and the stats drawer present as a right-pane panel, the same frame as the sheets. The solved board stays readable on the left.", notes: [["new", "One panel frame for sheets, debrief and stats"]] };
+  };
+
+  function shelfCards(x, w, kind, y0) {
+    let y = y0;
+    const put = (h, title) => { card(x, y, w, h, title, "a shelf card"); y += h + 16; };
+    if (kind === "left") { put(150, "Today's board"); put(130, "Gentle"); put(130, "Steady"); put(130, "Sharp"); }
+    else { put(110, "How to play"); put(110, "History"); put(110, "Technique School"); put(150, "Variants"); }
+  }
+
+  S.shelf = (v, open) => {
+    if (!open) { text(24, 44, "Nine", 30, "#e9ecf5", "start", 700); el("circle", { cx: 340, cy: 34, r: 22, fill: "rgba(127,182,255,0.18)" });
+      card(24, 80, 334, 150, "Today's board"); card(24, 246, 334, 130, "Gentle"); card(24, 392, 334, 130, "Steady"); card(24, 538, 334, 100, "Sharp");
+      return { title: "Home shelf", text: "Folded: today's single column, 382 pt wide.", notes: [["ok", "Unchanged from today"]] }; }
+    text(24, 44, "Nine", 30, "#e9ecf5", "start", 700); el("circle", { cx: 821, cy: 34, r: 22, fill: "rgba(127,182,255,0.18)" });
+    if (v === "today") {
+      shelfCards(24, 399.5, "left", 80); shelfCards(443.5, 399.5, "right", 80);
+      return { title: "Home shelf", text: "resolveShelf picks its two-column pair (399.5 pt columns, 20 pt gutter). The gutter sits at x 423.5–443.5, left of the crease, so the whole right column straddles it.", notes: [] };
+    }
+    shelfCards(24, LPANE[1] - 24, "left", 80); shelfCards(RPANE[0], 867 - 24 - RPANE[0], "right", 80);
+    return { title: "Home shelf", text: "The same pair, with the fold band as the gutter: left column 24–455.5 (431.5 wide), right column 495.5–843 (347.5 wide). Card order is unchanged.", notes: [["new", "No card crosses the crease"], ["warn", "Columns are unequal (431.5 and 347.5), because the status pill takes 84 pt on the right"]] };
+  };
+
+  S.channel = (v, open) => {
+    const r = S.shelf(v, open);
+    return { title: "Channel page", text: open ? (v === "today" ? "The channel page uses the same pair arithmetic as the shelf, so its right column straddles the crease too." : "The same fold-aligned pair as the home shelf.") : "Folded: today's single column.", notes: r.notes };
+  };
+
+  S.welcome = (v, open) => {
+    if (!open) { S.shelf("today", false); scrim(382, 644); card(16, 90, 350, 480, "Welcome to Nine", "the welcome card");
+      return { title: "First run", text: "Folded: today's welcome card.", notes: [["ok", "Unchanged from today"]] }; }
+    text(24, 44, "Nine", 30, "#e9ecf5", "start", 700);
+    if (v === "today") { scrim(867, 635); card((867 - 460) / 2, 60, 460, 500, "Welcome to Nine", "the welcome card");
+      return { title: "First run", text: "Today the 460 pt card centres on the safe area and crosses the crease.", notes: [] }; }
+    S.shelf("proposed", true); scrim(867, 635);
+    card(16, 60, LPANE[1] - 32, 500, "Welcome to Nine", "the welcome card");
+    return { title: "First run", text: "The card centred in the left pane, clamped to 423.5 pt. The fold-aligned shelf shows behind the scrim.", notes: [["new", "Nothing crosses the crease"]] };
+  };
+
+  S.tutorial = (v, open) => {
+    if (!open) { board(24, 70, 334); card(16, 440, 350, 170, "Placing a digit", "the narration card");
+      return { title: "Tutorial", text: "Folded: today's board and narration card.", notes: [["ok", "Unchanged from today"]] }; }
+    if (v === "today") { board((867 - 425) / 2, 30, 425); card((867 - 460) / 2, 470, 460, 150, "Placing a digit", "the narration card");
+      return { title: "Tutorial", text: "Today the tutorial board and its card both centre on the safe area, across the crease.", notes: [] }; }
+    const s = LPANE[1] - 48;
+    board(24, (635 - s) / 2, s);
+    card(RPANE[0] + 16, 120, RPANE[1] - RPANE[0] - 32, 300, "Placing a digit", "the narration card");
+    return { title: "Tutorial", text: "Changed from the written proposal. Beside the 550 pt game board there is only a 164 pt strip, too narrow for narration, so the tutorial uses a book spread: a 407.5 pt board in the left pane and the narration in the right pane.", notes: [["warn", "The tutorial board is smaller than the game board it is teaching"], ["new", "Board and narration face each other across the fold"]] };
+  };
+
+  S.school = (v, open) => {
+    const listCard = (x, w) => { text(x, 44, "Technique School", 26, "#e9ecf5", "start", 700); let y = 70; for (const t of ["Naked singles", "Hidden singles", "Pointing pairs", "Box/line reduction", "Naked pairs", "X-wing"]) { card(x, y, w, 80, t, "a School row"); y += 92; } };
+    if (!open) { listCard(24, 334); return { title: "Technique School", text: "Folded: today's single column.", notes: [["ok", "Unchanged from today"]] }; }
+    if (v === "today") { listCard((867 - 560) / 2, 560); return { title: "Technique School", text: "Today the index column (up to 560 pt) centres on the safe area, across the crease.", notes: [] }; }
+    listCard(24, LPANE[1] - 48);
+    return { title: "Technique School", text: "The index in the left pane, 407.5 pt wide. The right pane is empty ground. No new master–detail view.", notes: [["new", "Nothing crosses the crease"], ["warn", "Half the open screen is unused on this page"]] };
+  };
+
+  function draw() {
+    svg = document.getElementById("svg");
+    svg.replaceChildren(); crossings = [];
+    const open = state.posture !== "folded";
+    const dev = open ? OPEN : FOLD, pad = 26;
+    svg.setAttribute("viewBox", `${-pad} ${-pad} ${dev.w + pad * 2} ${dev.h + pad * 2}`);
+    el("rect", { x: -14, y: -14, width: dev.w + 28, height: dev.h + 28, rx: 58, fill: "#1b1d24", stroke: "#3a3e4b" });
+    el("rect", { x: 0, y: 0, width: dev.w, height: dev.h, rx: 46, fill: "#000" });
+    const r = S[state.surface](open ? state.version : "proposed", open);
+    if (open) {
+      const active = state.posture === "bent";
+      el("rect", { x: BAND.x0, y: 0, width: 40, height: dev.h, fill: active ? "rgba(242,180,90,0.22)" : "rgba(242,180,90,0.07)", stroke: "rgba(242,180,90,0.6)", "stroke-dasharray": active ? "0" : "5 5" });
+      el("line", { x1: BAND.c, y1: 0, x2: BAND.c, y2: dev.h, stroke: "#f2b45a", "stroke-width": 1.5 });
+      const t = text(BAND.c, dev.h + 19, active ? "fold region · active" : "fold region · inactive", 13, "#f2c47a", "middle"); t.setAttribute("font-family", "JetBrains Mono, monospace");
+      el("rect", { x: 867, y: 0, width: 84, height: 120, rx: 30, fill: "rgba(255,255,255,0.10)" });
+    } else {
+      el("rect", { x: 382, y: 0, width: 84, height: 170, rx: 30, fill: "rgba(255,255,255,0.10)" });
+    }
+    return r;
+  }
+
+  function render() {
+    const r = draw();
+    const open = state.posture !== "folded";
+    const notes = (r.notes || []).slice();
+    if (open) {
+      const uniq = [...new Set(crossings)];
+      if (uniq.length) notes.unshift(["bad", "Crosses the crease: " + uniq.join(", ")]);
+      else if (state.surface !== "tutorial" && state.version === "proposed") notes.unshift(["ok", "Nothing but the board crosses the crease, and it does so along a box rule"]);
+      if (state.posture === "bent" && state.version === "proposed" && ["game", "sheet", "coach", "debrief"].includes(state.surface))
+        notes.push(["warn", "Bent: the inner 20 pt of board columns 6 and 7 lie inside the fold margins (the accepted trade-off)"]);
+    }
+    const label = { ok: "fine", warn: "trade-off", bad: "problem", new: "Duo only" };
+    document.getElementById("readout").innerHTML = `<h2>${r.title}</h2><p>${open ? (state.version === "today" ? "Today · " : "Proposed · ") : ""}${r.text}</p>
+      <div class="verdicts">${notes.map(([k, t]) => `<div><span class="pill ${k}">${label[k]}</span><span>${t}</span></div>`).join("")}</div>`;
+  }
+
+  for (const id of ["surface", "posture", "version"]) {
+    document.getElementById(id).addEventListener("click", (e) => {
+      const b = e.target.closest("button"); if (!b) return;
+      state[id] = b.dataset.v;
+      for (const x of document.querySelectorAll(`#${id} button`)) x.setAttribute("aria-pressed", String(x === b));
+      render();
+    });
+  }
+  render();
+})();
+</script>

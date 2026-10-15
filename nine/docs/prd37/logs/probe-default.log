@@ -1,0 +1,114 @@
+DUOPROBE [appear] swiftui.size=466.0x678.0 safe=t0.0 l0.0 b0.0 r0.0 hSC=Optional(SwiftUI.UserInterfaceSizeClass.compact) vSC=Optional(SwiftUI.UserInterfaceSizeClass.regular)
+DUOPROBE [appear] uikit.screen bounds=(0.0,0.0 466.0x678.0) native=(0.0,0.0 1398.0x2034.0) scale=3.0 nativeScale=3.0
+DUOPROBE [appear] uikit.scene role=UIWindowSceneSessionRoleApplication coordSpace=(0.0,0.0 466.0x678.0) orientation=1
+DUOPROBE [appear] uikit.traits hSC=1 vSC=2 idiom=0
+DUOPROBE [appear] uikit.window frame=(0.0,0.0 466.0x678.0) safe=t0.0 l0.0 b34.0 r84.0
+DUOPROBE [appear] uikit.screens count=1 (0.0,0.0 466.0x678.0)@3.0
+DUOPROBE hinge hinge 0.0 deg closed
+DUOPROBE hinge hinge 155.8 deg partiallyOpen
+DUOPROBE hinge hinge 180.0 deg fullyOpen
+DUOPROBE [resize] swiftui.size=951.0x669.0 safe=t0.0 l0.0 b0.0 r0.0 hSC=Optional(SwiftUI.UserInterfaceSizeClass.regular) vSC=Optional(SwiftUI.UserInterfaceSizeClass.regular)
+DUOPROBE [resize] swiftui.occlusion frame=(399.7,29.3 37.0x37.0) margins=t0.0 l0.0 b0.0 r0.0 active=true
+DUOPROBE [resize] swiftui.occlusion frame=(382.0,0.0 84.0x170.0) margins=t0.0 l0.0 b0.0 r0.0 active=true
+DUOPROBE [resize] uikit.screen bounds=(0.0,0.0 951.0x669.0) native=(0.0,0.0 2007.0x2853.0) scale=3.0 nativeScale=3.0
+DUOPROBE [resize] uikit.scene role=UIWindowSceneSessionRoleApplication coordSpace=(0.0,0.0 951.0x669.0) orientation=4
+DUOPROBE [resize] uikit.traits hSC=2 vSC=2 idiom=0
+DUOPROBE [resize] uikit.window frame=(0.0,0.0 951.0x669.0) safe=t82.0 l0.0 b34.0 r0.0
+DUOPROBE [resize] uikit.occlusion frame=(884.7,399.7 37.0x37.0) margins=t0.0 l0.0 b0.0 r0.0 active=true
+DUOPROBE [resize] uikit.occlusion frame=(781.0,382.0 170.0x84.0) margins=t0.0 l0.0 b0.0 r0.0 active=true
+DUOPROBE [resize] uikit.screens count=2 (0.0,0.0 466.0x678.0)@3.0 (0.0,0.0 951.0x669.0)@3.0
+DUOPROBE [division-change] swiftui.size=951.0x669.0 safe=t0.0 l0.0 b0.0 r0.0 hSC=Optional(SwiftUI.UserInterfaceSizeClass.regular) vSC=Optional(SwiftUI.UserInterfaceSizeClass.regular)
+DUOPROBE [division-change] swiftui.division frame=(455.5,0.0 40.0x669.0) margins=t0.0 l20.0 b0.0 r20.0 active=false
+DUOPROBE [division-change] swiftui.occlusion frame=(677.3,21.0 58.0x37.0) margins=t0.0 l0.0 b0.0 r0.0 active=false
+DUOPROBE [division-change] swiftui.occlusion frame=(867.0,0.0 84.0x120.0) margins=t0.0 l0.0 b0.0 r0.0 active=true
+DUOPROBE [division-change] uikit.screen bounds=(0.0,0.0 951.0x669.0) native=(0.0,0.0 2007.0x2853.0) scale=3.0 nativeScale=3.0
+DUOPROBE [division-change] uikit.scene role=UIWindowSceneSessionRoleApplication coordSpace=(0.0,0.0 951.0x669.0) orientation=4
+DUOPROBE [division-change] uikit.traits hSC=2 vSC=2 idiom=0
+DUOPROBE [division-change] uikit.window frame=(0.0,0.0 951.0x669.0) safe=t0.0 l0.0 b34.0 r84.0
+DUOPROBE [division-change] uikit.division frame=(455.5,0.0 40.0x669.0) margins=t0.0 l20.0 b0.0 r20.0 active=false
+DUOPROBE [division-change] uikit.occlusion frame=(677.3,21.0 58.0x37.0) margins=t0.0 l0.0 b0.0 r0.0 active=false
+DUOPROBE [division-change] uikit.occlusion frame=(867.0,0.0 84.0x120.0) margins=t0.0 l0.0 b0.0 r0.0 active=true
+DUOPROBE [division-change] uikit.screens count=2 (0.0,0.0 466.0x678.0)@3.0 (0.0,0.0 951.0x669.0)@3.0
+DUOPROBE hinge hinge 127.8 deg partiallyOpen
+DUOPROBE hinge hinge 127.8 deg partiallyOpen
+DUOPROBE [division-change] swiftui.size=951.0x669.0 safe=t0.0 l0.0 b0.0 r0.0 hSC=Optional(SwiftUI.UserInterfaceSizeClass.regular) vSC=Optional(SwiftUI.UserInterfaceSizeClass.regular)
+DUOPROBE [division-change] swiftui.division frame=(455.5,0.0 40.0x669.0) margins=t0.0 l20.0 b0.0 r20.0 active=true
+DUOPROBE [division-change] swiftui.occlusion frame=(677.3,21.0 58.0x37.0) margins=t0.0 l0.0 b0.0 r0.0 active=false
+DUOPROBE [division-change] swiftui.occlusion frame=(867.0,0.0 84.0x120.0) margins=t0.0 l0.0 b0.0 r0.0 active=true
+DUOPROBE [division-change] uikit.screen bounds=(0.0,0.0 951.0x669.0) native=(0.0,0.0 2007.0x2853.0) scale=3.0 nativeScale=3.0
+DUOPROBE [division-change] uikit.scene role=UIWindowSceneSessionRoleApplication coordSpace=(0.0,0.0 951.0x669.0) orientation=4
+DUOPROBE [division-change] uikit.traits hSC=2 vSC=2 idiom=0
+DUOPROBE [division-change] uikit.window frame=(0.0,0.0 951.0x669.0) safe=t0.0 l0.0 b34.0 r84.0
+DUOPROBE [division-change] uikit.division frame=(455.5,0.0 40.0x669.0) margins=t0.0 l20.0 b0.0 r20.0 active=true
+DUOPROBE [division-change] uikit.occlusion frame=(677.3,21.0 58.0x37.0) margins=t0.0 l0.0 b0.0 r0.0 active=false
+DUOPROBE [division-change] uikit.occlusion frame=(867.0,0.0 84.0x120.0) margins=t0.0 l0.0 b0.0 r0.0 active=true
+DUOPROBE [division-change] uikit.window frame=(0.0,0.0 951.0x669.0) safe=t0.0 l0.0 b34.0 r84.0
+DUOPROBE [division-change] uikit.division frame=(455.5,0.0 40.0x669.0) margins=t0.0 l20.0 b0.0 r20.0 active=true
+DUOPROBE [division-change] uikit.occlusion frame=(677.3,21.0 58.0x37.0) margins=t0.0 l0.0 b0.0 r0.0 active=false
+DUOPROBE [division-change] uikit.occlusion frame=(867.0,0.0 84.0x120.0) margins=t0.0 l0.0 b0.0 r0.0 active=true
+DUOPROBE [division-change] uikit.screens count=2 (0.0,0.0 466.0x678.0)@3.0 (0.0,0.0 951.0x669.0)@3.0
+DUOPROBE hinge hinge 127.8 deg partiallyOpen
+DUOPROBE hinge hinge 122.9 deg partiallyOpen
+DUOPROBE hinge hinge 0.0 deg closed
+DUOPROBE [division-change] swiftui.size=951.0x669.0 safe=t0.0 l0.0 b0.0 r0.0 hSC=Optional(SwiftUI.UserInterfaceSizeClass.regular) vSC=Optional(SwiftUI.UserInterfaceSizeClass.regular)
+DUOPROBE [division-change] swiftui.division frame=(455.5,0.0 40.0x669.0) margins=t0.0 l20.0 b0.0 r20.0 active=false
+DUOPROBE [division-change] swiftui.occlusion frame=(677.3,21.0 58.0x37.0) margins=t0.0 l0.0 b0.0 r0.0 active=false
+DUOPROBE [division-change] swiftui.occlusion frame=(867.0,0.0 84.0x120.0) margins=t0.0 l0.0 b0.0 r0.0 active=true
+DUOPROBE [division-change] uikit.screen bounds=(0.0,0.0 951.0x669.0) native=(0.0,0.0 2007.0x2853.0) scale=3.0 nativeScale=3.0
+DUOPROBE [division-change] uikit.scene role=UIWindowSceneSessionRoleApplication coordSpace=(0.0,0.0 951.0x669.0) orientation=4
+DUOPROBE [division-change] uikit.traits hSC=2 vSC=2 idiom=0
+DUOPROBE [division-change] uikit.window frame=(0.0,0.0 951.0x669.0) safe=t0.0 l0.0 b34.0 r84.0
+DUOPROBE [division-change] uikit.division frame=(455.5,0.0 40.0x669.0) margins=t0.0 l20.0 b0.0 r20.0 active=false
+DUOPROBE [division-change] uikit.occlusion frame=(677.3,21.0 58.0x37.0) margins=t0.0 l0.0 b0.0 r0.0 active=false
+DUOPROBE [division-change] uikit.occlusion frame=(867.0,0.0 84.0x120.0) margins=t0.0 l0.0 b0.0 r0.0 active=true
+DUOPROBE [division-change] uikit.window frame=(0.0,0.0 951.0x669.0) safe=t0.0 l0.0 b34.0 r84.0
+DUOPROBE [division-change] uikit.division frame=(455.5,0.0 40.0x669.0) margins=t0.0 l20.0 b0.0 r20.0 active=false
+DUOPROBE [division-change] uikit.occlusion frame=(677.3,21.0 58.0x37.0) margins=t0.0 l0.0 b0.0 r0.0 active=false
+DUOPROBE [division-change] uikit.occlusion frame=(867.0,0.0 84.0x120.0) margins=t0.0 l0.0 b0.0 r0.0 active=true
+DUOPROBE [division-change] uikit.screens count=2 (0.0,0.0 466.0x678.0)@3.0 (0.0,0.0 951.0x669.0)@3.0
+DUOPROBE [resize] swiftui.size=466.0x678.0 safe=t0.0 l0.0 b0.0 r0.0 hSC=Optional(SwiftUI.UserInterfaceSizeClass.compact) vSC=Optional(SwiftUI.UserInterfaceSizeClass.regular)
+DUOPROBE [resize] swiftui.division frame=(455.5,0.0 40.0x669.0) margins=t0.0 l20.0 b0.0 r20.0 active=false
+DUOPROBE [resize] swiftui.occlusion frame=(677.3,21.0 58.0x37.0) margins=t0.0 l0.0 b0.0 r0.0 active=false
+DUOPROBE [resize] swiftui.occlusion frame=(867.0,0.0 84.0x120.0) margins=t0.0 l0.0 b0.0 r0.0 active=true
+DUOPROBE [resize] uikit.screen bounds=(0.0,0.0 466.0x678.0) native=(0.0,0.0 1398.0x2034.0) scale=3.0 nativeScale=3.0
+DUOPROBE [resize] uikit.scene role=UIWindowSceneSessionRoleApplication coordSpace=(0.0,0.0 466.0x678.0) orientation=1
+DUOPROBE [resize] uikit.traits hSC=1 vSC=2 idiom=0
+DUOPROBE [resize] uikit.window frame=(0.0,0.0 466.0x678.0) safe=t0.0 l0.0 b34.0 r84.0
+DUOPROBE [resize] uikit.division frame=(0.0,455.5 669.0x40.0) margins=t20.0 l0.0 b20.0 r0.0 active=false
+DUOPROBE [resize] uikit.occlusion frame=(21.0,215.7 37.0x58.0) margins=t0.0 l0.0 b0.0 r0.0 active=false
+DUOPROBE [resize] uikit.occlusion frame=(0.0,0.0 120.0x84.0) margins=t0.0 l0.0 b0.0 r0.0 active=true
+DUOPROBE [resize] uikit.window frame=(0.0,0.0 951.0x669.0) safe=t0.0 l0.0 b34.0 r84.0
+DUOPROBE [resize] uikit.division frame=(0.0,455.5 669.0x40.0) margins=t0.0 l20.0 b0.0 r20.0 active=false
+DUOPROBE [resize] uikit.occlusion frame=(21.0,215.7 37.0x58.0) margins=t0.0 l0.0 b0.0 r0.0 active=false
+DUOPROBE [resize] uikit.occlusion frame=(0.0,0.0 120.0x84.0) margins=t0.0 l0.0 b0.0 r0.0 active=true
+DUOPROBE [resize] uikit.screens count=2 (0.0,0.0 466.0x678.0)@3.0 (0.0,0.0 951.0x669.0)@3.0
+DUOPROBE [division-change] swiftui.size=466.0x678.0 safe=t0.0 l0.0 b0.0 r0.0 hSC=Optional(SwiftUI.UserInterfaceSizeClass.compact) vSC=Optional(SwiftUI.UserInterfaceSizeClass.regular)
+DUOPROBE [division-change] swiftui.division frame=(0.0,455.5 669.0x40.0) margins=t20.0 l0.0 b20.0 r0.0 active=false
+DUOPROBE [division-change] swiftui.occlusion frame=(21.0,215.7 37.0x58.0) margins=t0.0 l0.0 b0.0 r0.0 active=false
+DUOPROBE [division-change] swiftui.occlusion frame=(0.0,0.0 120.0x84.0) margins=t0.0 l0.0 b0.0 r0.0 active=true
+DUOPROBE [division-change] uikit.screen bounds=(0.0,0.0 466.0x678.0) native=(0.0,0.0 1398.0x2034.0) scale=3.0 nativeScale=3.0
+DUOPROBE [division-change] uikit.scene role=UIWindowSceneSessionRoleApplication coordSpace=(0.0,0.0 466.0x678.0) orientation=1
+DUOPROBE [division-change] uikit.traits hSC=1 vSC=2 idiom=0
+DUOPROBE [division-change] uikit.window frame=(0.0,0.0 466.0x678.0) safe=t0.0 l0.0 b34.0 r84.0
+DUOPROBE [division-change] uikit.division frame=(0.0,455.5 669.0x40.0) margins=t20.0 l0.0 b20.0 r0.0 active=false
+DUOPROBE [division-change] uikit.occlusion frame=(21.0,215.7 37.0x58.0) margins=t0.0 l0.0 b0.0 r0.0 active=false
+DUOPROBE [division-change] uikit.occlusion frame=(0.0,0.0 120.0x84.0) margins=t0.0 l0.0 b0.0 r0.0 active=true
+DUOPROBE [division-change] uikit.window frame=(0.0,0.0 951.0x669.0) safe=t0.0 l0.0 b34.0 r84.0
+DUOPROBE [division-change] uikit.division frame=(0.0,455.5 669.0x40.0) margins=t0.0 l20.0 b0.0 r20.0 active=false
+DUOPROBE [division-change] uikit.occlusion frame=(21.0,215.7 37.0x58.0) margins=t0.0 l0.0 b0.0 r0.0 active=false
+DUOPROBE [division-change] uikit.occlusion frame=(0.0,0.0 120.0x84.0) margins=t0.0 l0.0 b0.0 r0.0 active=true
+DUOPROBE [division-change] uikit.screens count=2 (0.0,0.0 466.0x678.0)@3.0 (0.0,0.0 951.0x669.0)@3.0
+DUOPROBE [division-change] swiftui.size=466.0x678.0 safe=t0.0 l0.0 b0.0 r0.0 hSC=Optional(SwiftUI.UserInterfaceSizeClass.compact) vSC=Optional(SwiftUI.UserInterfaceSizeClass.regular)
+DUOPROBE [division-change] swiftui.occlusion frame=(399.7,29.3 37.0x37.0) margins=t0.0 l0.0 b0.0 r0.0 active=true
+DUOPROBE [division-change] swiftui.occlusion frame=(382.0,0.0 84.0x170.0) margins=t0.0 l0.0 b0.0 r0.0 active=true
+DUOPROBE [division-change] uikit.screen bounds=(0.0,0.0 466.0x678.0) native=(0.0,0.0 1398.0x2034.0) scale=3.0 nativeScale=3.0
+DUOPROBE [division-change] uikit.scene role=UIWindowSceneSessionRoleApplication coordSpace=(0.0,0.0 466.0x678.0) orientation=1
+DUOPROBE [division-change] uikit.traits hSC=1 vSC=2 idiom=0
+DUOPROBE [division-change] uikit.window frame=(0.0,0.0 466.0x678.0) safe=t0.0 l0.0 b34.0 r84.0
+DUOPROBE [division-change] uikit.occlusion frame=(399.7,29.3 37.0x37.0) margins=t0.0 l0.0 b0.0 r0.0 active=true
+DUOPROBE [division-change] uikit.occlusion frame=(382.0,0.0 84.0x170.0) margins=t0.0 l0.0 b0.0 r0.0 active=true
+DUOPROBE [division-change] uikit.window frame=(0.0,0.0 466.0x678.0) safe=t0.0 l0.0 b34.0 r84.0
+DUOPROBE [division-change] uikit.occlusion frame=(399.7,29.3 37.0x37.0) margins=t0.0 l0.0 b0.0 r0.0 active=true
+DUOPROBE [division-change] uikit.occlusion frame=(382.0,0.0 84.0x170.0) margins=t0.0 l0.0 b0.0 r0.0 active=true
+DUOPROBE [division-change] uikit.screens count=1 (0.0,0.0 466.0x678.0)@3.0
+dev.scratch.duoprobe: 74709
