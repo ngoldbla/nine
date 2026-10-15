@@ -159,6 +159,32 @@ extension FoldRules {
                            panelWidth: spreads ? panelWidth(width: width, band: band) : nil)
     }
 
+    /// The practice board on a book spread's leading page (the tutorial, the
+    /// first flick): the page's content box less the board's glass inset, no
+    /// smaller than the 200pt every practice board keeps. `width` and
+    /// `height` are the page itself — its card's padding is already gone.
+    public static func pageBoardSide(width: Double, height: Double, inset: Double) -> Double {
+        max(200, min(width, height) - 2 * inset)
+    }
+
+    /// The widest a coach or Why card gets, as on every other device.
+    public static let cardMaxWidth = 360.0
+
+    /// Where a coach or Why card opens on the spread: centred in `pane`, 16pt
+    /// clear of its edges, no wider than `cardMaxWidth`. The leading pane
+    /// starts past the control column and its gutter, because the card must
+    /// not cover the column's buttons (measured: a pane-wide card hid Back).
+    public static func cardFrame(_ pane: FoldPane, width: Double, band: FoldBand,
+                                 spread: Spread) -> (x: Double, width: Double) {
+        typealias R = BoardCompositionRules
+        let paneX = pane == .leading
+            ? spread.controlColumnX + R.controlColumnWidth + R.gutter
+            : band.trailing
+        let paneEnd = pane == .leading ? band.leading : width
+        let cardWidth = min(cardMaxWidth, paneEnd - paneX - 2 * panelInset)
+        return (paneX + (paneEnd - paneX - cardWidth) / 2, cardWidth)
+    }
+
     /// The pane a card about `cells` opens in: whichever holds fewer of them,
     /// so the card does not cover what it is talking about. Ties and empty
     /// lists go to the trailing pane, where the spread's pad already is.

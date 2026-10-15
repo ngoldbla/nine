@@ -1191,6 +1191,14 @@ struct TutorialView: View {
     /// capsule and every padding between them, measured at `chromeAllowance`.
     /// The board takes the rest, and the card ends where the board does.
     private func boardSide(geo: GeometryProxy) -> CGFloat {
+        // PRD-37: on the spread `geo` is the leading page, already inside its
+        // card's padding, and the words are on the other page — so none of the
+        // card arithmetic below applies (it drew the 200pt floor there).
+        if foldBand != nil {
+            return CGFloat(FoldRules.pageBoardSide(width: Double(geo.size.width),
+                                                   height: Double(geo.size.height),
+                                                   inset: Double(Self.boardInset)))
+        }
         let cardWidth = min(geo.size.width - 2 * Space.l, Self.cardMaxWidth)
         let content = cardWidth - 2 * Space.xl
         let byWidth = content - 2 * Self.boardInset

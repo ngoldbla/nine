@@ -191,5 +191,40 @@ class StaleTouchRecovery(unittest.TestCase):
         self.assertTrue(any(c[2:4] == ["status_bar", "U"] for c in self.fake.calls))
 
 
+class DuoScenes(unittest.TestCase):
+
+    def test_launch_only_scenes_pass_no_argument(self):
+        import shotlist
+        self.assertEqual(shotlist.duo_launch("game"), (True, []))
+        self.assertEqual(shotlist.duo_launch("home"), (False, []))
+
+    def test_every_other_duo_scene_names_its_surface(self):
+        import shotlist
+        self.assertEqual(shotlist.duo_launch("prefs"), (True, ["-NineDebugSurface", "prefs"]))
+        self.assertEqual(shotlist.duo_launch("coach"), (True, ["-NineDebugSurface", "coach"]))
+        self.assertEqual(shotlist.duo_launch("history"), (False, ["-NineDebugSurface", "history"]))
+        # The app's vocabulary (DebugSurface.swift) and the harness's agree.
+        src = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..",
+                                "Sources", "Shared", "DebugSurface.swift")).read()
+        for surface, _ in shotlist.DUO_SCENES.values():
+            if surface:
+                self.assertRegex(src, r"case[^\n]*\b%s\b" % surface)
+
+
+class DuoSettle(unittest.TestCase):
+
+    def test_a_blank_panel_with_only_the_status_bar_is_not_drawn(self):
+        # Measured: light-drawer was a white panel and the 9:41 pill alone
+        # passed the old whole-frame contrast test.
+        from PIL import Image, ImageDraw
+        import shotlist
+        blank = Image.new("L", (951, 669), 255)
+        ImageDraw.Draw(blank).rectangle((880, 10, 940, 110), fill=0)   # the pill
+        self.assertFalse(shotlist.panel_drawn(blank))
+        drawn = blank.copy()
+        ImageDraw.Draw(drawn).rectangle((100, 40, 650, 590), fill=40)  # a board
+        self.assertTrue(shotlist.panel_drawn(drawn))
+
+
 if __name__ == "__main__":
     unittest.main()

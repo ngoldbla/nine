@@ -166,6 +166,36 @@ final class FoldRulesTests: XCTestCase {
         XCTAssertNil(squat.panelWidth)
     }
 
+    /// A book spread's practice board fills its page. The page is already
+    /// the card's content box, so the card's gutters are not taken off twice
+    /// (measured on device: both spreads drew the 200pt floor's neighbourhood).
+    /// Tutorial page on the Duo: 455.5 − 2×16 − 2×20 = 383.5 wide, 563 tall,
+    /// glass inset 8. First flick: 455.5 − 2×20 − 2×28 = 359.5 × 539, inset 10.
+    func testASpreadPageBoardFillsItsPage() {
+        XCTAssertEqual(FoldRules.pageBoardSide(width: 383.5, height: 563, inset: 8), 367.5, accuracy: 0.001)
+        XCTAssertEqual(FoldRules.pageBoardSide(width: 359.5, height: 539, inset: 10), 339.5, accuracy: 0.001)
+        XCTAssertEqual(FoldRules.pageBoardSide(width: 300, height: 180, inset: 8), 200)  // the floor
+    }
+
+    /// Measured on device: a leading-pane coach card spanning the whole pane
+    /// (x 47.75–407.75) covered the control column and its Back button. The
+    /// leading pane a card may use starts past the control column and its
+    /// gutter (x 96), so the card sits over board columns 1–6 only; the
+    /// trailing pane is the right pane, as the sheets take it.
+    func testACardNeverCoversTheControlColumn() throws {
+        let s = try XCTUnwrap(FoldRules.spread(width: Self.openWidth, height: Self.openHeight,
+                                               band: Self.duoBand))
+        let leading = FoldRules.cardFrame(.leading, width: Self.openWidth, band: Self.duoBand, spread: s)
+        XCTAssertEqual(leading.x, 112, accuracy: 0.001)
+        XCTAssertEqual(leading.width, 327.5, accuracy: 0.001)
+        XCTAssertGreaterThanOrEqual(leading.x, s.controlColumnX + BoardCompositionRules.controlColumnWidth)
+        XCTAssertLessThanOrEqual(leading.x + leading.width, Self.duoBand.leading)
+
+        let trailing = FoldRules.cardFrame(.trailing, width: Self.openWidth, band: Self.duoBand, spread: s)
+        XCTAssertEqual(trailing.x, 511.5, accuracy: 0.001)
+        XCTAssertEqual(trailing.width, 339.5, accuracy: 0.001)
+    }
+
     func testACardOpensOppositeTheCellsItDiscusses() throws {
         let s = try XCTUnwrap(FoldRules.spread(width: Self.openWidth, height: Self.openHeight,
                                                band: Self.duoBand))

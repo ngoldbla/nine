@@ -62,8 +62,29 @@ DEVICES = {
 }
 
 # The scenes a launch alone reaches, for the Duo lanes: the seeded board
-# resumes on launch, and the shelf is the same launch with resume off.
-DUO_SCENES = ("game", "home")
+# resumes on launch, and the shelf is the same launch with resume off. Every
+# other surface is opened by a Debug-only launch argument,
+# `-NineDebugSurface <name>` (Sources/Shared/DebugSurface.swift), because no tap
+# reaches the open Duo's inner panel. name → (surface or None, opened from the
+# board). `boards`, `coach` and `drawer` exist only here: on every other device
+# they are reached by tapping, and `SCENES` keeps its list.
+DUO_SCENES = {
+    "game":     (None, True),
+    "home":     (None, False),
+    "prefs":    ("prefs", True),
+    "coach":    ("coach", True),
+    "drawer":   ("drawer", True),
+    "history":  ("history", False),
+    "boards":   ("boards", False),
+    "school":   ("school", False),
+    "tutorial": ("tutorial", False),
+}
+
+DUO_NOTES = {
+    "boards": "The Boards sheet (PRD-34).",
+    "coach": "A hint's coach card over the resumed board (PRD-11, PRD-37 \u00a74.5).",
+    "drawer": "The stats drawer pulled down over the board.",
+}
 
 # The App Store's own sizes, which the two devices above are not: ASC requires
 # a 6.9" iPhone set (1320x2868) and a 13" iPad set (2064x2752), and accepts the
@@ -489,17 +510,69 @@ def capture(udid, scene, out_dir, device_key, appearance, size, turn):
     return path
 
 
+def duo_launch(name):
+    """(resumeOnLaunch, launch arguments) for a Duo scene."""
+    surface, on_board = DUO_SCENES[name]
+    return on_board, (["-NineDebugSurface", surface] if surface else [])
+
+
 def capture_duo(udid, scene, out_dir, device_key, appearance, posture):
     """A Duo scene by launch alone, waited for by the clock rather than by the
     accessibility tree, which cannot see the open Duo's inner panel."""
-    prefs = dict(PREFS_ON, resumeOnLaunch=(scene["name"] == "game"))
-    simrig.relaunch(udid, BUNDLE_ID, ninestate.quiet_blobs(prefs))
-    time.sleep(12)
+    resume, launch_args = duo_launch(scene["name"])
+    prefs = dict(PREFS_ON, resumeOnLaunch=resume)
+    simrig.relaunch(udid, BUNDLE_ID, ninestate.quiet_blobs(prefs), launch_args)
     path = os.path.join(out_dir, "%s-%s-%s.png" % (device_key, appearance, scene["name"]))
     display = simrig.screenshot_display(posture)
-    run(["xcrun", "simctl", "io", udid, "screenshot", "--type=png"]
-        + (["--display=" + display] if display else []) + [path])
+    grab = lambda: run(["xcrun", "simctl", "io", udid, "screenshot", "--type=png"]
+                       + (["--display=" + display] if display else []) + [path])
+    settle_by_pixels(grab, path)
     return path
+
+
+def panel_drawn(frame):
+    """Whether the app has drawn anything, judged left of the trailing 84pt
+    status bar: its 9:41 pill is drawn on a blank panel too, and once passed
+    a white panel as a photograph (light-drawer, first run)."""
+    width, height = frame.size
+    content = frame.crop((0, 0, int(width * (951 - 84) / 951), height))
+    lo, hi = content.getextrema()
+    return hi - lo > 24
+
+
+def settle_by_pixels(grab, path, first=8.0, every=3.0, timeout=60.0):
+    """Shoot until the panel has drawn and stopped moving.
+
+    Measured on the open Duo (iOS 27.1, slimmed): the inner panel is a blank
+    ground for ~10 s after launch, and a sheet opened by `-NineDebugSurface`
+    is still sliding in at ~16 s. A fixed 12 s sleep photographed eight blank
+    panels and two sheets that had not arrived. So: wait for a frame that is
+    not one flat colour and differs from the one before by under 0.5% of its
+    pixels (the readout's clock ticks, so never zero). Without PIL it falls
+    back to a 25 s sleep, which covered every scene measured."""
+    try:
+        from PIL import Image, ImageChops
+    except ImportError:
+        time.sleep(25)
+        grab()
+        return
+    time.sleep(first)
+    deadline = time.time() + timeout
+    previous = None
+    while True:
+        grab()
+        frame = Image.open(path).convert("L").resize((285, 200))
+        drawn = panel_drawn(frame)
+        if drawn and previous is not None:
+            moved = sum(1 for v in ImageChops.difference(frame, previous).getdata() if v > 16)
+            if moved < 0.005 * 285 * 200:
+                return
+        previous = frame if drawn else None
+        if time.time() > deadline:
+            print("  warning: %s never settled in %ds; keeping the last frame"
+                  % (os.path.basename(path), int(timeout)))
+            return
+        time.sleep(every)
 
 
 # ------------------------------------------------------------------- entry
@@ -553,6 +626,10 @@ def main():
     parser.add_argument("--landscape", action="store_true",
                         help="rotate the device first — the only way to reach the "
                              "iPad drafting table (PRD-31)")
+    parser.add_argument("--sim-name", default=None,
+                        help="photograph on this simulator instead of the device's "
+                             "own (e.g. a Duo already set to the posture, with "
+                             "--no-erase: Device Hub's posture is set by hand)")
     parser.add_argument("--list", action="store_true", help="print the scenes and exit")
     args = parser.parse_args()
 
@@ -561,19 +638,28 @@ def main():
             print("%-14s %s" % (scene["name"], scene["note"]))
         return
 
-    scenes = SCENES if args.scenes == "all" else [
-        SCENES_BY_NAME[n] for n in args.scenes.split(",")
-        if n in SCENES_BY_NAME or sys.exit("unknown scene %r" % n)
-    ]
+    duo_run = any(ALL_DEVICES.get(d, {}).get("posture") for d in [args.device])
+    if duo_run:
+        names = list(DUO_SCENES) if args.scenes == "all" else args.scenes.split(",")
+        scenes = [dict(SCENES_BY_NAME.get(n) or dict(name=n, note=DUO_NOTES.get(n, "")))
+                  for n in names if n in DUO_SCENES or sys.exit("unknown Duo scene %r" % n)]
+    else:
+        scenes = SCENES if args.scenes == "all" else [
+            SCENES_BY_NAME[n] for n in args.scenes.split(",")
+            if n in SCENES_BY_NAME or sys.exit("unknown scene %r" % n)
+        ]
     devices = ["iphone", "ipad"] if args.device == "both" else [args.device]
     appearances = list(APPEARANCES) if args.appearance == "both" else [args.appearance]
 
     out_dir = os.path.abspath(args.out)
+    os.makedirs(out_dir, exist_ok=True)
     written = []
     runtimes = {}
 
     for device_key in devices:
-        spec = ALL_DEVICES[device_key]
+        spec = dict(ALL_DEVICES[device_key])
+        if args.sim_name:
+            spec["sim_name"] = args.sim_name
         runtime = simrig.ios_runtime(args.runtime or spec.get("runtime"))
         runtimes[device_key] = runtime["version"]
         udid = simrig.prepare_simulator(
@@ -592,9 +678,6 @@ def main():
             for appearance in appearances:
                 run(["xcrun", "simctl", "ui", udid, "appearance", appearance], check=False)
                 for scene in scenes:
-                    if scene["name"] not in DUO_SCENES:
-                        print("  %s: skipped on the Duo (needs a tap)" % scene["name"])
-                        continue
                     path = capture_duo(udid, scene, out_dir, device_key, appearance,
                                        spec["posture"])
                     print("  %s" % path)

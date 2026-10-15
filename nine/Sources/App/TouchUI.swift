@@ -150,7 +150,27 @@ struct TouchHomeView: View {
         }
         .animation(.couchFast, value: showTutorial)
         .animation(.couchFast, value: showSchool)
+        #if DEBUG
+        .onAppear { openDebugSurface() }
+        #endif
     }
+
+    #if DEBUG
+    /// PRD-37's photograph rig: `-NineDebugSurface` opens one shelf surface at
+    /// launch, because taps do not reach the open Duo (DebugSurface.swift).
+    private func openDebugSurface() {
+        guard let surface = DebugSurfaceLatch.take(onGameScreen: false) else { return }
+        DebugSurfaceLatch.afterArrival {
+            switch surface {
+            case .history: showHistory = true
+            case .boards: showBoards = true
+            case .tutorial: showTutorial = true
+            case .school: showSchool = true
+            case .prefs, .coach, .drawer: break
+            }
+        }
+    }
+    #endif
 
     /// The phone's shelf. Classic's page is unchanged below the pager rail.
     ///
@@ -1035,6 +1055,9 @@ struct TouchGameScreen: View {
         .focused($boardFocused)
         .onKeyPress { press in handleKey(press) ? .handled : .ignored }
         .onAppear { boardFocused = true }
+        #if DEBUG
+        .onAppear { openDebugSurface() }
+        #endif
         // A hint describes one position, so any move makes it stale. Retiring
         // it beats leaving a card on screen that is quietly no longer true.
         .onChange(of: model.game?.entries) { _, _ in
@@ -3412,7 +3435,7 @@ struct TouchGameScreen: View {
             // PRD-37: on the open Duo the card opens in the pane away from the
             // cursor, so the square it is reasoning about stays in view.
             let paneFrame = spread.flatMap {
-                cardPaneFrame(FoldRules.cardPane(for: [cursor], spread: $0), in: containerWidth)
+                cardPaneFrame(FoldRules.cardPane(for: [cursor], spread: $0), spread: $0, in: containerWidth)
             }
             ZStack(alignment: model.prefs.controlsAtBottom ? .top : .bottom) {
                 Color.black.opacity(0.001)
@@ -3463,14 +3486,12 @@ struct TouchGameScreen: View {
             }
     }
 
-    /// A card's frame on the open Duo: its pane, less a 16pt gutter each side,
-    /// no wider than the card's own 360pt. Nil without a fold.
-    private func cardPaneFrame(_ pane: FoldPane, in width: CGFloat) -> (x: CGFloat, width: CGFloat)? {
+    /// A card's frame on the open Duo (`FoldRules.cardFrame`). Nil without a fold.
+    private func cardPaneFrame(_ pane: FoldPane, spread: Spread,
+                               in width: CGFloat) -> (x: CGFloat, width: CGFloat)? {
         guard let band = foldBand else { return nil }
-        let paneX = pane == .leading ? 0 : CGFloat(band.trailing)
-        let paneWidth = pane == .leading ? CGFloat(band.leading) : width - CGFloat(band.trailing)
-        let cardWidth = min(360, paneWidth - 32)
-        return (paneX + (paneWidth - cardWidth) / 2, cardWidth)
+        let frame = FoldRules.cardFrame(pane, width: Double(width), band: band, spread: spread)
+        return (CGFloat(frame.x), CGFloat(frame.width))
     }
 
     /// The lightbulb is a toggle, not a dispenser: pressing it again puts the
@@ -3492,6 +3513,22 @@ struct TouchGameScreen: View {
         coachDragOffset = .zero
         withAnimation(.couchFast) { coachAdvice = nil }
     }
+
+    #if DEBUG
+    /// PRD-37's photograph rig: `-NineDebugSurface` opens one board surface at
+    /// launch, because taps do not reach the open Duo (DebugSurface.swift).
+    private func openDebugSurface() {
+        guard let surface = DebugSurfaceLatch.take(onGameScreen: true) else { return }
+        DebugSurfaceLatch.afterArrival {
+            switch surface {
+            case .prefs: showPrefs = true
+            case .coach: toggleCoach()
+            case .drawer: withAnimation(.couchFast) { drawerOpen = true }
+            case .history, .boards, .tutorial, .school: break
+            }
+        }
+    }
+    #endif
 
     /// The wand. Turning it on fills every empty cell's notes; turning it off
     /// clears nothing at all, which is the promise that makes it safe to try.
@@ -3528,7 +3565,7 @@ struct TouchGameScreen: View {
             let cells = (focus?.pattern ?? []) + (focus?.victims ?? [])
                 + [focus?.target].compactMap { $0 }
             let paneFrame = spread.flatMap {
-                cardPaneFrame(FoldRules.cardPane(for: cells, spread: $0), in: containerWidth)
+                cardPaneFrame(FoldRules.cardPane(for: cells, spread: $0), spread: $0, in: containerWidth)
             }
             ZStack(alignment: model.prefs.controlsAtBottom ? .top : .bottom) {
                 Color.black.opacity(0.001)

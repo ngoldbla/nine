@@ -341,8 +341,14 @@ private struct FirstFlickBeat: View {
             // The old `- 64` was 20pt of padding plus 24pt of slack, and it
             // survived the padding moving to 28 only by overhanging it.
             let cardWidth = min(geo.size.width - 2 * Space.xl, 560)
-            let side = max(200, min(cardWidth - 2 * (Space.xxl + inset),
-                                    geo.size.height * 0.52))
+            // PRD-37: on the spread `geo` is the leading page, already inside
+            // its panel's padding, so the card arithmetic would count it twice.
+            let side = foldBand != nil
+                ? CGFloat(FoldRules.pageBoardSide(width: Double(geo.size.width),
+                                                  height: Double(geo.size.height),
+                                                  inset: Double(inset)))
+                : max(200, min(cardWidth - 2 * (Space.xxl + inset),
+                               geo.size.height * 0.52))
             let lens = rose.map { roseLens(side: side, inset: inset, rose: $0) }
             BoardView(
                 game: game,
