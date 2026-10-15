@@ -4886,3 +4886,69 @@ Consequences recorded rather than hidden:
   ledgers that no longer exist. `SharedDailyBoardTests` became
   `SharedBoardTests` and pins the new `entryID` join key plus legacy-file
   tolerance.
+
+## PRD-37 — the spread: what the device said that the plan did not (2026-10-15)
+
+Measured on the iOS 27.1 simulator (24A94232) with Xcode 27.1 RC; every claim
+below names the run it came from.
+
+- **The iOS 27.1 simulator runtime runs one device type, `iPhone Duo`.**
+  `simctl create … iPhone 17 Pro … iOS-27-1` → "Incompatible device" (403).
+  The plan re-recorded the iPhone baselines on iOS 27.1; there is no iPhone to
+  record them on. So `nine-accessibility.yml` **stays on Xcode 26 and its
+  iOS 26.5 baselines**, and only `nine-engine.yml` and `testflight-tvos.yml`
+  move to Xcode 27.1 (PRD-37 §5). The accessibility lane builds the app with
+  the Duo code compiled out — it could not have tested the Duo anyway (next).
+- **Neither taps nor the accessibility bridge reach the open Duo's inner
+  panel.** `sim-use describe-ui` answers "No translation object" for every
+  board cell (Apple 187148389), and `sim-use tap` at the exact point
+  `describe-ui` reported for the Hint button does nothing. So the Duo lanes
+  photograph only what a launch reaches (`shotlist.py --device duo-open`), the
+  AX/contrast/loc lanes accept `--device duo-folded` and refuse `duo-open` with
+  that reason, and every interaction on the open Duo needs a person in Device
+  Hub — as does every posture change (Device Hub's window has no accessibility
+  tree, and computer-use clicks into it are refused).
+- **The shelf bar's channel pager crossed the crease.** Not in the plan's
+  surface table; found on the first open-Duo screenshot of the first run (the
+  pager capsule spanned x ≈ 400–710pt). Held to the left column by
+  `LeadingPaneWidth`, identity without a fold, and re-photographed clean.
+- **At the Duo's board size the rose cannot stay on the cursor's side of the
+  crease for columns 7–9.** The plate is 245.6pt; right of the crease there are
+  183.5pt. Bent, those rings open over columns 1–6 (`RoseLens.creaseSafeX`).
+- **The board is 550.5pt, not the mockup's 557pt** — at 557 the pad's keys are
+  43.3pt wide, under `Hit.min`. The 44pt key is in the solver, not a constant.
+- **The difficulty/clock/mistakes readout sits above the pad**, not as a chip
+  over the board as the mockup sketched: round 4 docked the chrome clear of the
+  board, and the 164pt strip beside it has room.
+- **Signing.** A default macOS Debug build hung for about two hours in
+  `codesign` on the Apple Distribution identity (a keychain prompt). Every build
+  check in this PR ran with `CODE_SIGNING_ALLOWED=NO`; nothing touched signing.
+- **Harness flake, diagnosed rather than retried away.** The AX and loc lanes
+  timed out opening the rose on the branch's builds. The same timeout hit
+  `main`'s build; the harness simulator's touch input goes stale over long runs
+  (`sim-use tap` reports success and nothing happens — 0/5 on `main`). After a
+  reboot the rose opened 10/10 on the branch and 5/5 on `main`, and the trees
+  were byte-identical. `simrig` does not yet reboot on its own; that is left
+  for the harness thread.
+- **Zero change elsewhere, as measured.** `main` and the branch, each built
+  with the same Xcode, run on iOS 26.5 through the same harness: AX trees
+  byte-identical on Xcode 27.1 (7/7) and on Xcode 26.6 (every screen across
+  runs); localization 25/25 identical on 27.1 and 24/25 on 26.6 (the 25th is the
+  touch flake: the rose never opened); the branch passes the contrast gate on
+  both. The committed AX baselines differ from both by their `sim-use` header
+  (0.11.0 → v0.12.0 on this machine) and, for History only, by a sheet-detent
+  difference that `main` shows identically — not re-recorded here.
+- **`shotlist.py --device both` could not run on this machine**: its rotation
+  correction clicks Simulator.app, which needs an Accessibility permission this
+  environment does not grant. The visual comparison was made instead on the
+  launch-reachable scenes (game, shelf; iPhone 17 Pro and iPad Pro 11";
+  light and dark): iPad 0.000–0.008% of pixels (the clock); iPhone identical in
+  layout, the remaining difference being the Dynamic Island pill drawn in one
+  capture and not the other, and one capture taken before the appearance switch
+  landed.
+- **Not yet verified by hand on the open Duo:** the rose bent, the coach card's
+  pane and drag, Preferences/History/Boards in the right pane, the debrief and
+  drawer panel, the tutorial and first-flick book spreads, School, folding
+  mid-game. Each needs a person in Device Hub; they are the open items on this
+  PR, together with the first `--device duo-folded` AX/contrast/loc baselines,
+  whose lanes stop to have the operator confirm the posture.

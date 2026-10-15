@@ -1,6 +1,6 @@
 # PRD-37 — The Spread (iPhone Duo)
 
-**Status:** Proposed · **Thread:** `nine/` + `couchkit/` · **Release:** 1.2
+**Status:** Implemented — hand checks on the open Duo outstanding (DEVIATIONS, PRD-37) · **Thread:** `nine/` + `couchkit/` · **Release:** 1.2
 **One-liner:** Folded, the iPhone Duo is an iPhone and Nine draws exactly what it
 draws today. Open, it is a book spread: a 550.5pt board whose crease falls on the
 board's own thick box rule, the controls on one page and the digits on the
