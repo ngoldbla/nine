@@ -59,7 +59,7 @@ permissions:
 jobs:
   testflight:
     if: ${{ !contains(github.event.head_commit.message, '[skip ci]') && github.repository_owner == 'ngoldbla' }}
-    runs-on: macos-latest
+    runs-on: xcode-27
     timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
@@ -68,12 +68,20 @@ jobs:
           # make that 1 every run → duplicate build number → TestFlight rejects it.
           fetch-depth: 0
 
-      - name: Select Xcode 26+ (tvOS 26 SDK)
+      - name: Select Xcode 27.1
         run: |
           set -euo pipefail
+          # Nine 1.2 needs the iOS 27.1 SDK (PRD-37 §5): the iPhone Duo's
+          # hinge and fold APIs exist nowhere else. No fallback — a build made
+          # with an older Xcode silently drops the Duo layout.
           XC=""
-          for d in /Applications/Xcode_26*.app; do [ -e "$d" ] && XC="$d"; done
-          if [ -n "$XC" ]; then sudo xcode-select -s "$XC"; fi
+          for d in /Applications/Xcode_27.1*.app; do [ -e "$d" ] && XC="$d"; done
+          if [ -z "$XC" ]; then
+            echo "::error::Xcode 27.1 is not installed on this runner (actions/runner-images#14850). Installed:"
+            ls -d /Applications/Xcode*.app || true
+            exit 1
+          fi
+          sudo xcode-select -s "$XC"
           xcodebuild -version
 
       - name: Install XcodeGen

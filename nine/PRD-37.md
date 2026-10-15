@@ -269,11 +269,19 @@ and it is confined to the open Duo:
 The Duo layout only exists in binaries built with the iOS 27.1 SDK. This PR
 therefore moves the toolchain, which also moves every platform's release build:
 
-- `nine-engine.yml`, `nine-accessibility.yml` and `testflight-tvos.yml` change
-  `runs-on: macos-latest` to `runs-on: xcode-27` (GitHub's preview image) and
-  select `/Applications/Xcode_27.1*.app`. **If it is absent the job fails with a
-  message naming the missing Xcode** — there is no fallback to Xcode 26.
-- The accessibility lane's baselines record their runtime (`runtime: 26.5` in every header). On the Xcode 27 image they run on iOS 27.1, so they are **re-recorded on iOS 27.1 from `main`'s unmodified code** in their own commit, and the branch is then verified against them byte for byte — the runtime move and the feature are never in the same diff.
+- `nine-engine.yml` (the PR gate) and `testflight-tvos.yml` (every platform's
+  release build) change `runs-on: macos-latest` to `runs-on: xcode-27`
+  (GitHub's preview image) and select `/Applications/Xcode_27.1*.app`. **If it
+  is absent the job fails with a message naming the missing Xcode** — there is
+  no fallback to Xcode 26.
+- **`nine-accessibility.yml` stays on Xcode 26 and its iOS 26.5 baselines.**
+  Measured: the iOS 27.1 simulator runtime (24A94232) supports exactly one
+  device type, `iPhone Duo` — `simctl create` refuses an iPhone 17 Pro on it
+  ("Incompatible device"). The `xcode-27` image carries iOS 27.0, not 26.5, so
+  moving the lane would leave every baseline red without testing anything new,
+  and the accessibility tools cannot read the open Duo in any case (§1.6). The
+  lane keeps doing what it does — guarding the iPhone — with the Duo code
+  compiled out of the app it builds.
 - As of 2026-10-14 GitHub has not deployed Xcode 27.1 RC to that image
   (actions/runner-images#14850, `awaiting-deployment`; the image ships 27.0).
   Until it does, the PR's checks fail by design and the PR cannot merge green.
