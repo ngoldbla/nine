@@ -551,6 +551,7 @@ def measure_cell(udid, theme, accent, shots, geometry, previous, with_rose):
                 "-x", str(int(cache.empty_frame["x"] + cache.empty_frame["width"] / 2)),
                 "-y", str(int(cache.empty_frame["y"] + cache.empty_frame["height"] / 2)),
             ])
+            simrig.note_tap(udid)
             if cache.petals is None:
                 # The run's second and last accessibility read: the ten petal
                 # frames, which are the same in every cell after this one.
@@ -855,8 +856,10 @@ def main():
             began = time.time()
             wants_rose = (not args.no_rose
                           and rose_wanted(theme, accent, pairs, args.rose_all))
-            values, previous = measure_cell(
-                udid, theme, accent, shots, geometry, previous, wants_rose)
+            values, previous = simrig.retrying_stale_touch(
+                udid, lambda: measure_cell(udid, theme, accent, shots, geometry,
+                                           previous, wants_rose),
+                "%s/%s" % (theme, accent))
             rows.append(((theme, accent, mode), values))
             print("  %-10s %-9s %-9s %s   (%.1fs)"
                   % (theme, accent, mode,

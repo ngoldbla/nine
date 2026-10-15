@@ -618,8 +618,12 @@ def main():
         for appearance in appearances:
             run(["xcrun", "simctl", "ui", udid, "appearance", appearance], check=False)
             for scene in scenes:
-                path = capture(udid, scene, out_dir, device_key, appearance,
-                               size, turn)
+                # Not retried rotated: a reboot puts the device back upright
+                # under a tap space registered for landscape.
+                shot = lambda: capture(udid, scene, out_dir, device_key, appearance,
+                                       size, turn)
+                path = shot() if turn else simrig.retrying_stale_touch(
+                    udid, shot, "%s/%s" % (appearance, scene["name"]))
                 print("  %s" % path)
                 written.append(path)
         if args.landscape:

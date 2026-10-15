@@ -299,6 +299,28 @@ def describe(udid, point=None, tolerate=False):
     sys.exit("describe-ui failed: %s%s" % (out[:400], result.stderr or ""))
 
 
+class WaitTimeout(SystemExit):
+    """A wait that ran out of time. Still a `SystemExit`: uncaught, it ends the
+    run with the same message it always did. `after_tap` says whether a tap
+    reached `sim-use` since the last launch, which is the stale-touch signature
+    `retrying_stale_touch` recovers from."""
+
+    def __init__(self, message, after_tap):
+        super().__init__(message)
+        self.after_tap = after_tap
+
+
+# Simulators that have been tapped since their last `relaunch`. A wait that
+# times out on one of these may be waiting on a tap that never landed.
+_TAPPED = set()
+
+
+def note_tap(udid):
+    """Record a tap for `WaitTimeout.after_tap`; harnesses that tap through
+    their own `sim-use tap` call this too."""
+    _TAPPED.add(udid)
+
+
 def wait_for(udid, label, timeout=40.0, hint_for_missing_board=True):
     """Poll until `label` is in the tree, tolerating a not-yet-ready bridge."""
     deadline = time.time() + timeout
@@ -335,9 +357,10 @@ def wait_for(udid, label, timeout=40.0, hint_for_missing_board=True):
             "have collapsed and the board is a blank rectangle to VoiceOver. "
             "Start at Sources/App/BoardAccessibility.swift.\n"
         )
-    sys.exit(
+    raise WaitTimeout(
         "timed out waiting for %r. Tree was:\n%s%s"
-        % (label, "\n".join(seen) if seen else "(nothing — the bridge never answered)", hint)
+        % (label, "\n".join(seen) if seen else "(nothing — the bridge never answered)", hint),
+        udid in _TAPPED,
     )
 
 
@@ -411,6 +434,7 @@ def tap(udid, data, label):
         "sim-use", "tap", "--device", udid,
         "-x", str(int(x)), "-y", str(int(y)),
     ])
+    note_tap(udid)
 
 
 def relaunch(udid, bundle_id, blobs, args=()):
@@ -429,7 +453,48 @@ def relaunch(udid, bundle_id, blobs, args=()):
     run(["xcrun", "simctl", "terminate", udid, bundle_id], check=False)
     wait_until_dead(udid, bundle_id)
     seed(udid, bundle_id, blobs)
+    _TAPPED.discard(udid)
     run(["xcrun", "simctl", "launch", udid, bundle_id, *args])
+
+
+# ------------------------------------------------------------ stale touch
+#
+# Over a long run the simulator's touch input goes stale: `sim-use tap`
+# reports success and nothing happens. Measured on `main`'s build as on the
+# branch's (0/5 rose opens), and cured by a reboot (5/5, 10/10) — DEVIATIONS,
+# PRD-37. It reads exactly like a regression ("the rose never opened"), so the
+# rig recovers from it once, loudly, rather than leaving every lane to be
+# re-run by hand.
+
+
+def reboot(udid):
+    """Shut down and boot `udid`, putting back what the run pinned: the
+    appearance it had (read before the shutdown), the status bar, a warm
+    accessibility bridge. The installed app and its container survive."""
+    appearance = run(["xcrun", "simctl", "ui", udid, "appearance"], check=False).strip()
+    run(["xcrun", "simctl", "shutdown", udid], check=False)
+    run(["xcrun", "simctl", "boot", udid], check=False)
+    run(["xcrun", "simctl", "bootstatus", udid, "-b"], capture=False)
+    if appearance in ("light", "dark"):
+        run(["xcrun", "simctl", "ui", udid, "appearance", appearance], check=False)
+    pin_status_bar(udid)
+    warm_up_bridge(udid)
+
+
+def retrying_stale_touch(udid, scene, what):
+    """Run `scene()`; if it times out waiting after a tap, reboot once and run
+    it again. A timeout before any tap is not stale touch and is raised at
+    once, and so is a second timeout — one reboot is a recovery, two would be
+    hiding a regression."""
+    try:
+        return scene()
+    except WaitTimeout as timeout:
+        if not timeout.after_tap:
+            raise
+        print("  %s: timed out after a tap — the stale-touch signature. Rebooting "
+              "the simulator once and retrying." % what)
+        reboot(udid)
+        return scene()
 
 
 def wait_until_dead(udid, bundle_id, timeout=20.0):

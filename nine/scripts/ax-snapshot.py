@@ -474,7 +474,9 @@ def main():
         if args.only and screen["name"] != args.only:
             continue
         print("capturing %s…" % screen["name"])
-        dump = capture(udid, screen, targets, runtime["version"])
+        dump = simrig.retrying_stale_touch(
+            udid, lambda: capture(udid, screen, targets, runtime["version"]),
+            screen["name"])
         path = os.path.join(BASELINES, "%s.txt" % screen["name"])
         if args.record:
             with open(path, "w") as handle:
