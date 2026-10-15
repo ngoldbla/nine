@@ -229,8 +229,8 @@ is `nil`, and the surface takes the code path it takes today.
 
 | Surface | Open-Duo layout | Source of the numbers |
 |---|---|---|
-| **Game** | §4.2. Header chips centred on box columns 1–6 (x ≈ 292); toasts and the auto-notes chip likewise | `FoldRules.spread` |
-| **Flick rose** | Already clamped inside the board frame (`RoseLens.anchoredCentre`). **When the band is active**, the ring is also kept on the cursor's side of the crease | `RoseLens` gains an optional crease |
+| **Game** | §4.2. The difficulty / clock / mistakes / remaining readout (`railHeader`) sits at the top of the 164pt strip above the digit pad, clear of the board as round 4 requires. Toasts, tips, the completion chip, the auto-notes chip and the composing/parlor chips stay over the board, re-centred on box columns 1–6 (x ≈ 292) | `FoldRules.spread` |
+| **Flick rose** | Already clamped inside the board frame (`RoseLens.anchoredCentre`). **When the band is active**, the ring is also kept clear of the crease: on the cursor's side when it fits, otherwise on the other side. At 550.5pt the plate is 245.6pt wide (`plateSpan` × scale 0.606); left of the crease there are 367pt and right of it 183.5pt, so a cursor in columns 7–9 opens its ring over columns 1–6. The ring never covers the cursor cell either way | `RoseLens.creaseSafeX` |
 | **Preferences, History, Boards** | `GlassSheet`'s trailing panel fills the right pane: x 511.5 – 851 (339.5 wide, against 380 elsewhere) | `FoldRules.panelFrame`, passed to CouchKit as `\.couchPanelLeadingInset` |
 | **Debrief, stats drawer** | The same right-pane panel frame | `FoldRules.panelFrame` |
 | **Coach and Why cards** | Open in the pane **not** containing the cell they discuss; draggable (§4.5) | `FoldRules` + cursor column |
@@ -273,6 +273,7 @@ therefore moves the toolchain, which also moves every platform's release build:
   `runs-on: macos-latest` to `runs-on: xcode-27` (GitHub's preview image) and
   select `/Applications/Xcode_27.1*.app`. **If it is absent the job fails with a
   message naming the missing Xcode** — there is no fallback to Xcode 26.
+- The accessibility lane's baselines record their runtime (`runtime: 26.5` in every header). On the Xcode 27 image they run on iOS 27.1, so they are **re-recorded on iOS 27.1 from `main`'s unmodified code** in their own commit, and the branch is then verified against them byte for byte — the runtime move and the feature are never in the same diff.
 - As of 2026-10-14 GitHub has not deployed Xcode 27.1 RC to that image
   (actions/runner-images#14850, `awaiting-deployment`; the image ships 27.0).
   Until it does, the PR's checks fail by design and the PR cannot merge green.
