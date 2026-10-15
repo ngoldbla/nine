@@ -152,6 +152,33 @@ final class FoldRulesTests: XCTestCase {
         XCTAssertEqual(FoldRules.cardPane(for: [], spread: s), .trailing)               // nothing to cover
     }
 
+    // MARK: The rose
+
+    /// 550.5pt board, crease 367pt in: the plate (245.6pt) fits left of the
+    /// crease and not right of it.
+    func testTheRoseStaysClearOfAnActiveCrease() {
+        let side = 550.5, inset = 8.0, crease = 367.0
+        let scale = RoseLens.scale(forSide: side)
+        let half = RoseLens.plateSpan(pencil: false, scale: scale) / 2
+        for cursor in 0..<81 {
+            let lens = RoseLens(cursor: cursor, side: side, inset: inset, pencil: false,
+                                scale: scale, crease: crease)
+            let straddles = lens.centre.x - half < crease && lens.centre.x + half > crease
+            XCTAssertFalse(straddles, "cursor \(cursor) at x \(lens.centre.x)")
+        }
+    }
+
+    func testNoCreaseIsTodaysRose() {
+        for side in [334.0, 386.0, 425.0, 550.5] {
+            let scale = RoseLens.scale(forSide: side)
+            for cursor in 0..<81 {
+                XCTAssertEqual(
+                    RoseLens(cursor: cursor, side: side, inset: 8, pencil: false, scale: scale),
+                    RoseLens(cursor: cursor, side: side, inset: 8, pencil: false, scale: scale, crease: nil))
+            }
+        }
+    }
+
     /// Zero change elsewhere: with no fold, every window the drafting-table
     /// tests sweep resolves exactly as it did before the parameter existed.
     func testNoFoldIsTodaysFunctionEverywhere() {

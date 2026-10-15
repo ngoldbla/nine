@@ -209,7 +209,8 @@ public struct RoseLens: Equatable, Sendable {
         inset: Double,
         pencil: Bool,
         scale: Double,
-        clamped: Bool = true
+        clamped: Bool = true,
+        crease: Double? = nil
     ) {
         self.pencil = pencil
         self.scale = scale
@@ -276,7 +277,16 @@ public struct RoseLens: Equatable, Sendable {
                 ? (min(max(cx, lo), hi), min(max(cy, lo), hi))
                 : (frameSide / 2, frameSide / 2)
         }
-        (self.centreX, self.centreY) = (view.x - inset, view.y - inset)
+        // PRD-37: on a bent Duo the plate must not lie across the crease.
+        // Horizontal only — the vertical placement above is what keeps the
+        // cursor cell uncovered, and moving sideways cannot undo it.
+        var x = view.x
+        if let crease {
+            x = Self.creaseSafeX(x, half: half, crease: crease + inset, cursorX: cx,
+                                 lo: half + Self.plateMargin,
+                                 hi: frameSide - half - Self.plateMargin)
+        }
+        (self.centreX, self.centreY) = (x - inset, view.y - inset)
     }
 
     /// Board-local centre of the ring — the space the two Afterglow shaders
@@ -362,6 +372,25 @@ public struct RoseLens: Equatable, Sendable {
 
     /// Petals sized for fingers: a hair wider than a board cell, until the
     /// board is big enough that a cell-sized petal would be a dinner plate.
+    /// The plate's centre x moved clear of a crease at `crease` (all view
+    /// space): onto the cursor's side when the plate fits there, else onto the
+    /// other side, else left where it was (a board too small to matter).
+    public static func creaseSafeX(_ x: Double, half: Double, crease: Double,
+                                   cursorX: Double, lo: Double, hi: Double) -> Double {
+        guard x - half < crease, x + half > crease else { return x }
+        let leadingMax = crease - half - plateMargin
+        let trailingMin = crease + half + plateMargin
+        let leadingFits = leadingMax >= lo, trailingFits = trailingMin <= hi
+        if cursorX < crease {
+            if leadingFits { return min(x, leadingMax) }
+            if trailingFits { return max(x, trailingMin) }
+        } else {
+            if trailingFits { return max(x, trailingMin) }
+            if leadingFits { return min(x, leadingMax) }
+        }
+        return x
+    }
+
     public static func scale(forSide side: Double) -> Double {
         min(0.62, ((side / 9) * 1.15) / 116)
     }
