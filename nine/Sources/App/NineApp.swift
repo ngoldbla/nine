@@ -186,6 +186,10 @@ struct RootView: View {
         // model nobody is looking at. By `onAppear` the live instance exists.
         // Registration is last-writer-wins and idempotent in practice.
         .onAppear { AppDependencyManager.shared.add(dependency: model) }
+        // PRD-37. Outermost on purpose: the overlays above are siblings of the
+        // view an environment value is set on (see the Mac tutorial note below),
+        // so the fold has to be published from outside all of them.
+        .readsFold()
         #if os(macOS)
         // Drive the NSWindow (desk mode size/level, frame autosave) and host
         // the keyboard-gestured tutorial from Help ▸ How to Play.
