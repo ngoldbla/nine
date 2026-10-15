@@ -113,3 +113,37 @@ public enum FoldRules {
         return best
     }
 }
+
+/// Which side of the fold.
+public enum FoldPane: Equatable, Sendable { case leading, trailing }
+
+extension FoldRules {
+
+    /// The shelf's two columns, one per pane, the band as the gutter.
+    public static func shelfPair(width: Double, height: Double, band: FoldBand) -> ShelfPair? {
+        typealias R = BoardCompositionRules
+        let leading = band.leading - R.shelfOuterPadding
+        let trailing = width - R.shelfOuterPadding - band.trailing
+        guard height >= R.shelfMinimumHeight,
+              leading >= R.shelfMinimumColumn, trailing >= R.shelfMinimumColumn
+        else { return nil }
+        return ShelfPair(columnWidth: leading, gutter: band.width,
+                         outerPadding: R.shelfOuterPadding, trailingColumnWidth: trailing)
+    }
+
+    /// GlassSheet's own trailing padding, which the panel is measured inside.
+    public static let panelInset = 16.0
+
+    /// The width a trailing panel takes so it fills the right pane exactly.
+    public static func panelWidth(width: Double, band: FoldBand) -> Double {
+        width - band.trailing - 2 * panelInset
+    }
+
+    /// The pane a card about `cells` opens in: whichever holds fewer of them,
+    /// so the card does not cover what it is talking about. Ties and empty
+    /// lists go to the trailing pane, where the spread's pad already is.
+    public static func cardPane(for cells: [Int], spread: Spread) -> FoldPane {
+        let leading = cells.filter { $0 % 9 < spread.ruleAfterColumn }.count
+        return leading >= cells.count - leading ? .trailing : .leading
+    }
+}

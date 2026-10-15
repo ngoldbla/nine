@@ -99,17 +99,24 @@ public enum ShelfComposition: Equatable, Sendable {
 
 /// The measured two-column shelf. Points in the window's own space.
 public struct ShelfPair: Equatable, Sendable {
+    /// The leading column's width — and the trailing one's, except on a
+    /// foldable, where the fold band is the gutter and the panes differ.
     public let columnWidth: Double
     public let gutter: Double
     public let outerPadding: Double
+    public let trailingColumnWidth: Double
 
-    public init(columnWidth: Double, gutter: Double, outerPadding: Double) {
+    public init(columnWidth: Double, gutter: Double, outerPadding: Double,
+                trailingColumnWidth: Double? = nil) {
         self.columnWidth = columnWidth
         self.gutter = gutter
         self.outerPadding = outerPadding
+        self.trailingColumnWidth = trailingColumnWidth ?? columnWidth
     }
 
-    public var totalWidth: Double { 2 * columnWidth + gutter + 2 * outerPadding }
+    public var totalWidth: Double {
+        columnWidth + trailingColumnWidth + gutter + 2 * outerPadding
+    }
 }
 
 /// The measured drafting table. Every number is points in the window's own
@@ -391,7 +398,11 @@ public enum BoardCompositionRules {
     public static let shelfMaximumWidth = 1080.0
 
     /// How the shelf composes for a window of this size.
-    public static func resolveShelf(width: Double, height: Double) -> ShelfComposition {
+    public static func resolveShelf(width: Double, height: Double,
+                                    fold: FoldBand? = nil) -> ShelfComposition {
+        if let fold, let pair = FoldRules.shelfPair(width: width, height: height, band: fold) {
+            return .pair(pair)
+        }
         let usable = min(width, shelfMaximumWidth) - 2 * shelfOuterPadding - shelfGutter
         let column = min(shelfColumnWidth, usable / 2)
         guard height >= shelfMinimumHeight, column >= shelfMinimumColumn else {

@@ -111,6 +111,47 @@ final class FoldRulesTests: XCTestCase {
                        BoardCompositionRules.resolve(width: 867, height: 635, fold: bent))
     }
 
+    // MARK: The shelf
+
+    func testTheDuoShelfUsesTheBandAsItsGutter() throws {
+        let pair = try XCTUnwrap(BoardCompositionRules.resolveShelf(
+            width: Self.openWidth, height: Self.openHeight, fold: Self.duoBand).pair)
+        XCTAssertEqual(pair.columnWidth, 431.5, accuracy: 0.001)
+        XCTAssertEqual(pair.trailingColumnWidth, 347.5, accuracy: 0.001)
+        XCTAssertEqual(pair.gutter, 40, accuracy: 0.001)
+        XCTAssertEqual(pair.outerPadding, 24)
+        XCTAssertEqual(pair.totalWidth, Self.openWidth, accuracy: 0.001)
+    }
+
+    func testNoFoldShelfIsTodaysShelfEverywhere() {
+        for width in stride(from: 320.0, through: 2000.0, by: 20.0) {
+            for height in stride(from: 320.0, through: 1440.0, by: 20.0) {
+                let today = BoardCompositionRules.resolveShelf(width: width, height: height)
+                XCTAssertEqual(BoardCompositionRules.resolveShelf(width: width, height: height, fold: nil), today)
+                if let pair = today.pair { XCTAssertEqual(pair.trailingColumnWidth, pair.columnWidth) }
+            }
+        }
+    }
+
+    // MARK: Panels and cards
+
+    /// GlassSheet pads its trailing panel 16pt from the edge; on the Duo its
+    /// leading edge must land 16pt past the band, at 511.5.
+    func testTheDuoPanelFillsTheRightPane() {
+        let w = FoldRules.panelWidth(width: Self.openWidth, band: Self.duoBand)
+        XCTAssertEqual(w, 339.5, accuracy: 0.001)
+        XCTAssertEqual(Self.openWidth - FoldRules.panelInset - w, 511.5, accuracy: 0.001)
+    }
+
+    func testACardOpensOppositeTheCellsItDiscusses() throws {
+        let s = try XCTUnwrap(FoldRules.spread(width: Self.openWidth, height: Self.openHeight,
+                                               band: Self.duoBand))
+        XCTAssertEqual(FoldRules.cardPane(for: [3 * 9 + 1], spread: s), .trailing)      // r4c2
+        XCTAssertEqual(FoldRules.cardPane(for: [3 * 9 + 7], spread: s), .leading)       // r4c8
+        XCTAssertEqual(FoldRules.cardPane(for: [0, 1, 8], spread: s), .trailing)        // majority left
+        XCTAssertEqual(FoldRules.cardPane(for: [], spread: s), .trailing)               // nothing to cover
+    }
+
     /// Zero change elsewhere: with no fold, every window the drafting-table
     /// tests sweep resolves exactly as it did before the parameter existed.
     func testNoFoldIsTodaysFunctionEverywhere() {
