@@ -89,11 +89,14 @@ def ios_runtime(version=None):
 
 def reslim(udid):
     """Erase and create bring a simulator back stock (~/.claude/CLAUDE.md).
-    Nine waits on Game Center at launch, so `gamed` stays. Off on hosts without
-    simslim (CI) and when NINE_SIMSLIM=0."""
+    Nine waits on Game Center at launch, so `gamed` stays. `--keep` is
+    mutually exclusive with `--profile`; the dev profile keeps nothing, so this
+    is that profile plus `gamed`. Off on hosts without simslim (CI) and when
+    NINE_SIMSLIM=0."""
     if shutil.which("simslim") is None or os.environ.get("NINE_SIMSLIM") == "0":
         return
-    run(["simslim", "on", udid, "--keep", "com.apple.gamed"], check=False, capture=False)
+    run(["simslim", "on", udid, "--keep", "com.apple.gamed", "--preserve-boot-state"],
+        check=False, capture=False)
     run(["xcrun", "simctl", "bootstatus", udid, "-b"], capture=False)
 
 
@@ -149,7 +152,12 @@ def prepare_simulator(runtime, name, device_type, erase=True, appearance="light"
                       slim=None):
     """A dedicated, erased simulator. Erasing is not politeness: a reused
     container can carry a previous session's library, and on a host signed into
-    iCloud the cloud library will restore one into a fresh install."""
+    iCloud the cloud library will restore one into a fresh install.
+
+    `slim` defaults to "only the Duo". The iPhone and iPad baselines were
+    recorded on stock simulators and CI has no simslim, so a slimmed local
+    baseline lane would be measuring a different instrument; the Duo lanes
+    have no CI counterpart and need the memory."""
     data = json.loads(run(["xcrun", "simctl", "list", "devices", "--json"]))
     # Name *and* runtime: a same-named simulator on another runtime is a
     # different instrument, and reusing it would undo the runtime pin.
@@ -169,7 +177,9 @@ def prepare_simulator(runtime, name, device_type, erase=True, appearance="light"
         run(["xcrun", "simctl", "erase", udid])
     run(["xcrun", "simctl", "boot", udid], check=False)
     run(["xcrun", "simctl", "bootstatus", udid, "-b"], capture=False)
-    if fresh and slim is not False:
+    if slim is None:
+        slim = device_type == DUO
+    if fresh and slim:
         reslim(udid)
     # Pin the appearance: `.auto` themes follow it, and a mid-run switch would
     # rewrite colours (harmless to the tree, but it also re-renders the board).

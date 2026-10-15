@@ -505,6 +505,18 @@ def capture_duo(udid, scene, out_dir, device_key, appearance, posture):
 # ------------------------------------------------------------------- entry
 
 
+def index_record(runtimes, shots, scenes):
+    """What `index.json` says about a run. Runtimes are per device: a run can
+    mix the iPhone's pinned 26.5 with the Duo's 27.1, and one field for both
+    would misdate half the pictures."""
+    return {
+        "runtimes": dict(runtimes),
+        "sim_use": simrig.sim_use_version(),
+        "shots": list(shots),
+        "scenes": {s["name"]: s["note"] for s in scenes},
+    }
+
+
 def build(udid, derived):
     print("building for %s…" % udid)
     run([
@@ -558,10 +570,12 @@ def main():
 
     out_dir = os.path.abspath(args.out)
     written = []
+    runtimes = {}
 
     for device_key in devices:
         spec = ALL_DEVICES[device_key]
         runtime = simrig.ios_runtime(args.runtime or spec.get("runtime"))
+        runtimes[device_key] = runtime["version"]
         udid = simrig.prepare_simulator(
             runtime, spec["sim_name"], spec["device_type"],
             erase=not args.no_erase, appearance=appearances[0],
@@ -613,12 +627,8 @@ def main():
 
     index = os.path.join(out_dir, "index.json")
     with open(index, "w") as handle:
-        json.dump({
-            "runtime": runtime["version"] if devices else None,
-            "sim_use": simrig.sim_use_version(),
-            "shots": [os.path.basename(p) for p in written],
-            "scenes": {s["name"]: s["note"] for s in scenes},
-        }, handle, indent=2, sort_keys=True)
+        json.dump(index_record(runtimes, [os.path.basename(p) for p in written], scenes),
+                  handle, indent=2, sort_keys=True)
     print("\n%d shots in %s" % (len(written), out_dir))
 
 

@@ -114,6 +114,14 @@ public enum FoldRules {
     }
 }
 
+/// What `FoldReader` publishes to everything below the root.
+public struct FoldReading: Equatable, Sendable {
+    public let band: FoldBand?
+    public let panelWidth: Double?
+
+    public static let none = FoldReading(band: nil, panelWidth: nil)
+}
+
 /// Which side of the fold.
 public enum FoldPane: Equatable, Sendable { case leading, trailing }
 
@@ -137,6 +145,18 @@ extension FoldRules {
     /// The width a trailing panel takes so it fills the right pane exactly.
     public static func panelWidth(width: Double, band: FoldBand) -> Double {
         width - band.trailing - 2 * panelInset
+    }
+
+    /// What the root publishes for one window: the validated band, and the
+    /// trailing panel's width only when that band also yields a spread — a
+    /// sheet is narrowed to the right pane because the board fills the left.
+    /// With no band it is `.none`, the reader's initial state, so a resize on
+    /// a window without a fold writes nothing.
+    public static func reading(_ band: FoldBand?, width: Double, height: Double) -> FoldReading {
+        guard let band else { return .none }
+        let spreads = spread(width: width, height: height, band: band) != nil
+        return FoldReading(band: band,
+                           panelWidth: spreads ? panelWidth(width: width, band: band) : nil)
     }
 
     /// The pane a card about `cells` opens in: whichever holds fewer of them,

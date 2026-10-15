@@ -143,6 +143,29 @@ final class FoldRulesTests: XCTestCase {
         XCTAssertEqual(Self.openWidth - FoldRules.panelInset - w, 511.5, accuracy: 0.001)
     }
 
+    /// What the root publishes. The panel width rides only on a band that
+    /// also yields a spread, and with no band the reading is the reader's
+    /// initial state — so a resize on any other device writes nothing.
+    func testTheRootPublishesAPanelWidthOnlyWithASpread() {
+        let open = FoldRules.reading(Self.duoBand, width: Self.openWidth, height: Self.openHeight)
+        XCTAssertEqual(open.band, Self.duoBand)
+        XCTAssertEqual(open.panelWidth ?? 0, 339.5, accuracy: 0.001)
+
+        XCTAssertEqual(FoldRules.reading(nil, width: Self.openWidth, height: Self.openHeight), .none)
+        XCTAssertEqual(FoldRules.reading(nil, width: 402, height: 874), FoldReading.none)
+
+        // A band that validates but is too short for any spread: the shelf may
+        // still use the band, and no sheet is narrowed for a board that is
+        // not there.
+        let short = 200.0
+        XCTAssertNotNil(FoldRules.validate(Self.duoBand, width: Self.openWidth, height: short,
+                                           regionTop: 0, regionBottom: short))
+        XCTAssertNil(FoldRules.spread(width: Self.openWidth, height: short, band: Self.duoBand))
+        let squat = FoldRules.reading(Self.duoBand, width: Self.openWidth, height: short)
+        XCTAssertEqual(squat.band, Self.duoBand)
+        XCTAssertNil(squat.panelWidth)
+    }
+
     func testACardOpensOppositeTheCellsItDiscusses() throws {
         let s = try XCTUnwrap(FoldRules.spread(width: Self.openWidth, height: Self.openHeight,
                                                band: Self.duoBand))

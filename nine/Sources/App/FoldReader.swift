@@ -23,22 +23,16 @@ extension EnvironmentValues {
     }
 }
 
-private struct FoldState: Equatable {
-    var band: FoldBand?
-    var width: Double = 0
-}
-
 private struct FoldReader: ViewModifier {
-    @State private var state = FoldState()
+    @State private var state = FoldReading.none
 
     func body(content: Content) -> some View {
         content
             .environment(\.foldBand, state.band)
             // CouchKit's GlassSheet sizes its trailing panel from this; on the
             // open Duo that is the right pane, 339.5pt, leading edge at 511.5.
-            .environment(\.couchPanelWidth, state.band.map {
-                CGFloat(FoldRules.panelWidth(width: state.width, band: $0))
-            })
+            // Nil unless the band also yields a spread (`FoldRules.reading`).
+            .environment(\.couchPanelWidth, state.panelWidth.map { CGFloat($0) })
             #if os(iOS) && !targetEnvironment(macCatalyst) && canImport(SwiftUI, _version: 8.0.85.29)
             .background { FoldProbe(state: $state) }
             #endif
@@ -47,7 +41,7 @@ private struct FoldReader: ViewModifier {
 
 #if os(iOS) && !targetEnvironment(macCatalyst) && canImport(SwiftUI, _version: 8.0.85.29)
 private struct FoldProbe: View {
-    @Binding var state: FoldState
+    @Binding var state: FoldReading
 
     var body: some View {
         if #available(iOS 27.1, *) {
@@ -63,7 +57,7 @@ private struct FoldProbe: View {
     }
 
     @available(iOS 27.1, *)
-    private static func measure(_ proxy: GeometryProxy) -> FoldState {
+    private static func measure(_ proxy: GeometryProxy) -> FoldReading {
         let width = Double(proxy.size.width), height = Double(proxy.size.height)
         let band = proxy.reservedRegions(kind: .division, options: [.includeInactive])
             .lazy
@@ -77,7 +71,10 @@ private struct FoldProbe: View {
                     regionBottom: Double(region.frame.maxY))
             }
             .first
-        return FoldState(band: band, width: width)
+        // No band, no width: the reading stays `.none` through every resize of
+        // a window without a fold, so `onChange` never fires and nothing is
+        // written.
+        return FoldRules.reading(band, width: width, height: height)
     }
 }
 #endif
