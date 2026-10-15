@@ -998,8 +998,8 @@ struct TouchGameScreen: View {
             }
             .onChange(of: model.solvedAt) { renderShareCard() }
             // Above the board and its chips, below the prefs sheet.
-            .overlay { coachView }
-            .overlay { whyView }
+            .overlay { coachView(spread: composition.spread, width: geo.size.width) }
+            .overlay { whyView(spread: composition.spread, width: geo.size.width) }
             .overlay {
                 // PRD-34: no `onNewGame` — the next board lives on the shelf,
                 // in the Boards sheet, and in the post-solve "Another" chip.
@@ -3382,8 +3382,13 @@ struct TouchGameScreen: View {
     /// The card, in the same free band the hint uses and dismissed the same
     /// way. Never auto-advances: a player reading a proof sets the pace.
     @ViewBuilder
-    private var whyView: some View {
+    private func whyView(spread: Spread?, width containerWidth: CGFloat) -> some View {
         if why != nil || whyRefusal != nil {
+            // PRD-37: on the open Duo the card opens in the pane away from the
+            // cursor, so the square it is reasoning about stays in view.
+            let paneFrame = spread.flatMap {
+                cardPaneFrame(FoldRules.cardPane(for: [cursor], spread: $0), in: containerWidth)
+            }
             ZStack(alignment: model.prefs.controlsAtBottom ? .top : .bottom) {
                 Color.black.opacity(0.001)
                     .ignoresSafeArea()
@@ -3403,7 +3408,10 @@ struct TouchGameScreen: View {
                         WhyRefusalContent(refusal: whyRefusal, accent: accent)
                     }
                 }
-                .padding(.horizontal, 20)
+                .frame(width: paneFrame?.width)
+                .padding(.horizontal, paneFrame == nil ? 20 : 0)
+                .frame(maxWidth: paneFrame == nil ? nil : .infinity, alignment: .leading)
+                .padding(.leading, paneFrame?.x ?? 0)
                 .padding(model.prefs.controlsAtBottom ? .top : .bottom, 8)
                 .transition(.opacity.combined(
                     with: .move(edge: model.prefs.controlsAtBottom ? .top : .bottom)
@@ -3414,6 +3422,32 @@ struct TouchGameScreen: View {
 
     // MARK: Coach (PRD-11)
 
+    /// Where the player dragged the coach card on the open Duo (PRD-37 §4.5).
+    /// Not persisted: every new hint starts in the pane opposite its cells.
+    @State private var coachDragOffset: CGSize = .zero
+    @GestureState private var coachDragLive: CGSize = .zero
+
+    /// Free drag; the card rests wherever it is dropped (the owner's choice
+    /// over snapping). The lightbulb still toggles it away from anywhere.
+    private var coachDrag: some Gesture {
+        DragGesture(minimumDistance: 8)
+            .updating($coachDragLive) { value, live, _ in live = value.translation }
+            .onEnded { value in
+                coachDragOffset.width += value.translation.width
+                coachDragOffset.height += value.translation.height
+            }
+    }
+
+    /// A card's frame on the open Duo: its pane, less a 16pt gutter each side,
+    /// no wider than the card's own 360pt. Nil without a fold.
+    private func cardPaneFrame(_ pane: FoldPane, in width: CGFloat) -> (x: CGFloat, width: CGFloat)? {
+        guard let band = foldBand else { return nil }
+        let paneX = pane == .leading ? 0 : CGFloat(band.trailing)
+        let paneWidth = pane == .leading ? CGFloat(band.leading) : width - CGFloat(band.trailing)
+        let cardWidth = min(360, paneWidth - 32)
+        return (paneX + (paneWidth - cardWidth) / 2, cardWidth)
+    }
+
     /// The lightbulb is a toggle, not a dispenser: pressing it again puts the
     /// card away rather than spending another hint on the same position.
     private func toggleCoach() {
@@ -3423,12 +3457,14 @@ struct TouchGameScreen: View {
         dismissWhy()
         dismissTip()
         closeDrawer()
+        coachDragOffset = .zero
         withAnimation(.couchFast) { coachAdvice = advice }
         announce(CoachCardLabel.spoken(title: BoardSpeech.coachTitle(advice),
                                        sentence: BoardSpeech.coachSentence(advice)))
     }
 
     private func dismissCoach() {
+        coachDragOffset = .zero
         withAnimation(.couchFast) { coachAdvice = nil }
     }
 
@@ -3458,8 +3494,17 @@ struct TouchGameScreen: View {
     /// moving a pixel. A tap anywhere else dismisses it, through the same
     /// near-invisible scrim the rose uses.
     @ViewBuilder
-    private var coachView: some View {
+    private func coachView(spread: Spread?, width containerWidth: CGFloat) -> some View {
         if let coachAdvice {
+            // PRD-37: on the open Duo the card opens in the pane that holds
+            // fewer of the cells it is about, and the player may drag it
+            // anywhere — 1.2's one new input concept, confined to the Duo.
+            let focus = CoachFocus(coachAdvice)
+            let cells = (focus?.pattern ?? []) + (focus?.victims ?? [])
+                + [focus?.target].compactMap { $0 }
+            let paneFrame = spread.flatMap {
+                cardPaneFrame(FoldRules.cardPane(for: cells, spread: $0), in: containerWidth)
+            }
             ZStack(alignment: model.prefs.controlsAtBottom ? .top : .bottom) {
                 Color.black.opacity(0.001)
                     .ignoresSafeArea()
@@ -3473,8 +3518,15 @@ struct TouchGameScreen: View {
                     if case .step(let step) = coachAdvice { model.applyCoachStep(step) }
                     dismissCoach()
                 }
-                .padding(.horizontal, 20)
+                .frame(width: paneFrame?.width)
+                .padding(.horizontal, paneFrame == nil ? 20 : 0)
+                .frame(maxWidth: paneFrame == nil ? nil : .infinity, alignment: .leading)
+                .padding(.leading, paneFrame?.x ?? 0)
                 .padding(model.prefs.controlsAtBottom ? .top : .bottom, 8)
+                .offset(paneFrame == nil ? .zero : CGSize(
+                    width: coachDragOffset.width + coachDragLive.width,
+                    height: coachDragOffset.height + coachDragLive.height))
+                .gesture(coachDrag, including: paneFrame == nil ? .none : .all)
                 .transition(.opacity.combined(
                     with: .move(edge: model.prefs.controlsAtBottom ? .top : .bottom)
                 ))
