@@ -1533,7 +1533,8 @@ struct TouchGameScreen: View {
                 insets: .table,
                 revealHeight: size.height - 2 * outer,
                 controlBarReserve: 0,
-                chipOffset: CGFloat(spread.chipCentreOffset)
+                chipOffset: CGFloat(spread.chipCentreOffset),
+                hostsDebrief: false
             )
             Color.clear.frame(width: trailingGap)
             VStack(spacing: Space.l) {
@@ -1552,7 +1553,18 @@ struct TouchGameScreen: View {
         // drawer itself presents in the right pane (see `statsDrawer`).
         .overlay(alignment: .top) { drawerGrabber }
         .overlay(alignment: .top) { statsDrawer }
+        .overlay(alignment: .bottom) { debriefPanel }
         .simultaneousGesture(drawerRevealGesture)
+        // The drawer is reachable here only by the pull-down, exactly as on the
+        // phone, so VoiceOver gets the column's named action with the column's
+        // guards — the drafting table omits it only because its rail is
+        // permanently on screen.
+        .accessibilityAction(named: Text(Strings.string(
+            drawerOpen ? "game.drawer.hide" : "game.drawer.show"))) {
+            guard drawerOpen || (rose == nil && !showPrefs && model.game != nil) else { return }
+            if !drawerOpen { model.noteDrawerFound() }
+            withAnimation(.couchFast) { drawerOpen.toggle() }
+        }
     }
 
     /// How wide a digit key gets in the table's rail.
@@ -1594,7 +1606,8 @@ struct TouchGameScreen: View {
         insets: ChromeInsets,
         revealHeight: CGFloat,
         controlBarReserve: CGFloat,
-        chipOffset: CGFloat = 0
+        chipOffset: CGFloat = 0,
+        hostsDebrief: Bool = true
     ) -> some View {
         content
             // `chipOffset` is PRD-37's: on the spread the chips centre on the
@@ -1619,7 +1632,10 @@ struct TouchGameScreen: View {
             .overlay(alignment: .bottom) {
                 debriefGrabber.padding(.bottom, insets.debriefGrabber)
             }
-            .overlay(alignment: .bottom) { debriefPanel }
+            // PRD-37: the spread hosts the panel on its full-width container
+            // instead, so it can sit in the right pane rather than inside the
+            // board's own frame.
+            .overlay(alignment: .bottom) { if hostsDebrief { debriefPanel } }
             // The flexible bands around the board are `Color.clear`, which
             // SwiftUI does not hit-test, so without a content shape the whole
             // reveal band is a hole and the pull-up never starts. Claiming
@@ -3535,7 +3551,9 @@ struct TouchGameScreen: View {
                 .offset(paneFrame == nil ? .zero : CGSize(
                     width: coachDragOffset.width + coachDragLive.width,
                     height: coachDragOffset.height + coachDragLive.height))
-                .gesture(coachDrag, including: paneFrame == nil ? .none : .all)
+                // `.subviews`, never `.none`: `.none` also disables the card's
+                // own action button. See `GestureMaskSourceTests`.
+                .gesture(coachDrag, including: paneFrame == nil ? .subviews : .all)
                 .transition(.opacity.combined(
                     with: .move(edge: model.prefs.controlsAtBottom ? .top : .bottom)
                 ))

@@ -47,9 +47,9 @@ BUNDLE_ID = "com.couchsuite.nine"
 # the runtime to re-photograph the same layout 40pt wider.
 DEVICES = {
     "iphone": dict(device_type="iPhone 17 Pro", sim_name="Nine-Shotlist-iPhone",
-                   scale=3),
+                   scale=3, runtime=simrig.IPHONE_RUNTIME),
     "ipad": dict(device_type="iPad Pro 11-inch (M5)", sim_name="Nine-Shotlist-iPad",
-                 scale=2),
+                 scale=2, runtime=simrig.IPHONE_RUNTIME),
     # PRD-37: the iPhone Duo, one simulator photographed in each posture. They
     # are their own lanes, not part of `both`: no tool can set a posture, so a
     # person does (Device Hub's toolbar), and neither taps nor the accessibility
@@ -72,9 +72,9 @@ DUO_SCENES = ("game", "home")
 # `store_screenshots_capture` lane in `fastlane/Fastfile` asks for these by name.
 STORE_DEVICES = {
     "iphone-store": dict(device_type="iPhone 17 Pro Max", sim_name="Nine-Store-iPhone",
-                         scale=3),
+                         scale=3, runtime=simrig.IPHONE_RUNTIME),
     "ipad-store": dict(device_type="iPad Pro 13-inch (M5)", sim_name="Nine-Store-iPad",
-                       scale=2),
+                       scale=2, runtime=simrig.IPHONE_RUNTIME),
 }
 
 ALL_DEVICES = dict(DEVICES, **STORE_DEVICES)

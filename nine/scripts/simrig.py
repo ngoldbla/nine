@@ -61,6 +61,11 @@ def newest_ios_runtime():
 # `primary` panel is dark; `simctl io screenshot` defaults to `primary`, so
 # every open capture has to name the inner one.
 DUO = "iPhone Duo"
+# The runtime every iPhone and iPad baseline was recorded on. Pinned rather
+# than "newest" because the iOS 27.1 runtime that arrives with Xcode 27.1 runs
+# exactly one device type, the iPhone Duo — `simctl create` refuses an iPhone
+# 17 Pro on it — so "newest" stopped meaning "a runtime with an iPhone".
+IPHONE_RUNTIME = "26.5"
 DUO_DISPLAY_OPEN = "primary-1"
 
 
@@ -123,7 +128,7 @@ def harness_device(key, device_type, baselines, sim_name):
     cell), so a baseline recorded there would be a photograph of a broken tree.
     Returns (device_type, posture, baselines, sim_name, runtime_pin)."""
     if key == "iphone":
-        return device_type, None, baselines, sim_name, None
+        return device_type, None, baselines, sim_name, IPHONE_RUNTIME
     if key == "duo-folded":
         return (DUO, "closed", os.path.join(baselines, "duo-folded"),
                 sim_name + "-Duo", "27.1")
