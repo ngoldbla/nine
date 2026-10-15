@@ -50,7 +50,20 @@ DEVICES = {
                    scale=3),
     "ipad": dict(device_type="iPad Pro 11-inch (M5)", sim_name="Nine-Shotlist-iPad",
                  scale=2),
+    # PRD-37: the iPhone Duo, one simulator photographed in each posture. They
+    # are their own lanes, not part of `both`: no tool can set a posture, so a
+    # person does (Device Hub's toolbar), and neither taps nor the accessibility
+    # bridge reach the open Duo's inner panel (Apple 187148389) — these lanes
+    # photograph only what a launch alone reaches. See `capture_duo`.
+    "duo-folded": dict(device_type="iPhone Duo", sim_name="Nine-Shotlist-Duo",
+                       scale=3, runtime="27.1", posture="closed"),
+    "duo-open": dict(device_type="iPhone Duo", sim_name="Nine-Shotlist-Duo",
+                     scale=3, runtime="27.1", posture="open"),
 }
+
+# The scenes a launch alone reaches, for the Duo lanes: the seeded board
+# resumes on launch, and the shelf is the same launch with resume off.
+DUO_SCENES = ("game", "home")
 
 # The App Store's own sizes, which the two devices above are not: ASC requires
 # a 6.9" iPhone set (1320x2868) and a 13" iPad set (2064x2752), and accepts the
@@ -476,6 +489,19 @@ def capture(udid, scene, out_dir, device_key, appearance, size, turn):
     return path
 
 
+def capture_duo(udid, scene, out_dir, device_key, appearance, posture):
+    """A Duo scene by launch alone, waited for by the clock rather than by the
+    accessibility tree, which cannot see the open Duo's inner panel."""
+    prefs = dict(PREFS_ON, resumeOnLaunch=(scene["name"] == "game"))
+    simrig.relaunch(udid, BUNDLE_ID, ninestate.quiet_blobs(prefs))
+    time.sleep(12)
+    path = os.path.join(out_dir, "%s-%s-%s.png" % (device_key, appearance, scene["name"]))
+    display = simrig.screenshot_display(posture)
+    run(["xcrun", "simctl", "io", udid, "screenshot", "--type=png"]
+        + (["--display=" + display] if display else []) + [path])
+    return path
+
+
 # ------------------------------------------------------------------- entry
 
 
@@ -509,6 +535,9 @@ def main():
     parser.add_argument("--no-build", action="store_true",
                         help="install whatever is already in the derived data")
     parser.add_argument("--derived", default=".build/shots")
+    parser.add_argument("--runtime", default=None,
+                        help="pin the iOS runtime (e.g. 26.5, 27.1); default: the "
+                             "device's own pin, else the newest installed")
     parser.add_argument("--landscape", action="store_true",
                         help="rotate the device first — the only way to reach the "
                              "iPad drafting table (PRD-31)")
@@ -524,15 +553,15 @@ def main():
         SCENES_BY_NAME[n] for n in args.scenes.split(",")
         if n in SCENES_BY_NAME or sys.exit("unknown scene %r" % n)
     ]
-    devices = list(DEVICES) if args.device == "both" else [args.device]
+    devices = ["iphone", "ipad"] if args.device == "both" else [args.device]
     appearances = list(APPEARANCES) if args.appearance == "both" else [args.appearance]
 
     out_dir = os.path.abspath(args.out)
-    runtime = simrig.newest_ios_runtime()
     written = []
 
     for device_key in devices:
         spec = ALL_DEVICES[device_key]
+        runtime = simrig.ios_runtime(args.runtime or spec.get("runtime"))
         udid = simrig.prepare_simulator(
             runtime, spec["sim_name"], spec["device_type"],
             erase=not args.no_erase, appearance=appearances[0],
@@ -543,6 +572,20 @@ def main():
         if app_path is None:
             app_path = build(udid, args.derived)
         run(["xcrun", "simctl", "install", udid, app_path])
+
+        if spec.get("posture"):
+            simrig.require_posture(udid, spec["posture"])
+            for appearance in appearances:
+                run(["xcrun", "simctl", "ui", udid, "appearance", appearance], check=False)
+                for scene in scenes:
+                    if scene["name"] not in DUO_SCENES:
+                        print("  %s: skipped on the Duo (needs a tap)" % scene["name"])
+                        continue
+                    path = capture_duo(udid, scene, out_dir, device_key, appearance,
+                                       spec["posture"])
+                    print("  %s" % path)
+                    written.append(path)
+            continue
 
         turn = args.landscape
         # **Unconditional, not only when `--landscape` was asked for.** A
@@ -571,7 +614,7 @@ def main():
     index = os.path.join(out_dir, "index.json")
     with open(index, "w") as handle:
         json.dump({
-            "runtime": runtime["version"],
+            "runtime": runtime["version"] if devices else None,
             "sim_use": simrig.sim_use_version(),
             "shots": [os.path.basename(p) for p in written],
             "scenes": {s["name"]: s["note"] for s in scenes},

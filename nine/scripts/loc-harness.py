@@ -780,15 +780,25 @@ def main():
                         help="calibrate the assertions against hand-built "
                              "trees. No simulator, no build, ~0 s — and the "
                              "only proof three of them can fail at all.")
+    parser.add_argument("--device", default="iphone",
+                        choices=["iphone", "duo-folded", "duo-open"],
+                        help="iphone keeps today's baselines and paths byte for byte (PRD-37)")
+    parser.add_argument("--runtime", default=None,
+                        help="pin the iOS runtime (e.g. 26.5, 27.1); the baselines record it")
     args = parser.parse_args()
+    global DEVICE_TYPE, SIM_NAME, BASELINES
+    DEVICE_TYPE, posture, BASELINES, SIM_NAME, runtime_pin = simrig.harness_device(
+        args.device, DEVICE_TYPE, BASELINES, SIM_NAME)
 
     if args.selftest:
         return command_selftest(args)
 
-    runtime = simrig.newest_ios_runtime()
+    runtime = simrig.ios_runtime(args.runtime or runtime_pin)
     print("runtime: %s  device: %s" % (runtime["name"], DEVICE_TYPE))
     udid = simrig.prepare_simulator(
         runtime, SIM_NAME, DEVICE_TYPE, erase=not args.no_erase)
+    if posture:
+        simrig.require_posture(udid, posture)
     simrig.build_and_install(udid, args.app, REPO)
 
     os.makedirs(BASELINES, exist_ok=True)

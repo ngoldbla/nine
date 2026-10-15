@@ -14,6 +14,8 @@ Nothing in this file knows what is being measured.
 """
 
 import json
+import os
+import shutil
 import subprocess
 import sys
 import time
@@ -55,6 +57,81 @@ def newest_ios_runtime():
     return ios[-1]
 
 
+# PRD-37. Open, the iPhone Duo draws on its inner panel and the outer
+# `primary` panel is dark; `simctl io screenshot` defaults to `primary`, so
+# every open capture has to name the inner one.
+DUO = "iPhone Duo"
+DUO_DISPLAY_OPEN = "primary-1"
+
+
+def ios_runtime(version=None):
+    """The runtime to boot: `version` ("26.5", "27.1") or NINE_SIM_RUNTIME,
+    else the newest. **Pin it for every baseline lane**: the baselines record
+    their runtime, and installing a newer one must not quietly move them."""
+    version = version or os.environ.get("NINE_SIM_RUNTIME")
+    if not version:
+        return newest_ios_runtime()
+    data = json.loads(run(["xcrun", "simctl", "list", "runtimes", "--json"]))
+    ios = [r for r in data["runtimes"]
+           if r.get("isAvailable") and r.get("platform") == "iOS"]
+    match = [r for r in ios
+             if r["version"] == version or r["version"].startswith(version + ".")]
+    if not match:
+        sys.exit("iOS %s simulator runtime not installed (have: %s)"
+                 % (version, ", ".join(r["version"] for r in ios)))
+    return match[-1]
+
+
+def reslim(udid):
+    """Erase and create bring a simulator back stock (~/.claude/CLAUDE.md).
+    Nine waits on Game Center at launch, so `gamed` stays. Off on hosts without
+    simslim (CI) and when NINE_SIMSLIM=0."""
+    if shutil.which("simslim") is None or os.environ.get("NINE_SIMSLIM") == "0":
+        return
+    run(["simslim", "on", udid, "--keep", "com.apple.gamed"], check=False, capture=False)
+    run(["xcrun", "simctl", "bootstatus", udid, "-b"], capture=False)
+
+
+def screenshot_display(posture):
+    """The `--display` an open Duo needs, or None for every other device."""
+    return DUO_DISPLAY_OPEN if posture == "open" else None
+
+
+def require_posture(udid, posture):
+    """No tool can fold the simulator (PRD-37 §1.6): Device Hub's three posture
+    buttons are the only control. Ask the operator, once per run — posture
+    survives relaunch."""
+    if not sys.stdin.isatty():
+        sys.exit("the Duo %s lane needs a person to set Device Hub's posture; "
+                 "run it from a terminal" % posture)
+    label = {"open": "Open", "closed": "Closed"}[posture]
+    answer = input("Set Device Hub's posture for %s to %s (bottom toolbar), "
+                   "then type '%s' and press Return: " % (udid, label, posture))
+    if answer.strip().lower() != posture:
+        sys.exit("posture not confirmed")
+
+
+def harness_device(key, device_type, baselines, sim_name):
+    """`--device` for the baseline lanes (AX, contrast, localization).
+
+    `iphone` returns the lane's own constants untouched, so its baselines and
+    paths are byte-identical to before PRD-37. `duo-folded` is the iPhone Duo's
+    outer panel, with baselines in a sibling directory and the iOS 27.1 runtime
+    it needs. `duo-open` is refused, with the measurement that refuses it: the
+    accessibility bridge cannot see the open Duo's inner panel (Apple
+    187148389; `describe-ui` answers "No translation object" for every board
+    cell), so a baseline recorded there would be a photograph of a broken tree.
+    Returns (device_type, posture, baselines, sim_name, runtime_pin)."""
+    if key == "iphone":
+        return device_type, None, baselines, sim_name, None
+    if key == "duo-folded":
+        return (DUO, "closed", os.path.join(baselines, "duo-folded"),
+                sim_name + "-Duo", "27.1")
+    sys.exit("--device %s: the accessibility bridge cannot read the open iPhone "
+             "Duo (Apple 187148389), so this lane would record a broken tree. "
+             "Use shotlist.py --device duo-open for pictures." % key)
+
+
 def device_type_id(name):
     data = json.loads(run(["xcrun", "simctl", "list", "devicetypes", "--json"]))
     for dt in data["devicetypes"]:
@@ -63,16 +140,19 @@ def device_type_id(name):
     sys.exit("device type %r not installed" % name)
 
 
-def prepare_simulator(runtime, name, device_type, erase=True, appearance="light"):
+def prepare_simulator(runtime, name, device_type, erase=True, appearance="light",
+                      slim=None):
     """A dedicated, erased simulator. Erasing is not politeness: a reused
     container can carry a previous session's library, and on a host signed into
     iCloud the cloud library will restore one into a fresh install."""
     data = json.loads(run(["xcrun", "simctl", "list", "devices", "--json"]))
+    # Name *and* runtime: a same-named simulator on another runtime is a
+    # different instrument, and reusing it would undo the runtime pin.
     udid = None
-    for devices in data["devices"].values():
-        for device in devices:
-            if device["name"] == name:
-                udid = device["udid"]
+    for device in data["devices"].get(runtime["identifier"], []):
+        if device["name"] == name:
+            udid = device["udid"]
+    fresh = udid is None or erase
     if udid is None:
         udid = run([
             "xcrun", "simctl", "create", name,
@@ -84,6 +164,8 @@ def prepare_simulator(runtime, name, device_type, erase=True, appearance="light"
         run(["xcrun", "simctl", "erase", udid])
     run(["xcrun", "simctl", "boot", udid], check=False)
     run(["xcrun", "simctl", "bootstatus", udid, "-b"], capture=False)
+    if fresh and slim is not False:
+        reslim(udid)
     # Pin the appearance: `.auto` themes follow it, and a mid-run switch would
     # rewrite colours (harmless to the tree, but it also re-renders the board).
     if appearance:
