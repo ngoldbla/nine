@@ -52,7 +52,7 @@ class PrepareSimulatorSlimming(unittest.TestCase):
     def prepare(self, device_type, devices=(), **kwargs):
         fake = FakeSimctl(devices)
         with mock.patch.object(simrig, "run", fake), \
-                mock.patch.object(simrig, "warm_up_bridge", lambda udid: None), \
+                mock.patch.object(simrig, "warm_up_bridge", lambda udid, launch=None: None), \
                 mock.patch.object(simrig.shutil, "which", lambda name: "/bin/" + name), \
                 mock.patch.dict(os.environ, {}, clear=False):
             os.environ.pop("NINE_SIMSLIM", None)
@@ -125,7 +125,7 @@ class StaleTouchRecovery(unittest.TestCase):
                               lambda udid, point=None, tolerate=False: {"entries": [{"label": "Home"}]}),
             mock.patch.object(simrig, "wait_until_dead", lambda udid, bundle: None),
             mock.patch.object(simrig, "seed", lambda udid, bundle, blobs: None),
-            mock.patch.object(simrig, "warm_up_bridge", lambda udid: None),
+            mock.patch.object(simrig, "warm_up_bridge", lambda udid, launch=None: None),
             mock.patch.object(simrig.time, "sleep", lambda s: None),
         ]
         for p in patches:
@@ -224,6 +224,55 @@ class DuoSettle(unittest.TestCase):
         drawn = blank.copy()
         ImageDraw.Draw(drawn).rectangle((100, 40, 650, 590), fill=40)  # a board
         self.assertTrue(shotlist.panel_drawn(drawn))
+
+
+class DuoBridgeWarmUp(unittest.TestCase):
+    """Measured: on the iOS 27.1 Duo, `describe-ui` answers "No translation
+    object" for SpringBoard indefinitely (300 s on a fresh, folded
+    Nine-AX-Duo) but reads an app. So the Duo warms up inside Settings."""
+
+    def run_prepare(self, device_type):
+        fake = FakeSimctl()
+        warmed = []
+        with mock.patch.object(simrig, "run", fake), \
+                mock.patch.object(simrig, "warm_up_bridge",
+                                  lambda udid, launch=None: warmed.append(launch)), \
+                mock.patch.object(simrig.shutil, "which", lambda name: None):
+            simrig.prepare_simulator(RUNTIME, "Nine-Test", device_type)
+        return warmed
+
+    def test_the_duo_warms_up_inside_an_app(self):
+        self.assertEqual(self.run_prepare(simrig.DUO), [simrig.DUO_WARM_UP_APP])
+
+    def test_the_iphone_warms_up_as_before(self):
+        self.assertEqual(self.run_prepare("iPhone 17 Pro"), [None])
+
+    def test_a_warm_up_in_an_app_launches_it_and_puts_it_away(self):
+        fake = FakeSimctl()
+        with mock.patch.object(simrig, "run", fake), \
+                mock.patch.object(simrig, "describe", lambda udid, point=None, tolerate=False: {"entries": []}):
+            simrig.warm_up_bridge("U", launch="com.apple.Preferences")
+        verbs = [c[2:5] for c in fake.calls if c[:2] == ["xcrun", "simctl"]]
+        self.assertEqual(verbs, [["launch", "U", "com.apple.Preferences"],
+                                 ["terminate", "U", "com.apple.Preferences"]])
+
+
+class DuoDisplays(unittest.TestCase):
+    """Measured: `simctl io screenshot` with no `--display` returned the
+    outer panel on Nine-AX-Duo and the dark inner one (2007 px) on a folded
+    Nine-Contrast-Duo, so every Duo capture names its panel."""
+
+    def test_each_posture_names_its_panel(self):
+        self.assertEqual(simrig.screenshot_display("open"), "primary-1")
+        self.assertEqual(simrig.screenshot_display("closed"), "primary")
+        self.assertIsNone(simrig.screenshot_display(None))
+
+    def test_screenshot_args_carry_the_panel(self):
+        self.assertEqual(simrig.screenshot_args("U", "/p.bmp", "bmp", "closed"),
+                         ["xcrun", "simctl", "io", "U", "screenshot", "--type=bmp",
+                          "--display=primary", "/p.bmp"])
+        self.assertEqual(simrig.screenshot_args("U", "/p.bmp", "bmp", None),
+                         ["xcrun", "simctl", "io", "U", "screenshot", "--type=bmp", "/p.bmp"])
 
 
 if __name__ == "__main__":

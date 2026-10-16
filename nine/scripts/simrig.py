@@ -67,6 +67,10 @@ DUO = "iPhone Duo"
 # 17 Pro on it — so "newest" stopped meaning "a runtime with an iPhone".
 IPHONE_RUNTIME = "26.5"
 DUO_DISPLAY_OPEN = "primary-1"
+# The bridge cannot read the 27.1 Duo's SpringBoard ("No translation object"
+# for 300 s on a fresh, folded simulator) but reads an app, so the Duo's
+# warm-up happens inside one that every simulator has.
+DUO_WARM_UP_APP = "com.apple.Preferences"
 
 
 def ios_runtime(version=None):
@@ -101,8 +105,17 @@ def reslim(udid):
 
 
 def screenshot_display(posture):
-    """The `--display` an open Duo needs, or None for every other device."""
-    return DUO_DISPLAY_OPEN if posture == "open" else None
+    """The `--display` a Duo capture needs, or None for every other device.
+    Named in both postures: with no `--display`, `simctl` returned the outer
+    panel on one folded Duo and the dark inner one (2007 px) on another."""
+    return {"open": DUO_DISPLAY_OPEN, "closed": "primary"}.get(posture)
+
+
+def screenshot_args(udid, path, kind, posture):
+    """`simctl io screenshot` for this device and posture."""
+    display = screenshot_display(posture)
+    return (["xcrun", "simctl", "io", udid, "screenshot", "--type=" + kind]
+            + (["--display=" + display] if display else []) + [path])
 
 
 def require_posture(udid, posture):
@@ -186,7 +199,7 @@ def prepare_simulator(runtime, name, device_type, erase=True, appearance="light"
     if appearance:
         run(["xcrun", "simctl", "ui", udid, "appearance", appearance], check=False)
     pin_status_bar(udid)
-    warm_up_bridge(udid)
+    warm_up_bridge(udid, launch=DUO_WARM_UP_APP if device_type == DUO else None)
     return udid
 
 
@@ -219,15 +232,19 @@ def pin_status_bar(udid):
          "--batteryLevel", "100"], check=False)
 
 
-def warm_up_bridge(udid, timeout=300.0):
+def warm_up_bridge(udid, timeout=300.0, launch=None):
     """`simctl bootstatus` returning is not the same as the accessibility
     bridge being up. On a freshly erased simulator the gap is minutes, and every
     probe in it answers "No translation object returned for simulator" — which
     reads exactly like a collapsed tree. Wait for a real answer before the first
     screen, so a slow boot can never be mistaken for a regression."""
+    if launch:
+        run(["xcrun", "simctl", "launch", udid, launch], check=False)
     deadline = time.time() + timeout
     while time.time() < deadline:
         if describe(udid, tolerate=True) is not None:
+            if launch:
+                run(["xcrun", "simctl", "terminate", udid, launch], check=False)
             return
         time.sleep(2.0)
     sys.exit(

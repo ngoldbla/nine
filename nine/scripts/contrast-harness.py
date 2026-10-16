@@ -420,8 +420,13 @@ def first_empty_label(entries):
     sys.exit("the frozen board has no empty cell to open the rose on")
 
 
+# The Duo posture this run measures (`--device duo-folded`), or None: a Duo
+# capture must name its panel (`simrig.screenshot_display`).
+POSTURE = None
+
+
 def shoot(udid, path):
-    simrig.run(["xcrun", "simctl", "io", udid, "screenshot", "--type=bmp", path])
+    simrig.run(simrig.screenshot_args(udid, path, "bmp", POSTURE))
     return Frame(path)
 
 
@@ -835,6 +840,8 @@ def main():
           "" if not args.contrast else " + %d increased" % len(increased_pairs)))
     udid = simrig.prepare_simulator(
         runtime, SIM_NAME, DEVICE_TYPE, erase=not args.no_erase)
+    global POSTURE
+    POSTURE = posture
     if posture:
         simrig.require_posture(udid, posture)
     simrig.build_and_install(udid, args.app, REPO)
