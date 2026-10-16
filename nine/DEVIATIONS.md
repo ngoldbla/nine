@@ -4952,3 +4952,55 @@ below names the run it came from.
   mid-game. Each needs a person in Device Hub; they are the open items on this
   PR, together with the first `--device duo-folded` AX/contrast/loc baselines,
   whose lanes stop to have the operator confirm the posture.
+
+### PRD-37, second session — what the photographs said (2026-10-15)
+
+Run from `docs/prd37/HANDOFF.md` with the owner away; every ruling is in
+`docs/prd37/execution-ledger.md` ("Session 2").
+
+- **Every open-Duo surface is now photographed without a tap.** A Debug-only
+  launch argument, `-NineDebugSurface prefs|history|boards|tutorial|school|coach|drawer`,
+  opens one surface on arrival; `shotlist.py --device duo-open` reaches each by
+  it. `DebugSurfaceSealTests` fails if any of it leaves `#if DEBUG`; the
+  Release iOS build carries 0 of its symbols and 0 copies of the argument.
+  18 screens (light and dark) are in `docs/prd37/screens/duo-open/`.
+- **The lane's 12 s wait photographed blank panels.** Measured: the open Duo
+  draws nothing for ~10 s after launch and a sheet is still sliding at ~16 s.
+  The lane now waits for a drawn, settled panel, judged left of the 84pt status
+  bar (whose 9:41 pill passed a white panel once).
+- **Two defects the photographs found, both Duo-only:**
+  - the tutorial's and the first flick's book-spread boards drew the 200pt
+    floor (≈213pt on screen): both sized the board with the phone card's
+    arithmetic from a page already inside that card and without the narration.
+    `FoldRules.pageBoardSide`: tutorial **367.5pt**, first flick **339.5pt**.
+    §4.4 says 407.5 — the leading pane less 24pt margins with no card; the
+    page keeps its card, so 367.5 stands (40pt under the spec's number).
+  - the leading-pane coach/Why card (x 47.75–407.75) covered the control column
+    and its Back button. `FoldRules.cardFrame` starts that pane past the column
+    and its gutter: x 112–439.5, over board columns 1–6.
+- **School's index is 423.5pt wide**, not §4.4's 407.5: the leading pane less
+  SchoolView's own 16pt padding. It is clear of the band, which is what the
+  rule is for; unchanged.
+- **`simrig` recovers from stale touch.** A wait that times out after a tap
+  reboots the simulator once and reruns the scene. On two back-to-back AX runs
+  the first hit it on `game-rose` and recovered; both matched the baselines.
+  It cannot help loc's rose, which has no anchor to time out on: `main`'s
+  `en-game-rose` showed the closed rose again in this session's proof.
+- **Zero change re-proved after these changes** — `main`@9058cb1 vs the branch,
+  same Xcode, iOS 26.5, stock simulators, one lane at a time:
+  - AX, Xcode 26.6: **7/7 byte-identical**; Xcode 27.1: **7/7 byte-identical**
+    (full re-run). One earlier 27.1 branch run captured the shelf 28pt lower
+    (Continue at y 229, not 201); it did not reproduce in four isolated home
+    runs (branch ×2, `main` ×2, all 201) or a full re-run. The run before it
+    died at the same screen in the minute the simulator's `amsengagementd`
+    crashed, on a host with ~70 MB free. Recorded rather than explained.
+  - localization, Xcode 27.1: **24/25 identical**; the 25th is `main`'s rose
+    not opening (stale touch); the branch's file equals the committed baseline.
+  - contrast, branch: **every one of 80 cells clears its floor** on 26.6 and 27.1.
+  - with no argument, the Debug build is today's: the AX lanes above ran Debug
+    builds that contain the rig.
+- **Three stock simulators at once do not fit this 8 GB Mac**: every
+  `bootstatus` sat in data migration for 20+ minutes. The proof runs serially.
+- **Still for a person in Device Hub:** bending and flattening (the rose bent),
+  the coach card's drag, the debrief (needs a solved board), folding mid-game,
+  and the first `duo-folded` baselines (posture Closed).
