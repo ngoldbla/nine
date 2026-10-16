@@ -420,8 +420,13 @@ def first_empty_label(entries):
     sys.exit("the frozen board has no empty cell to open the rose on")
 
 
+# The Duo posture this run measures (`--device duo-folded`), or None: a Duo
+# capture must name its panel (`simrig.screenshot_display`).
+POSTURE = None
+
+
 def shoot(udid, path):
-    simrig.run(["xcrun", "simctl", "io", udid, "screenshot", "--type=bmp", path])
+    simrig.run(simrig.screenshot_args(udid, path, "bmp", POSTURE))
     return Frame(path)
 
 
@@ -551,6 +556,7 @@ def measure_cell(udid, theme, accent, shots, geometry, previous, with_rose):
                 "-x", str(int(cache.empty_frame["x"] + cache.empty_frame["width"] / 2)),
                 "-y", str(int(cache.empty_frame["y"] + cache.empty_frame["height"] / 2)),
             ])
+            simrig.note_tap(udid)
             if cache.petals is None:
                 # The run's second and last accessibility read: the ten petal
                 # frames, which are the same in every cell after this one.
@@ -773,7 +779,17 @@ def main():
                              "(default: alongside the matrix, as .captured)")
     parser.add_argument("--no-erase", action="store_true",
                         help="reuse the harness simulator as-is; local iteration only")
+    parser.add_argument("--device", default="iphone",
+                        choices=["iphone", "duo-folded", "duo-open"],
+                        help="iphone keeps today's baselines and paths byte for byte (PRD-37)")
+    parser.add_argument("--runtime", default=None,
+                        help="pin the iOS runtime (e.g. 26.5, 27.1); the baselines record it")
     args = parser.parse_args()
+    global DEVICE_TYPE, SIM_NAME, BASELINES, MATRIX, SCREEN_POINT_WIDTH
+    DEVICE_TYPE, posture, BASELINES, SIM_NAME, runtime_pin = simrig.harness_device(
+        args.device, DEVICE_TYPE, BASELINES, SIM_NAME)
+    MATRIX = os.path.join(BASELINES, "matrix.txt")
+    SCREEN_POINT_WIDTH = {"iphone": 402.0, "duo-folded": 466.0}[args.device]
 
     if not os.path.exists(FIXTURE):
         sys.exit("no frozen board at %s — freeze it first:\n"
@@ -818,12 +834,16 @@ def main():
     elif not args.rose_all:
         covered += "  |  petal column: one cell per theme"
 
-    runtime = simrig.newest_ios_runtime()
+    runtime = simrig.ios_runtime(args.runtime or runtime_pin)
     print("runtime: %s  device: %s" % (runtime["name"], DEVICE_TYPE))
     print("%d cells standard%s" % (len(pairs),
           "" if not args.contrast else " + %d increased" % len(increased_pairs)))
     udid = simrig.prepare_simulator(
         runtime, SIM_NAME, DEVICE_TYPE, erase=not args.no_erase)
+    global POSTURE
+    POSTURE = posture
+    if posture:
+        simrig.require_posture(udid, posture)
     simrig.build_and_install(udid, args.app, REPO)
 
     os.makedirs(BASELINES, exist_ok=True)
@@ -843,8 +863,10 @@ def main():
             began = time.time()
             wants_rose = (not args.no_rose
                           and rose_wanted(theme, accent, pairs, args.rose_all))
-            values, previous = measure_cell(
-                udid, theme, accent, shots, geometry, previous, wants_rose)
+            values, previous = simrig.retrying_stale_touch(
+                udid, lambda: measure_cell(udid, theme, accent, shots, geometry,
+                                           previous, wants_rose),
+                "%s/%s" % (theme, accent))
             rows.append(((theme, accent, mode), values))
             print("  %-10s %-9s %-9s %s   (%.1fs)"
                   % (theme, accent, mode,

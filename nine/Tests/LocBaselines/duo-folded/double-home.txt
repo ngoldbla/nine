@@ -1,0 +1,10 @@
+# mode: double   runtime: 27.1   device: iPhone Duo   sim-use: v0.12.0
+# role        x,y     w x h   label
+Button       24,167 334x123 "1$#@filled@ filled. %1$#@filled@ filled.,  , Continue Continue,  , 1$@ \u00b7 2$@ Steady Steady \u00b7 7%"
+Button       24,340 103x231 "Gentle Gentle,  , Singles & scans Singles & scans"
+Button       42,606 298x71  "1$@, 2$@ Play together Play together, On a FaceTime call, everyone gets this board On a FaceTime call, everyone gets this board"
+Button      139,348 103x215 "Steady Steady,  , Pairs & box lines Pairs & box lines"
+Button      255,340 103x231 "Sharp Sharp,  , X-wings & deep logic X-wings & deep logic"
+GenericElement   0,143 382x28  ""
+GenericElement 172,124  39x7   ""
+StaticText   28,308  83x24  "Play Play"

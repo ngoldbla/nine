@@ -98,3 +98,10 @@ nine/Tests/ContrastBaselines/.captured/
 # run (five screens x en/de/ja/double/rtl). The `.txt` baselines beside them are
 # the contract and are committed.
 nine/Tests/LocBaselines/.captured/
+
+# PRD-37: the per-device baseline directories (`duo-folded/`) capture beside
+# themselves the same way, one level down. Missing these once committed 957 MB
+# of contrast BMPs to a feature branch.
+nine/Tests/AXBaselines/*/.captured/
+nine/Tests/ContrastBaselines/*/.captured/
+nine/Tests/LocBaselines/*/.captured/

@@ -1,0 +1,13 @@
+# mode: ja   runtime: 27.1   device: iPhone Duo   sim-use: v0.12.0
+# role        x,y     w x h   label
+Button       24,167 334x101 "53 \u30de\u30b9\u4e2d 4 \u30de\u30b9 \u8a18\u5165\u6e08\u307f\u3002\u3001\u7d9a\u3051\u308b\u3001\u7740\u5b9f \u00b7 7%"
+Button       24,326 103x177 "\u7a4f\u3084\u304b\u3001\u5358\u4e00\u5019\u88dc\u3068\u8d70\u67fb"
+Button       24,656 103x112 "\u904a\u3073\u65b9"
+Button       42,546 298x64  "\u4e00\u7dd2\u306b\u904a\u3076\u3001FaceTime \u901a\u8a71\u4e2d\u306f\u3001\u5168\u54e1\u304c\u540c\u3058\u76e4\u9762\u306b\u306a\u308a\u307e\u3059"
+Button      139,318 103x193 "\u7740\u5b9f\u3001\u30da\u30a2\u3068\u30dc\u30c3\u30af\u30b9\u30e9\u30a4\u30f3"
+Button      139,656 103x112 "\u5c65\u6b74"
+Button      255,326 103x177 "\u92ed\u654f\u3001X-Wing \u3068\u6df1\u3044\u8ad6\u7406"
+Button      255,656 103x112 "\u30c6\u30af\u30cb\u30c3\u30af\u6559\u5ba4"
+GenericElement   0,143 382x28  ""
+GenericElement 172,124  39x7   ""
+StaticText   28,286  56x24  "\u30d7\u30ec\u30a4"

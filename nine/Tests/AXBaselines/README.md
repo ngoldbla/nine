@@ -68,3 +68,12 @@ in that order. Everything below is not, and lives in
   not by traversal, so grouping the output by container is as close as the
   instrument gets to showing the hierarchy.
 - **The wording of any announcement.** Nothing spoken transiently is in a tree.
+
+## `duo-folded/` (PRD-37)
+
+The same seven screens on the iPhone Duo's outer panel (466×678, iOS 27.1),
+recorded with `ax-snapshot.py --device duo-folded --record` after a person set
+Device Hub's posture to Closed. Local only: CI has no iOS 27.1 iPhone runtime
+and `nine-accessibility.yml` stays on Xcode 26, so nothing diffs these
+automatically. The open Duo has no baselines — the accessibility bridge cannot
+read its inner panel (Apple 187148389).

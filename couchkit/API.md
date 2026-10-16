@@ -354,6 +354,7 @@ public struct GlassChip: View {                // "June 2019 · Lake Tahoe"
 public struct GlassSheet<Content: View>: View {  // trailing sheet; Back dismisses
     public init(isPresented: Binding<Bool>, @ViewBuilder content: () -> Content)
 }
+extension EnvironmentValues { public var couchPanelWidth: CGFloat? }  // trailing panel width; nil = 380 (PRD-37)
 
 public struct GlassRing: View {                // progress/timer ring
     public init(progress: Double, lineWidth: CGFloat = 10)

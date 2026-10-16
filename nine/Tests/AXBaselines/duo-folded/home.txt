@@ -1,0 +1,18 @@
+# nine accessibility tree — screen: home
+# device: iPhone Duo   runtime: 27.1   sim-use: v0.12.0
+#
+# Regenerate: nine/scripts/ax-snapshot.py --record
+
+[Content]
+  GenericElement ""  (172,124 39x7)
+  StaticText "Play"  (28,123 39x24)
+  GenericElement ""  (0,143 382x28)
+  Button "Gentle, Singles & scans"  (24,155 103x177)
+  Button "Steady, Pairs & box lines"  (139,155 103x177)
+  Button "Sharp, X-wings & deep logic"  (255,155 103x177)
+  Button "Play together, On a FaceTime call, everyone gets this board"  (42,368 298x64)
+  Button "How to play"  (24,478 103x112)
+  Button "History"  (139,478 103x112)
+  Button "Technique School"  (255,478 103x112)
+
+# 10 elements in 1 container

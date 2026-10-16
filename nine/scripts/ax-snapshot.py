@@ -434,7 +434,15 @@ def main():
                              "iteration only: an un-erased container can carry "
                              "a previous library, and on an iCloud-signed-in "
                              "host the cloud library restores one.")
+    parser.add_argument("--device", default="iphone",
+                        choices=["iphone", "duo-folded", "duo-open"],
+                        help="iphone keeps today's baselines and paths byte for byte (PRD-37)")
+    parser.add_argument("--runtime", default=None,
+                        help="pin the iOS runtime (e.g. 26.5, 27.1); the baselines record it")
     args = parser.parse_args()
+    global DEVICE_TYPE, SIM_NAME, BASELINES
+    DEVICE_TYPE, posture, BASELINES, SIM_NAME, runtime_pin = simrig.harness_device(
+        args.device, DEVICE_TYPE, BASELINES, SIM_NAME)
 
     if not os.path.exists(FIXTURE):
         sys.exit(
@@ -449,10 +457,12 @@ def main():
         sys.exit("no screen named %r. Known: %s"
                  % (args.only, ", ".join(sorted(known))))
 
-    runtime = simrig.newest_ios_runtime()
+    runtime = simrig.ios_runtime(args.runtime or runtime_pin)
     print("runtime: %s  device: %s" % (runtime["name"], DEVICE_TYPE))
     udid = simrig.prepare_simulator(
         runtime, SIM_NAME, DEVICE_TYPE, erase=not args.no_erase)
+    if posture:
+        simrig.require_posture(udid, posture)
     simrig.build_and_install(udid, args.app, REPO)
 
     targets = fixture_probe_labels()
@@ -464,7 +474,9 @@ def main():
         if args.only and screen["name"] != args.only:
             continue
         print("capturing %s…" % screen["name"])
-        dump = capture(udid, screen, targets, runtime["version"])
+        dump = simrig.retrying_stale_touch(
+            udid, lambda: capture(udid, screen, targets, runtime["version"]),
+            screen["name"])
         path = os.path.join(BASELINES, "%s.txt" % screen["name"])
         if args.record:
             with open(path, "w") as handle:

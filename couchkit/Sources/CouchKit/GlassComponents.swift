@@ -265,6 +265,20 @@ public struct GlassChip: View {
     }
 }
 
+/// The width a `GlassSheet` trailing panel takes, when the host knows better
+/// than 380 — Nine's open iPhone Duo, whose right pane is 339.5pt (PRD-37).
+/// `nil` everywhere else, which is today's panel exactly.
+private struct CouchPanelWidthKey: EnvironmentKey {
+    static let defaultValue: CGFloat? = nil
+}
+
+extension EnvironmentValues {
+    public var couchPanelWidth: CGFloat? {
+        get { self[CouchPanelWidthKey.self] }
+        set { self[CouchPanelWidthKey.self] = newValue }
+    }
+}
+
 // MARK: - GlassSheet
 
 /// The one allowed secondary surface. Dismisses on Back (tvOS), on a tap on the
@@ -304,6 +318,10 @@ public struct GlassSheet<Content: View>: View {
     // both presentations are real.
     #if os(iOS)
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    #endif
+    #if !os(tvOS)
+    /// PRD-37: a host-supplied trailing-panel width; nil keeps 380.
+    @Environment(\.couchPanelWidth) private var panelWidth
     #endif
 
     /// - Parameters:
@@ -420,7 +438,7 @@ public struct GlassSheet<Content: View>: View {
                     .transition(.opacity)
                 content
                     .padding(22)
-                    .frame(maxWidth: 380, maxHeight: .infinity)
+                    .frame(maxWidth: panelWidth ?? 380, maxHeight: .infinity)
                     .couchGlass(in: Self.panelShape)
                     .couchElevated(in: Self.panelShape, isLight: isLight)
                     // Symmetric, and horizontal rather than trailing-only: the

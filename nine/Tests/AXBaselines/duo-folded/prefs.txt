@@ -1,0 +1,21 @@
+# nine accessibility tree — screen: prefs
+# device: iPhone Duo   runtime: 27.1   sim-use: v0.12.0
+#
+# Regenerate: nine/scripts/ax-snapshot.py --record
+
+[Content]
+  Image "wifi_68_status_bar_C2"  (409,123 18x13)
+  Button "Sheet Grabber" = "Expanded"  (183,174 100x24)
+  StaticText "Nine"  (30,212 60x34)
+  Heading "PLAY"  (30,270 35x16)
+  CheckBox "Timer" = "1" [selected]  (30,291 330x52)
+  CheckBox "Error highlight" = "1" [selected]  (30,344 330x52)
+  CheckBox "Number highlight" = "1" [selected]  (30,396 330x52)
+  CheckBox "Resume on launch" = "1" [selected]  (30,448 330x52)
+  Heading "FEEL"  (30,524 33x16)
+[Bottom]
+  CheckBox "Haptics" = "1" [selected]  (30,546 330x52)
+  Heading "APPEARANCE"  (30,622 93x16)
+  StaticText "Theme, Auto"  (46,656 298x28)
+
+# 12 elements in 2 containers

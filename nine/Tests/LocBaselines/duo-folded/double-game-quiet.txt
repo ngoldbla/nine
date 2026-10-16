@@ -1,0 +1,16 @@
+# mode: double   runtime: 27.1   device: iPhone Duo   sim-use: v0.12.0
+# role        x,y     w x h   label
+Button       20,430  65x58  "1$lld, 2$#@left@ 1, %2$#@left@"
+Button       20,492  83x58  "1$lld, 2$#@left@ 6, %2$#@left@"
+Button       57,586  44x44  "Hint Hint"
+Button       89,430  65x58  "1$lld, 2$#@left@ 2, %2$#@left@"
+Button      107,492  82x58  "1$lld, 2$#@left@ 7, %2$#@left@"
+Button      113,586  44x44  "Pencil marks Pencil marks"
+Button      158,430  65x58  "1$lld, 2$#@left@ 3, %2$#@left@"
+Button      169,586  44x44  "Auto notes Auto notes"
+Button      193,492  83x58  "1$lld, 2$#@left@ 8, %2$#@left@"
+Button      225,586  44x44  "Undo Undo"
+Button      228,430  65x58  "1$lld, 2$#@left@ 4, %2$#@left@"
+Button      280,492  82x58  "1$lld, 2$#@left@ 9, %2$#@left@"
+Button      281,586  44x44  "Settings Settings"
+Button      297,430  65x58  "1$lld, 2$#@left@ 5, %2$#@left@"

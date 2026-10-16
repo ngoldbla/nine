@@ -14,6 +14,8 @@ Nothing in this file knows what is being measured.
 """
 
 import json
+import os
+import shutil
 import subprocess
 import sys
 import time
@@ -55,6 +57,102 @@ def newest_ios_runtime():
     return ios[-1]
 
 
+# PRD-37. Open, the iPhone Duo draws on its inner panel and the outer
+# `primary` panel is dark; `simctl io screenshot` defaults to `primary`, so
+# every open capture has to name the inner one.
+DUO = "iPhone Duo"
+# The runtime every iPhone and iPad baseline was recorded on. Pinned rather
+# than "newest" because the iOS 27.1 runtime that arrives with Xcode 27.1 runs
+# exactly one device type, the iPhone Duo — `simctl create` refuses an iPhone
+# 17 Pro on it — so "newest" stopped meaning "a runtime with an iPhone".
+IPHONE_RUNTIME = "26.5"
+DUO_DISPLAY_OPEN = "primary-1"
+# The bridge cannot read the 27.1 Duo's SpringBoard ("No translation object"
+# for 300 s on a fresh, folded simulator) but reads an app, so the Duo's
+# warm-up happens inside one that every simulator has.
+DUO_WARM_UP_APP = "com.apple.Preferences"
+
+
+def ios_runtime(version=None):
+    """The runtime to boot: `version` ("26.5", "27.1") or NINE_SIM_RUNTIME,
+    else the newest. **Pin it for every baseline lane**: the baselines record
+    their runtime, and installing a newer one must not quietly move them."""
+    version = version or os.environ.get("NINE_SIM_RUNTIME")
+    if not version:
+        return newest_ios_runtime()
+    data = json.loads(run(["xcrun", "simctl", "list", "runtimes", "--json"]))
+    ios = [r for r in data["runtimes"]
+           if r.get("isAvailable") and r.get("platform") == "iOS"]
+    match = [r for r in ios
+             if r["version"] == version or r["version"].startswith(version + ".")]
+    if not match:
+        sys.exit("iOS %s simulator runtime not installed (have: %s)"
+                 % (version, ", ".join(r["version"] for r in ios)))
+    return match[-1]
+
+
+def reslim(udid):
+    """Erase and create bring a simulator back stock (~/.claude/CLAUDE.md).
+    Nine waits on Game Center at launch, so `gamed` stays. `--keep` is
+    mutually exclusive with `--profile`; the dev profile keeps nothing, so this
+    is that profile plus `gamed`. Off on hosts without simslim (CI) and when
+    NINE_SIMSLIM=0."""
+    if shutil.which("simslim") is None or os.environ.get("NINE_SIMSLIM") == "0":
+        return
+    run(["simslim", "on", udid, "--keep", "com.apple.gamed", "--preserve-boot-state"],
+        check=False, capture=False)
+    run(["xcrun", "simctl", "bootstatus", udid, "-b"], capture=False)
+
+
+def screenshot_display(posture):
+    """The `--display` a Duo capture needs, or None for every other device.
+    Named in both postures: with no `--display`, `simctl` returned the outer
+    panel on one folded Duo and the dark inner one (2007 px) on another."""
+    return {"open": DUO_DISPLAY_OPEN, "closed": "primary"}.get(posture)
+
+
+def screenshot_args(udid, path, kind, posture):
+    """`simctl io screenshot` for this device and posture."""
+    display = screenshot_display(posture)
+    return (["xcrun", "simctl", "io", udid, "screenshot", "--type=" + kind]
+            + (["--display=" + display] if display else []) + [path])
+
+
+def require_posture(udid, posture):
+    """No tool can fold the simulator (PRD-37 §1.6): Device Hub's three posture
+    buttons are the only control. Ask the operator, once per run — posture
+    survives relaunch."""
+    if not sys.stdin.isatty():
+        sys.exit("the Duo %s lane needs a person to set Device Hub's posture; "
+                 "run it from a terminal" % posture)
+    label = {"open": "Open", "closed": "Closed"}[posture]
+    answer = input("Set Device Hub's posture for %s to %s (bottom toolbar), "
+                   "then type '%s' and press Return: " % (udid, label, posture))
+    if answer.strip().lower() != posture:
+        sys.exit("posture not confirmed")
+
+
+def harness_device(key, device_type, baselines, sim_name):
+    """`--device` for the baseline lanes (AX, contrast, localization).
+
+    `iphone` returns the lane's own constants untouched, so its baselines and
+    paths are byte-identical to before PRD-37. `duo-folded` is the iPhone Duo's
+    outer panel, with baselines in a sibling directory and the iOS 27.1 runtime
+    it needs. `duo-open` is refused, with the measurement that refuses it: the
+    accessibility bridge cannot see the open Duo's inner panel (Apple
+    187148389; `describe-ui` answers "No translation object" for every board
+    cell), so a baseline recorded there would be a photograph of a broken tree.
+    Returns (device_type, posture, baselines, sim_name, runtime_pin)."""
+    if key == "iphone":
+        return device_type, None, baselines, sim_name, IPHONE_RUNTIME
+    if key == "duo-folded":
+        return (DUO, "closed", os.path.join(baselines, "duo-folded"),
+                sim_name + "-Duo", "27.1")
+    sys.exit("--device %s: the accessibility bridge cannot read the open iPhone "
+             "Duo (Apple 187148389), so this lane would record a broken tree. "
+             "Use shotlist.py --device duo-open for pictures." % key)
+
+
 def device_type_id(name):
     data = json.loads(run(["xcrun", "simctl", "list", "devicetypes", "--json"]))
     for dt in data["devicetypes"]:
@@ -63,16 +161,24 @@ def device_type_id(name):
     sys.exit("device type %r not installed" % name)
 
 
-def prepare_simulator(runtime, name, device_type, erase=True, appearance="light"):
+def prepare_simulator(runtime, name, device_type, erase=True, appearance="light",
+                      slim=None):
     """A dedicated, erased simulator. Erasing is not politeness: a reused
     container can carry a previous session's library, and on a host signed into
-    iCloud the cloud library will restore one into a fresh install."""
+    iCloud the cloud library will restore one into a fresh install.
+
+    `slim` defaults to "only the Duo". The iPhone and iPad baselines were
+    recorded on stock simulators and CI has no simslim, so a slimmed local
+    baseline lane would be measuring a different instrument; the Duo lanes
+    have no CI counterpart and need the memory."""
     data = json.loads(run(["xcrun", "simctl", "list", "devices", "--json"]))
+    # Name *and* runtime: a same-named simulator on another runtime is a
+    # different instrument, and reusing it would undo the runtime pin.
     udid = None
-    for devices in data["devices"].values():
-        for device in devices:
-            if device["name"] == name:
-                udid = device["udid"]
+    for device in data["devices"].get(runtime["identifier"], []):
+        if device["name"] == name:
+            udid = device["udid"]
+    fresh = udid is None or erase
     if udid is None:
         udid = run([
             "xcrun", "simctl", "create", name,
@@ -84,12 +190,16 @@ def prepare_simulator(runtime, name, device_type, erase=True, appearance="light"
         run(["xcrun", "simctl", "erase", udid])
     run(["xcrun", "simctl", "boot", udid], check=False)
     run(["xcrun", "simctl", "bootstatus", udid, "-b"], capture=False)
+    if slim is None:
+        slim = device_type == DUO
+    if fresh and slim:
+        reslim(udid)
     # Pin the appearance: `.auto` themes follow it, and a mid-run switch would
     # rewrite colours (harmless to the tree, but it also re-renders the board).
     if appearance:
         run(["xcrun", "simctl", "ui", udid, "appearance", appearance], check=False)
     pin_status_bar(udid)
-    warm_up_bridge(udid)
+    warm_up_bridge(udid, launch=DUO_WARM_UP_APP if device_type == DUO else None)
     return udid
 
 
@@ -122,15 +232,19 @@ def pin_status_bar(udid):
          "--batteryLevel", "100"], check=False)
 
 
-def warm_up_bridge(udid, timeout=300.0):
+def warm_up_bridge(udid, timeout=300.0, launch=None):
     """`simctl bootstatus` returning is not the same as the accessibility
     bridge being up. On a freshly erased simulator the gap is minutes, and every
     probe in it answers "No translation object returned for simulator" — which
     reads exactly like a collapsed tree. Wait for a real answer before the first
     screen, so a slow boot can never be mistaken for a regression."""
+    if launch:
+        run(["xcrun", "simctl", "launch", udid, launch], check=False)
     deadline = time.time() + timeout
     while time.time() < deadline:
         if describe(udid, tolerate=True) is not None:
+            if launch:
+                run(["xcrun", "simctl", "terminate", udid, launch], check=False)
             return
         time.sleep(2.0)
     sys.exit(
@@ -202,6 +316,28 @@ def describe(udid, point=None, tolerate=False):
     sys.exit("describe-ui failed: %s%s" % (out[:400], result.stderr or ""))
 
 
+class WaitTimeout(SystemExit):
+    """A wait that ran out of time. Still a `SystemExit`: uncaught, it ends the
+    run with the same message it always did. `after_tap` says whether a tap
+    reached `sim-use` since the last launch, which is the stale-touch signature
+    `retrying_stale_touch` recovers from."""
+
+    def __init__(self, message, after_tap):
+        super().__init__(message)
+        self.after_tap = after_tap
+
+
+# Simulators that have been tapped since their last `relaunch`. A wait that
+# times out on one of these may be waiting on a tap that never landed.
+_TAPPED = set()
+
+
+def note_tap(udid):
+    """Record a tap for `WaitTimeout.after_tap`; harnesses that tap through
+    their own `sim-use tap` call this too."""
+    _TAPPED.add(udid)
+
+
 def wait_for(udid, label, timeout=40.0, hint_for_missing_board=True):
     """Poll until `label` is in the tree, tolerating a not-yet-ready bridge."""
     deadline = time.time() + timeout
@@ -238,9 +374,10 @@ def wait_for(udid, label, timeout=40.0, hint_for_missing_board=True):
             "have collapsed and the board is a blank rectangle to VoiceOver. "
             "Start at Sources/App/BoardAccessibility.swift.\n"
         )
-    sys.exit(
+    raise WaitTimeout(
         "timed out waiting for %r. Tree was:\n%s%s"
-        % (label, "\n".join(seen) if seen else "(nothing — the bridge never answered)", hint)
+        % (label, "\n".join(seen) if seen else "(nothing — the bridge never answered)", hint),
+        udid in _TAPPED,
     )
 
 
@@ -314,6 +451,7 @@ def tap(udid, data, label):
         "sim-use", "tap", "--device", udid,
         "-x", str(int(x)), "-y", str(int(y)),
     ])
+    note_tap(udid)
 
 
 def relaunch(udid, bundle_id, blobs, args=()):
@@ -332,7 +470,48 @@ def relaunch(udid, bundle_id, blobs, args=()):
     run(["xcrun", "simctl", "terminate", udid, bundle_id], check=False)
     wait_until_dead(udid, bundle_id)
     seed(udid, bundle_id, blobs)
+    _TAPPED.discard(udid)
     run(["xcrun", "simctl", "launch", udid, bundle_id, *args])
+
+
+# ------------------------------------------------------------ stale touch
+#
+# Over a long run the simulator's touch input goes stale: `sim-use tap`
+# reports success and nothing happens. Measured on `main`'s build as on the
+# branch's (0/5 rose opens), and cured by a reboot (5/5, 10/10) — DEVIATIONS,
+# PRD-37. It reads exactly like a regression ("the rose never opened"), so the
+# rig recovers from it once, loudly, rather than leaving every lane to be
+# re-run by hand.
+
+
+def reboot(udid):
+    """Shut down and boot `udid`, putting back what the run pinned: the
+    appearance it had (read before the shutdown), the status bar, a warm
+    accessibility bridge. The installed app and its container survive."""
+    appearance = run(["xcrun", "simctl", "ui", udid, "appearance"], check=False).strip()
+    run(["xcrun", "simctl", "shutdown", udid], check=False)
+    run(["xcrun", "simctl", "boot", udid], check=False)
+    run(["xcrun", "simctl", "bootstatus", udid, "-b"], capture=False)
+    if appearance in ("light", "dark"):
+        run(["xcrun", "simctl", "ui", udid, "appearance", appearance], check=False)
+    pin_status_bar(udid)
+    warm_up_bridge(udid)
+
+
+def retrying_stale_touch(udid, scene, what):
+    """Run `scene()`; if it times out waiting after a tap, reboot once and run
+    it again. A timeout before any tap is not stale touch and is raised at
+    once, and so is a second timeout — one reboot is a recovery, two would be
+    hiding a regression."""
+    try:
+        return scene()
+    except WaitTimeout as timeout:
+        if not timeout.after_tap:
+            raise
+        print("  %s: timed out after a tap — the stale-touch signature. Rebooting "
+              "the simulator once and retrying." % what)
+        reboot(udid)
+        return scene()
 
 
 def wait_until_dead(udid, bundle_id, timeout=20.0):

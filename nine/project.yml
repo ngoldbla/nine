@@ -62,7 +62,7 @@ targets:
       base:
         SWIFT_VERSION: "6.0"
         PRODUCT_BUNDLE_IDENTIFIER: com.couchsuite.nine
-        MARKETING_VERSION: "1.1"
+        MARKETING_VERSION: "1.2"
         CURRENT_PROJECT_VERSION: 1
         TARGETED_DEVICE_FAMILY: "1,2,3"
         # tvOS keeps the layered brand asset; iOS uses the flat square icon;
@@ -244,7 +244,7 @@ targets:
         # ASC requires the extension's CFBundleShortVersionString to equal
         # the app's; CURRENT_PROJECT_VERSION stays in lockstep via the
         # project-wide xcargs the Fastfile passes.
-        MARKETING_VERSION: "1.1"
+        MARKETING_VERSION: "1.2"
         CURRENT_PROJECT_VERSION: 1
         TARGETED_DEVICE_FAMILY: "1,2"
         SKIP_INSTALL: true
@@ -322,7 +322,7 @@ targets:
         # ASC requires an embedded watch app's CFBundleShortVersionString to
         # equal its host's; CURRENT_PROJECT_VERSION rides the project-wide
         # xcargs the Fastfile passes, so the build number follows the iOS train.
-        MARKETING_VERSION: "1.1"
+        MARKETING_VERSION: "1.2"
         CURRENT_PROJECT_VERSION: 1
         SKIP_INSTALL: true
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon-watchOS

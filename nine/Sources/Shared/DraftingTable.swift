@@ -30,13 +30,22 @@ public enum BoardComposition: Equatable, Sendable {
     /// simply *there* — discoverability solved by geometry rather than by a
     /// hairline grabber that has to teach itself and then get out of the way.
     case table(DraftingTable)
+    /// PRD-37's spread: the open iPhone Duo. The board sits with the crease on
+    /// its own box rule, the controls on one page and the digits on the other.
+    case spread(Spread)
 
-    /// The board's side in either arm, for the callers that only want that.
+    /// The board's side in any arm, for the callers that only want that.
     public var boardSide: Double {
         switch self {
         case .column(let side): return side
         case .table(let table): return table.boardSide
+        case .spread(let spread): return spread.boardSide
         }
+    }
+
+    public var spread: Spread? {
+        if case .spread(let spread) = self { return spread }
+        return nil
     }
 
     public var table: DraftingTable? {
@@ -90,17 +99,24 @@ public enum ShelfComposition: Equatable, Sendable {
 
 /// The measured two-column shelf. Points in the window's own space.
 public struct ShelfPair: Equatable, Sendable {
+    /// The leading column's width — and the trailing one's, except on a
+    /// foldable, where the fold band is the gutter and the panes differ.
     public let columnWidth: Double
     public let gutter: Double
     public let outerPadding: Double
+    public let trailingColumnWidth: Double
 
-    public init(columnWidth: Double, gutter: Double, outerPadding: Double) {
+    public init(columnWidth: Double, gutter: Double, outerPadding: Double,
+                trailingColumnWidth: Double? = nil) {
         self.columnWidth = columnWidth
         self.gutter = gutter
         self.outerPadding = outerPadding
+        self.trailingColumnWidth = trailingColumnWidth ?? columnWidth
     }
 
-    public var totalWidth: Double { 2 * columnWidth + gutter + 2 * outerPadding }
+    public var totalWidth: Double {
+        columnWidth + trailingColumnWidth + gutter + 2 * outerPadding
+    }
 }
 
 /// The measured drafting table. Every number is points in the window's own
@@ -382,7 +398,11 @@ public enum BoardCompositionRules {
     public static let shelfMaximumWidth = 1080.0
 
     /// How the shelf composes for a window of this size.
-    public static func resolveShelf(width: Double, height: Double) -> ShelfComposition {
+    public static func resolveShelf(width: Double, height: Double,
+                                    fold: FoldBand? = nil) -> ShelfComposition {
+        if let fold, let pair = FoldRules.shelfPair(width: width, height: height, band: fold) {
+            return .pair(pair)
+        }
         let usable = min(width, shelfMaximumWidth) - 2 * shelfOuterPadding - shelfGutter
         let column = min(shelfColumnWidth, usable / 2)
         guard height >= shelfMinimumHeight, column >= shelfMinimumColumn else {
@@ -393,8 +413,13 @@ public enum BoardCompositionRules {
                                outerPadding: shelfOuterPadding))
     }
 
-    /// The composition for a window of this size.
-    public static func resolve(width: Double, height: Double) -> BoardComposition {
+    /// The composition for a window of this size — and, on a foldable, for the
+    /// fold iOS reports in it (PRD-37). `fold == nil` is today's function.
+    public static func resolve(width: Double, height: Double,
+                               fold: FoldBand? = nil) -> BoardComposition {
+        if let fold, let spread = FoldRules.spread(width: width, height: height, band: fold) {
+            return .spread(spread)
+        }
         let column = columnBoardSide(width: width, height: height)
         let table = tableBoardSide(width: width, height: height)
         guard table >= tableBoardFloor, table >= column * boardConcession else {

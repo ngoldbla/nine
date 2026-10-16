@@ -75,3 +75,9 @@ Which is the whole argument for asserting on frames rather than on pixels, and
 for opening the rose rather than trusting the sentence in the plan — the plan
 and its follow-up both said petal 1 sits bottom-left. It sits top-left; the ring
 is telephone-keypad order.
+
+## `duo-folded/` (PRD-37)
+
+All five modes on the iPhone Duo's outer panel, recorded with
+`loc-harness.py --device duo-folded --record` (posture Closed). Local only,
+for the reason `Tests/AXBaselines/README.md` gives.

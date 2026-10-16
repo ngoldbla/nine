@@ -1,0 +1,14 @@
+# mode: en   runtime: 27.1   device: iPhone Duo   sim-use: v0.12.0
+# role        x,y     w x h   label
+Button      183,174 100x24  "Sheet Grabber"
+CheckBox     30,291 330x52  "Timer"
+CheckBox     30,344 330x52  "Error highlight"
+CheckBox     30,396 330x52  "Number highlight"
+CheckBox     30,448 330x52  "Resume on launch"
+CheckBox     30,546 330x52  "Haptics"
+Heading      30,270  35x16  "PLAY"
+Heading      30,524  33x16  "FEEL"
+Heading      30,622  93x16  "APPEARANCE"
+Image       409,123  18x13  "wifi_68_status_bar_C2"
+StaticText   30,212  60x34  "Nine"
+StaticText   46,656 298x28  "Theme, Auto"

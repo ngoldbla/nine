@@ -34,6 +34,8 @@ struct TouchHomeView: View {
     /// mirror, decision 3 of PRD-20 — a pager genuinely should. See
     /// `pageTurnGesture`.
     @Environment(\.layoutDirection) private var layoutDirection
+    /// PRD-37: the open iPhone Duo's fold; nil everywhere else.
+    @Environment(\.foldBand) private var foldBand
 
     /// The accent resolved for the theme's leaning (themes pin the scheme).
     private var accent: Color { model.prefs.accent.color(isLight: colorScheme == .light) }
@@ -70,7 +72,7 @@ struct TouchHomeView: View {
                 // question; `theTableIsAlwaysAlsoAShelfPair` pins that the two
                 // can still never disagree in the direction that would matter.
                 let shelf = BoardCompositionRules.resolveShelf(
-                    width: Double(geo.size.width), height: Double(geo.size.height))
+                    width: Double(geo.size.width), height: Double(geo.size.height), fold: foldBand)
                 ScrollView {
                     if let pair = shelf.pair {
                         shelfPair(pair)
@@ -97,7 +99,10 @@ struct TouchHomeView: View {
                 // shelf there was nothing on screen naming the app or saying
                 // which channel page you were on.
                 .safeAreaInset(edge: .top, spacing: 0) {
-                    shelfBar(width: CGFloat(shelf.contentWidth))
+                    shelfBar(width: CGFloat(shelf.contentWidth),
+                             // PRD-37: on the open Duo the pager stays in the
+                             // left column instead of centring on the crease.
+                             pagerWidth: foldBand == nil ? nil : shelf.pair.map { CGFloat($0.columnWidth) })
                 }
                 // Above the `ScrollView`'s own content and simultaneous with it, so
                 // the shelf still scrolls vertically and the six cards still take
@@ -145,7 +150,27 @@ struct TouchHomeView: View {
         }
         .animation(.couchFast, value: showTutorial)
         .animation(.couchFast, value: showSchool)
+        #if DEBUG
+        .onAppear { openDebugSurface() }
+        #endif
     }
+
+    #if DEBUG
+    /// PRD-37's photograph rig: `-NineDebugSurface` opens one shelf surface at
+    /// launch, because taps do not reach the open Duo (DebugSurface.swift).
+    private func openDebugSurface() {
+        guard let surface = DebugSurfaceLatch.take(onGameScreen: false) else { return }
+        DebugSurfaceLatch.afterArrival {
+            switch surface {
+            case .history: showHistory = true
+            case .boards: showBoards = true
+            case .tutorial: showTutorial = true
+            case .school: showSchool = true
+            case .prefs, .coach, .drawer: break
+            }
+        }
+    }
+    #endif
 
     /// The phone's shelf. Classic's page is unchanged below the pager rail.
     ///
@@ -209,10 +234,11 @@ struct TouchHomeView: View {
     /// number and the cards to another, which is two of the "three competing
     /// alignment origins in the top 300pt" the audit measured; now the wordmark
     /// and the first card share one leading margin by construction.
-    private func shelfBar(width: CGFloat) -> some View {
+    private func shelfBar(width: CGFloat, pagerWidth: CGFloat? = nil) -> some View {
         VStack(spacing: Space.m) {
             header
             ChannelPagerRail(model: model, accent: accent)
+                .modifier(LeadingPaneWidth(width: pagerWidth))
         }
         .padding(.horizontal, CGFloat(BoardCompositionRules.shelfOuterPadding))
         .padding(.bottom, Space.m)
@@ -317,6 +343,9 @@ struct TouchHomeView: View {
     /// `testTheShelfPairFitsAndStopsGrowing` sweeps every window for it.
     private func shelfPair(_ pair: ShelfPair) -> some View {
         let column = CGFloat(pair.columnWidth)
+        // PRD-37: the second column's width. Equal to `column` everywhere
+        // except the open Duo, where each column fills its own pane.
+        let trailing = CGFloat(pair.trailingColumnWidth)
         let gutter = CGFloat(pair.gutter)
         return VStack(spacing: gutter) {
             if let ledgered = model.channel.ledgered {
@@ -332,7 +361,7 @@ struct TouchHomeView: View {
                         .frame(width: column, alignment: .top)
                     VStack(spacing: Space.xxl) { learnRow }
                         .fixedSize(horizontal: false, vertical: true)
-                        .frame(width: column, alignment: .top)
+                        .frame(width: trailing, alignment: .top)
                 }
             } else {
                 HStack(alignment: .top, spacing: gutter) {
@@ -355,7 +384,7 @@ struct TouchHomeView: View {
                         parlorCard
                     }
                     .fixedSize(horizontal: false, vertical: true)
-                    .frame(width: column, alignment: .top)
+                    .frame(width: trailing, alignment: .top)
                 }
             }
         }
@@ -951,6 +980,10 @@ struct TouchGameScreen: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.colorScheme) private var colorScheme
+    /// PRD-37: the open iPhone Duo's fold, and the right pane's panel width.
+    /// Both nil on every other device.
+    @Environment(\.foldBand) private var foldBand
+    @Environment(\.couchPanelWidth) private var panelWidth
 
     /// The accent resolved for the theme's leaning (themes pin the scheme).
     private var accent: Color { model.prefs.accent.color(isLight: colorScheme == .light) }
@@ -982,9 +1015,11 @@ struct TouchGameScreen: View {
             // can seat a rail beside a full board. `DraftingTableTests` sweeps
             // the whole decision on Linux.
             let composition = BoardCompositionRules.resolve(
-                width: Double(geo.size.width), height: Double(geo.size.height))
+                width: Double(geo.size.width), height: Double(geo.size.height), fold: foldBand)
             Group {
-                if let table = composition.table {
+                if let spread = composition.spread {
+                    spreadView(spread, in: geo.size)
+                } else if let table = composition.table {
                     draftingTable(table, in: geo.size)
                 } else {
                     boardColumn(side: CGFloat(composition.boardSide), in: geo.size)
@@ -992,8 +1027,8 @@ struct TouchGameScreen: View {
             }
             .onChange(of: model.solvedAt) { renderShareCard() }
             // Above the board and its chips, below the prefs sheet.
-            .overlay { coachView }
-            .overlay { whyView }
+            .overlay { coachView(spread: composition.spread, width: geo.size.width) }
+            .overlay { whyView(spread: composition.spread, width: geo.size.width) }
             .overlay {
                 // PRD-34: no `onNewGame` — the next board lives on the shelf,
                 // in the Boards sheet, and in the post-solve "Another" chip.
@@ -1020,6 +1055,9 @@ struct TouchGameScreen: View {
         .focused($boardFocused)
         .onKeyPress { press in handleKey(press) ? .handled : .ignored }
         .onAppear { boardFocused = true }
+        #if DEBUG
+        .onAppear { openDebugSurface() }
+        #endif
         // A hint describes one position, so any move makes it stale. Retiring
         // it beats leaving a card on screen that is quietly no longer true.
         .onChange(of: model.game?.entries) { _, _ in
@@ -1494,6 +1532,64 @@ struct TouchGameScreen: View {
         .padding(padding)
     }
 
+    /// PRD-37: the open iPhone Duo, laid out as a book. The crease falls on
+    /// the board's own thick rule (after column 6 on the Duo), the six controls
+    /// stand on the leading page exactly as on the drafting table, and the
+    /// trailing strip holds the readout and a 3×3 pad of 44pt keys. Flat and
+    /// bent are the same layout — only the rose reads `isActive`.
+    private func spreadView(_ spread: Spread, in size: CGSize) -> some View {
+        let inset = CGFloat(BoardCompositionRules.boardInset)
+        let side = CGFloat(spread.boardSide)
+        let columnWidth = CGFloat(BoardCompositionRules.controlColumnWidth)
+        let leadingGap = CGFloat(spread.boardLeft - spread.controlColumnX) - inset - columnWidth
+        let trailingGap = CGFloat(spread.padX - spread.boardLeft) - side - inset
+        let outer = CGFloat(BoardCompositionRules.outerPadding)
+        let crease = (foldBand?.isActive ?? false) ? spread.crease - spread.boardLeft : nil
+        return HStack(spacing: 0) {
+            controlColumn
+                .frame(width: columnWidth)
+                .frame(maxHeight: .infinity)
+            Color.clear.frame(width: leadingGap)
+            chromed(
+                boardArea(side: side, inset: inset, crease: crease)
+                    .frame(maxHeight: .infinity),
+                insets: .table,
+                revealHeight: size.height - 2 * outer,
+                controlBarReserve: 0,
+                chipOffset: CGFloat(spread.chipCentreOffset),
+                hostsDebrief: false
+            )
+            Color.clear.frame(width: trailingGap)
+            VStack(spacing: Space.l) {
+                railHeader
+                Spacer(minLength: 0)
+                digitPad(columns: 3, keyHeight: CGFloat(BoardCompositionRules.padKeyFloor))
+                Spacer(minLength: 0)
+            }
+            .frame(width: CGFloat(spread.padWidth))
+            .frame(maxHeight: .infinity)
+        }
+        .padding(.leading, CGFloat(spread.controlColumnX))
+        .padding(.vertical, outer)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+        // No rail on a spread, so the stats keep the phone's pull-down — the
+        // drawer itself presents in the right pane (see `statsDrawer`).
+        .overlay(alignment: .top) { drawerGrabber }
+        .overlay(alignment: .top) { statsDrawer }
+        .overlay(alignment: .bottom) { debriefPanel }
+        .simultaneousGesture(drawerRevealGesture)
+        // The drawer is reachable here only by the pull-down, exactly as on the
+        // phone, so VoiceOver gets the column's named action with the column's
+        // guards — the drafting table omits it only because its rail is
+        // permanently on screen.
+        .accessibilityAction(named: Text(Strings.string(
+            drawerOpen ? "game.drawer.hide" : "game.drawer.show"))) {
+            guard drawerOpen || (rose == nil && !showPrefs && model.game != nil) else { return }
+            if !drawerOpen { model.noteDrawerFound() }
+            withAnimation(.couchFast) { drawerOpen.toggle() }
+        }
+    }
+
     /// How wide a digit key gets in the table's rail.
     ///
     /// Three across at the rail's 360pt, less its 16pt padding and two 12pt
@@ -1532,13 +1628,17 @@ struct TouchGameScreen: View {
         _ content: some View,
         insets: ChromeInsets,
         revealHeight: CGFloat,
-        controlBarReserve: CGFloat
+        controlBarReserve: CGFloat,
+        chipOffset: CGFloat = 0,
+        hostsDebrief: Bool = true
     ) -> some View {
         content
-            .overlay(alignment: .bottom) { toastView.padding(.bottom, insets.chip) }
-            .overlay(alignment: .bottom) { tipView.padding(.bottom, insets.chip) }
-            .overlay(alignment: .bottom) { completionChip.padding(.bottom, insets.completion) }
-            .overlay(alignment: .bottom) { autoNotesChipView.padding(.bottom, insets.chip) }
+            // `chipOffset` is PRD-37's: on the spread the chips centre on the
+            // columns before the crease. Zero, and so inert, everywhere else.
+            .overlay(alignment: .bottom) { toastView.padding(.bottom, insets.chip).offset(x: chipOffset) }
+            .overlay(alignment: .bottom) { tipView.padding(.bottom, insets.chip).offset(x: chipOffset) }
+            .overlay(alignment: .bottom) { completionChip.padding(.bottom, insets.completion).offset(x: chipOffset) }
+            .overlay(alignment: .bottom) { autoNotesChipView.padding(.bottom, insets.chip).offset(x: chipOffset) }
             // PRD-28 §5's dot row, stacked with the composing chip rather than
             // fighting it for the same inset. Both are top-of-board chrome and
             // both can be up at once — a parlor board composes like any other.
@@ -1548,13 +1648,17 @@ struct TouchGameScreen: View {
                     parlorRow
                 }
                 .padding(.top, insets.top)
+                .offset(x: chipOffset)
             }
             // The debrief's twin at the drawer's other edge, in the same order
             // and for the same reason: the hint under the panel it advertises.
             .overlay(alignment: .bottom) {
                 debriefGrabber.padding(.bottom, insets.debriefGrabber)
             }
-            .overlay(alignment: .bottom) { debriefPanel }
+            // PRD-37: the spread hosts the panel on its full-width container
+            // instead, so it can sit in the right pane rather than inside the
+            // board's own frame.
+            .overlay(alignment: .bottom) { if hostsDebrief { debriefPanel } }
             // The flexible bands around the board are `Color.clear`, which
             // SwiftUI does not hit-test, so without a content shape the whole
             // reveal band is a hole and the pull-up never starts. Claiming
@@ -2735,7 +2839,7 @@ struct TouchGameScreen: View {
                     parlor: model.parlor.room?.members ?? [],
                     onClose: { closeDebrief() }
                 )
-                .padding(.horizontal, 10)
+                .modifier(RightPanePanel(width: panelWidth, fallbackPadding: 10))
                 .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { height in
                     debriefHeight = max(1, height)
                 }
@@ -2782,7 +2886,7 @@ struct TouchGameScreen: View {
                     .padding(18)
                     .frame(maxWidth: 480)
                     .couchGlass(in: RoundedRectangle(cornerRadius: 28, style: .continuous))
-                    .padding(.horizontal, 10)
+                    .modifier(RightPanePanel(width: panelWidth, fallbackPadding: 10))
                     // Measured before the offset — the panel's real height is
                     // what the drag maps onto, whatever the stats add up to.
                     .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { height in
@@ -2796,9 +2900,9 @@ struct TouchGameScreen: View {
     // MARK: Board + rose
 
     @ViewBuilder
-    private func boardArea(side: CGFloat, inset: CGFloat) -> some View {
+    private func boardArea(side: CGFloat, inset: CGFloat, crease: Double? = nil) -> some View {
         if let game = model.game {
-            let lens = rose.map { roseLens(side: side, inset: inset, rose: $0) }
+            let lens = rose.map { roseLens(side: side, inset: inset, rose: $0, crease: crease) }
             BoardView(
                 game: game,
                 cursor: cursor,
@@ -3081,13 +3185,18 @@ struct TouchGameScreen: View {
     /// board frame (screen edges would otherwise clip it). One value rather
     /// than the pair of `roseScale`/`rosePosition` helpers this replaced,
     /// because paint and lens disagreeing by four points is visible.
-    private func roseLens(side: CGFloat, inset: CGFloat, rose: RoseState) -> RoseLens {
+    ///
+    /// `crease` (board-local, PRD-37) is passed only on a bent Duo, where the
+    /// plate must not lie across the fold.
+    private func roseLens(side: CGFloat, inset: CGFloat, rose: RoseState,
+                          crease: Double? = nil) -> RoseLens {
         RoseLens(
             cursor: cursor,
             side: Double(side),
             inset: Double(inset),
             pencil: rose.pencil,
-            scale: RoseLens.scale(forSide: Double(side))
+            scale: RoseLens.scale(forSide: Double(side)),
+            crease: crease
         )
     }
 
@@ -3321,8 +3430,13 @@ struct TouchGameScreen: View {
     /// The card, in the same free band the hint uses and dismissed the same
     /// way. Never auto-advances: a player reading a proof sets the pace.
     @ViewBuilder
-    private var whyView: some View {
+    private func whyView(spread: Spread?, width containerWidth: CGFloat) -> some View {
         if why != nil || whyRefusal != nil {
+            // PRD-37: on the open Duo the card opens in the pane away from the
+            // cursor, so the square it is reasoning about stays in view.
+            let paneFrame = spread.flatMap {
+                cardPaneFrame(FoldRules.cardPane(for: [cursor], spread: $0), spread: $0, in: containerWidth)
+            }
             ZStack(alignment: model.prefs.controlsAtBottom ? .top : .bottom) {
                 Color.black.opacity(0.001)
                     .ignoresSafeArea()
@@ -3342,7 +3456,10 @@ struct TouchGameScreen: View {
                         WhyRefusalContent(refusal: whyRefusal, accent: accent)
                     }
                 }
-                .padding(.horizontal, 20)
+                .frame(width: paneFrame?.width)
+                .padding(.horizontal, paneFrame == nil ? 20 : 0)
+                .frame(maxWidth: paneFrame == nil ? nil : .infinity, alignment: .leading)
+                .padding(.leading, paneFrame?.x ?? 0)
                 .padding(model.prefs.controlsAtBottom ? .top : .bottom, 8)
                 .transition(.opacity.combined(
                     with: .move(edge: model.prefs.controlsAtBottom ? .top : .bottom)
@@ -3353,6 +3470,30 @@ struct TouchGameScreen: View {
 
     // MARK: Coach (PRD-11)
 
+    /// Where the player dragged the coach card on the open Duo (PRD-37 §4.5).
+    /// Not persisted: every new hint starts in the pane opposite its cells.
+    @State private var coachDragOffset: CGSize = .zero
+    @GestureState private var coachDragLive: CGSize = .zero
+
+    /// Free drag; the card rests wherever it is dropped (the owner's choice
+    /// over snapping). The lightbulb still toggles it away from anywhere.
+    private var coachDrag: some Gesture {
+        DragGesture(minimumDistance: 8)
+            .updating($coachDragLive) { value, live, _ in live = value.translation }
+            .onEnded { value in
+                coachDragOffset.width += value.translation.width
+                coachDragOffset.height += value.translation.height
+            }
+    }
+
+    /// A card's frame on the open Duo (`FoldRules.cardFrame`). Nil without a fold.
+    private func cardPaneFrame(_ pane: FoldPane, spread: Spread,
+                               in width: CGFloat) -> (x: CGFloat, width: CGFloat)? {
+        guard let band = foldBand else { return nil }
+        let frame = FoldRules.cardFrame(pane, width: Double(width), band: band, spread: spread)
+        return (CGFloat(frame.x), CGFloat(frame.width))
+    }
+
     /// The lightbulb is a toggle, not a dispenser: pressing it again puts the
     /// card away rather than spending another hint on the same position.
     private func toggleCoach() {
@@ -3362,14 +3503,32 @@ struct TouchGameScreen: View {
         dismissWhy()
         dismissTip()
         closeDrawer()
+        coachDragOffset = .zero
         withAnimation(.couchFast) { coachAdvice = advice }
         announce(CoachCardLabel.spoken(title: BoardSpeech.coachTitle(advice),
                                        sentence: BoardSpeech.coachSentence(advice)))
     }
 
     private func dismissCoach() {
+        coachDragOffset = .zero
         withAnimation(.couchFast) { coachAdvice = nil }
     }
+
+    #if DEBUG
+    /// PRD-37's photograph rig: `-NineDebugSurface` opens one board surface at
+    /// launch, because taps do not reach the open Duo (DebugSurface.swift).
+    private func openDebugSurface() {
+        guard let surface = DebugSurfaceLatch.take(onGameScreen: true) else { return }
+        DebugSurfaceLatch.afterArrival {
+            switch surface {
+            case .prefs: showPrefs = true
+            case .coach: toggleCoach()
+            case .drawer: withAnimation(.couchFast) { drawerOpen = true }
+            case .history, .boards, .tutorial, .school: break
+            }
+        }
+    }
+    #endif
 
     /// The wand. Turning it on fills every empty cell's notes; turning it off
     /// clears nothing at all, which is the promise that makes it safe to try.
@@ -3397,8 +3556,17 @@ struct TouchGameScreen: View {
     /// moving a pixel. A tap anywhere else dismisses it, through the same
     /// near-invisible scrim the rose uses.
     @ViewBuilder
-    private var coachView: some View {
+    private func coachView(spread: Spread?, width containerWidth: CGFloat) -> some View {
         if let coachAdvice {
+            // PRD-37: on the open Duo the card opens in the pane that holds
+            // fewer of the cells it is about, and the player may drag it
+            // anywhere — 1.2's one new input concept, confined to the Duo.
+            let focus = CoachFocus(coachAdvice)
+            let cells = (focus?.pattern ?? []) + (focus?.victims ?? [])
+                + [focus?.target].compactMap { $0 }
+            let paneFrame = spread.flatMap {
+                cardPaneFrame(FoldRules.cardPane(for: cells, spread: $0), spread: $0, in: containerWidth)
+            }
             ZStack(alignment: model.prefs.controlsAtBottom ? .top : .bottom) {
                 Color.black.opacity(0.001)
                     .ignoresSafeArea()
@@ -3412,8 +3580,17 @@ struct TouchGameScreen: View {
                     if case .step(let step) = coachAdvice { model.applyCoachStep(step) }
                     dismissCoach()
                 }
-                .padding(.horizontal, 20)
+                .frame(width: paneFrame?.width)
+                .padding(.horizontal, paneFrame == nil ? 20 : 0)
+                .frame(maxWidth: paneFrame == nil ? nil : .infinity, alignment: .leading)
+                .padding(.leading, paneFrame?.x ?? 0)
                 .padding(model.prefs.controlsAtBottom ? .top : .bottom, 8)
+                .offset(paneFrame == nil ? .zero : CGSize(
+                    width: coachDragOffset.width + coachDragLive.width,
+                    height: coachDragOffset.height + coachDragLive.height))
+                // `.subviews`, never `.none`: `.none` also disables the card's
+                // own action button. See `GestureMaskSourceTests`.
+                .gesture(coachDrag, including: paneFrame == nil ? .subviews : .all)
                 .transition(.opacity.combined(
                     with: .move(edge: model.prefs.controlsAtBottom ? .top : .bottom)
                 ))
@@ -3926,6 +4103,39 @@ private enum Phrase {
             ? Strings.string("shelf.continue.captionMore",
                              .text(difficulty), .text(progress), .int(others))
             : Strings.string("shelf.continue.caption", .text(difficulty), .text(progress))
+    }
+}
+/// PRD-37: confine a panel (the stats drawer, the debrief) to the open iPhone
+/// Duo's right pane, the same frame `GlassSheet` takes there. Without a panel
+/// width this is exactly the shipped `.padding(.horizontal, fallbackPadding)`.
+private struct RightPanePanel: ViewModifier {
+    let width: CGFloat?
+    let fallbackPadding: CGFloat
+
+    func body(content: Content) -> some View {
+        if let width {
+            content
+                .frame(width: width)
+                .frame(maxWidth: .infinity, alignment: .trailing)
+                .padding(.trailing, CGFloat(FoldRules.panelInset))
+        } else {
+            content.padding(.horizontal, fallbackPadding)
+        }
+    }
+}
+/// PRD-37: hold a full-width shelf element to the open Duo's left column.
+/// Without a width this is no modifier at all.
+private struct LeadingPaneWidth: ViewModifier {
+    let width: CGFloat?
+
+    func body(content: Content) -> some View {
+        if let width {
+            content
+                .frame(width: width)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        } else {
+            content
+        }
     }
 }
 #endif

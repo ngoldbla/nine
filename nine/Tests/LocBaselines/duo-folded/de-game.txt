@@ -1,0 +1,16 @@
+# mode: de   runtime: 27.1   device: iPhone Duo   sim-use: v0.12.0
+# role        x,y     w x h   label
+Button       20,430  65x58  "1, noch 3"
+Button       20,492  83x58  "6, noch 5"
+Button       57,586  44x44  "Hinweis"
+Button       89,430  65x58  "2, noch 7"
+Button      107,492  82x58  "7, noch 5"
+Button      113,586  44x44  "Bleistiftnotizen"
+Button      158,430  65x58  "3, noch 6"
+Button      169,586  44x44  "Auto-Notizen"
+Button      193,492  83x58  "8, noch 7"
+Button      225,586  44x44  "Widerrufen"
+Button      228,430  65x58  "4, noch 4"
+Button      280,492  82x58  "9, noch 6"
+Button      281,586  44x44  "Einstellungen"
+Button      297,430  65x58  "5, noch 6"

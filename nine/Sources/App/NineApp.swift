@@ -186,6 +186,12 @@ struct RootView: View {
         // model nobody is looking at. By `onAppear` the live instance exists.
         // Registration is last-writer-wins and idempotent in practice.
         .onAppear { AppDependencyManager.shared.add(dependency: model) }
+        // PRD-37. On the root stack, so every screen and every sheet presented
+        // from inside it reads the one `\.foldBand`. Not the outermost
+        // modifier, and it does not need to be: nothing below reads the fold.
+        // An overlay added below this line would be a sibling of the view the
+        // value is written on and would not see it (the PRD-22 note below).
+        .readsFold()
         #if os(macOS)
         // Drive the NSWindow (desk mode size/level, frame autosave) and host
         // the keyboard-gestured tutorial from Help ▸ How to Play.
