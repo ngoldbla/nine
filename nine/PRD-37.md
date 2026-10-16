@@ -1,6 +1,6 @@
 # PRD-37 — The Spread (iPhone Duo)
 
-**Status:** Implemented; every open-Duo surface photographed (`docs/prd37/screens/duo-open/`) — hand checks needing a posture change or a drag outstanding (DEVIATIONS, PRD-37) · **Thread:** `nine/` + `couchkit/` · **Release:** 1.2
+**Status:** Implemented and verified on the Duo — every open surface photographed, every hand check passed, `duo-folded` baselines recorded (DEVIATIONS, PRD-37); merging waits on Xcode 27.1 reaching CI · **Thread:** `nine/` + `couchkit/` · **Release:** 1.2
 **One-liner:** Folded, the iPhone Duo is an iPhone and Nine draws exactly what it
 draws today. Open, it is a book spread: a 550.5pt board whose crease falls on the
 board's own thick box rule, the controls on one page and the digits on the

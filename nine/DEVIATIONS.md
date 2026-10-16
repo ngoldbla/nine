@@ -5004,3 +5004,32 @@ Run from `docs/prd37/HANDOFF.md` with the owner away; every ruling is in
 - **Still for a person in Device Hub:** bending and flattening (the rose bent),
   the coach card's drag, the debrief (needs a solved board), folding mid-game,
   and the first `duo-folded` baselines (posture Closed).
+
+### PRD-37, third session — the hand checks (2026-10-16)
+
+With the owner at Device Hub; every result and photograph is in
+`docs/prd37/execution-ledger.md` ("Session 3") and `docs/prd37/screens/hand-checks/`.
+
+- **All six hand checks pass:** the rose bent (a column-8 cursor opens the ring
+  over columns 2–6, 6pt short of the crease); bent → flat moves nothing; the
+  coach card drags across the crease, rests where dropped and reopens in its
+  pane; the debrief fills the right pane with its scrim and a playing replay;
+  the first run's welcome card and first-flick spread (board 339.5pt); folding
+  and unfolding mid-game keep the board, the placed digit, the mistakes and the
+  clock, with no relaunch.
+- **The debrief looked broken first** — ~120pt of panel, no scrim — and was a
+  frame frozen mid-drag: the Mac was out of memory (swap 6.1 of 7.2 GB) with a
+  2.42 GB stock iPhone simulator booted outside this work. With it shut down
+  (swap 3.9 GB) the same drag opened the panel cleanly.
+- **Unfolding shows the system status bar horizontal over the readout for a
+  moment**; it settles to the vertical pill within 15 s. System chrome, not Nine.
+- **`nine-accessibility.yml` stays on Xcode 26** — the owner's decision, closing
+  the first session's open ruling.
+- **The first `duo-folded` baselines are recorded** (iOS 27.1, local only — CI
+  has no 27.1 iPhone runtime): AX 7 screens, localization 25 files, contrast 88
+  cells (80 + 8 Increase Contrast), every one over its floor.
+- **Two harness bugs the Duo lanes found:** `describe-ui` cannot read the 27.1
+  Duo's SpringBoard (300 s of "No translation object") but reads an app, so
+  the Duo's bridge warm-up runs inside Settings; and `simctl io screenshot`
+  with no `--display` returned the inner panel on one folded Duo and the outer
+  on another, so a folded capture now names `primary`.
