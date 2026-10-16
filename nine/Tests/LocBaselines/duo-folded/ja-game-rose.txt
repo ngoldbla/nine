@@ -1,0 +1,11 @@
+# mode: ja   runtime: 27.1   device: iPhone Duo   sim-use: v0.12.0
+# role        x,y     w x h   label
+Button      159,114  45x45  "1 \u3092\u7f6e\u304f"
+Button      159,163  45x45  "4 \u3092\u7f6e\u304f"
+Button      159,211  45x45  "7 \u3092\u7f6e\u304f"
+Button      208,114  45x45  "2 \u3092\u7f6e\u304f"
+Button      208,163  45x45  "5 \u3092\u7f6e\u304f"
+Button      208,211  45x45  "8 \u3092\u7f6e\u304f"
+Button      256,114  45x45  "3 \u3092\u7f6e\u304f"
+Button      256,163  45x45  "6 \u3092\u7f6e\u304f"
+Button      256,211  45x45  "9 \u3092\u7f6e\u304f"

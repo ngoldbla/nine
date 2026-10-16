@@ -1,0 +1,13 @@
+# mode: de   runtime: 27.1   device: iPhone Duo   sim-use: v0.12.0
+# role        x,y     w x h   label
+Button       24,167 334x101 "4 von 53 gef\u00fcllt., Fortsetzen, Stetig \u00b7 7\u00a0%"
+Button       24,318 103x177 "Sanft, Singles & Scannen"
+Button       24,640 103x112 "Spielanleitung"
+Button       42,530 298x64  "Gemeinsam spielen, In einem FaceTime-Anruf bekommen alle dieses Spielfeld"
+Button      139,318 103x177 "Stetig, Paare & Blocklinien"
+Button      139,640 103x112 "Verlauf"
+Button      255,318 103x177 "Scharf, X-Wings & tiefe Logik"
+Button      255,640 103x112 "Technikschule"
+GenericElement   0,143 382x28  ""
+GenericElement 172,124  39x7   ""
+StaticText   28,286  46x24  "Spiel"

@@ -1,0 +1,14 @@
+# mode: de   runtime: 27.1   device: iPhone Duo   sim-use: v0.12.0
+# role        x,y     w x h   label
+Button      183,174 100x24  "Aufzeichnungsblatt"
+CheckBox     30,291 330x52  "Timer"
+CheckBox     30,344 330x52  "Fehler hervorheben"
+CheckBox     30,396 330x52  "Zahlen hervorheben"
+CheckBox     30,448 330x52  "Beim Start fortsetzen"
+CheckBox     30,546 330x52  "Haptik"
+Heading      30,270  39x16  "SPIEL"
+Heading      30,524  55x16  "GEF\u00dcHL"
+Heading      30,622 141x16  "ERSCHEINUNGSBILD"
+Image       409,123  18x13  "wifi_68_status_bar_C2"
+StaticText   30,212  60x34  "Nine"
+StaticText   46,656 298x28  "Design, Automatisch"

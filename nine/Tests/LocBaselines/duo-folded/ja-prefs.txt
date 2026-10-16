@@ -1,0 +1,14 @@
+# mode: ja   runtime: 27.1   device: iPhone Duo   sim-use: v0.12.0
+# role        x,y     w x h   label
+Button      183,174 100x24  "\u30b7\u30fc\u30c8\u30b0\u30e9\u30d0\u30fc"
+CheckBox     30,291 330x52  "\u30bf\u30a4\u30de\u30fc"
+CheckBox     30,344 330x52  "\u30a8\u30e9\u30fc\u306e\u5f37\u8abf"
+CheckBox     30,396 330x52  "\u540c\u3058\u6570\u5b57\u306e\u5f37\u8abf"
+CheckBox     30,448 330x52  "\u8d77\u52d5\u6642\u306b\u518d\u958b"
+CheckBox     30,546 330x52  "\u89e6\u899a\u30d5\u30a3\u30fc\u30c9\u30d0\u30c3\u30af"
+Heading      30,270  38x16  "\u30d7\u30ec\u30a4"
+Heading      30,524  25x16  "\u611f\u89e6"
+Heading      30,622  25x16  "\u5916\u89b3"
+Image       409,123  18x13  "wifi_68_status_bar_C2"
+StaticText   30,212  60x34  "Nine"
+StaticText   46,656 298x28  "\u30c6\u30fc\u30de\u3001\u81ea\u52d5"

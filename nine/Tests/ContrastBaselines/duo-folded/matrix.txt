@@ -1,0 +1,97 @@
+# nine board contrast — measured on the composited glass (PRD-22)
+# device: iPhone Duo   runtime: 27.1   sim-use: v0.12.0
+# floors: givens 7.0  entries 4.5  coral 3.0  petal 4.5
+#
+# Regenerate: nine/scripts/contrast-harness.py --record
+#
+# 80 standard cells over 8 themes; 8 Increase Contrast cells (one accent per theme — the mode moves grounds, not ink); 8 petal readings (one per theme). `auto` is not a cell: ThemeChoice.tones(for:) delegates it to Void or Paper.
+
+theme      accent    contrast   givens  entries    coral    petal
+dark       glacier   standard    12.83     6.68     6.02     9.48
+dark       ember     standard    12.69     6.98     5.96        —
+dark       meadow    standard    12.69     8.59     5.96        —
+dark       lilac     standard    12.69     5.39     5.96        —
+dark       crimson   standard    12.69     5.43     5.96        —
+dark       gold      standard    12.69     9.50     5.96        —
+dark       teal      standard    12.83     8.03     6.02        —
+dark       magenta   standard    12.83     5.66     6.02        —
+dark       moss      standard    12.83     9.55     6.02        —
+dark       orchid    standard    12.83     5.37     6.02        —
+light      glacier   standard    11.34     5.55     5.02    11.33
+light      ember     standard    11.34     5.57     5.02        —
+light      meadow    standard    11.43     5.55     5.07        —
+light      lilac     standard    11.43     5.58     5.07        —
+light      crimson   standard    11.43     5.53     5.07        —
+light      gold      standard    11.36     5.54     5.03        —
+light      teal      standard    11.34     5.55     5.02        —
+light      magenta   standard    11.34     5.45     5.02        —
+light      moss      standard    11.34     5.52     5.02        —
+light      orchid    standard    11.43     5.61     5.07        —
+camel      glacier   standard    10.43     5.19     4.70    10.96
+camel      ember     standard    10.35     5.19     4.67        —
+camel      meadow    standard    10.35     5.12     4.67        —
+camel      lilac     standard    10.35     5.15     4.67        —
+camel      crimson   standard    10.35     5.10     4.67        —
+camel      gold      standard    10.35     5.14     4.67        —
+camel      teal      standard    10.43     5.20     4.70        —
+camel      magenta   standard    10.43     5.11     4.70        —
+camel      moss      standard    10.35     5.14     4.67        —
+camel      orchid    standard    10.35     5.18     4.67        —
+blueprint  glacier   standard    13.21     6.65     6.00     9.70
+blueprint  ember     standard    13.21     7.03     6.00        —
+blueprint  meadow    standard    13.21     8.65     6.00        —
+blueprint  lilac     standard    13.23     5.44     6.01        —
+blueprint  crimson   standard    13.21     5.47     6.00        —
+blueprint  gold      standard    13.21     9.57     6.00        —
+blueprint  teal      standard    13.23     8.01     6.01        —
+blueprint  magenta   standard    13.21     5.64     6.00        —
+blueprint  moss      standard    13.21     9.51     6.00        —
+blueprint  orchid    standard    13.21     5.35     6.00        —
+forest     glacier   standard    11.79     5.78     5.22     9.60
+forest     ember     standard    11.79     6.11     5.22        —
+forest     meadow    standard    11.81     7.53     5.23        —
+forest     lilac     standard    11.81     4.73     5.23        —
+forest     crimson   standard    11.81     4.76     5.23        —
+forest     gold      standard    11.81     8.33     5.23        —
+forest     teal      standard    11.81     6.97     5.23        —
+forest     magenta   standard    11.79     4.90     5.22        —
+forest     moss      standard    11.79     8.27     5.22        —
+forest     orchid    standard    11.79     4.65     5.22        —
+ember      glacier   standard    13.00     6.41     5.78     9.77
+ember      ember     standard    13.05     6.80     5.80        —
+ember      meadow    standard    13.05     8.36     5.80        —
+ember      lilac     standard    13.05     5.25     5.80        —
+ember      crimson   standard    13.05     5.29     5.80        —
+ember      gold      standard    13.05     9.25     5.80        —
+ember      teal      standard    13.00     7.70     5.78        —
+ember      magenta   standard    13.00     5.43     5.78        —
+ember      moss      standard    13.00     9.16     5.78        —
+ember      orchid    standard    13.00     5.15     5.78        —
+tide       glacier   standard    12.46     5.92     5.34     9.94
+tide       ember     standard    12.46     6.25     5.34        —
+tide       meadow    standard    12.46     7.69     5.34        —
+tide       lilac     standard    12.46     4.83     5.34        —
+tide       crimson   standard    12.46     4.87     5.34        —
+tide       gold      standard    12.46     8.51     5.34        —
+tide       teal      standard    12.44     7.10     5.33        —
+tide       magenta   standard    12.44     5.01     5.33        —
+tide       moss      standard    12.44     8.45     5.33        —
+tide       orchid    standard    12.46     4.76     5.34        —
+mono       glacier   standard    12.65     5.88     5.30    10.14
+mono       ember     standard    12.65     6.21     5.30        —
+mono       meadow    standard    12.65     7.64     5.30        —
+mono       lilac     standard    12.65     4.80     5.30        —
+mono       crimson   standard    12.65     4.83     5.30        —
+mono       gold      standard    12.65     8.45     5.30        —
+mono       teal      standard    12.65     7.06     5.30        —
+mono       magenta   standard    12.65     4.98     5.30        —
+mono       moss      standard    12.65     8.40     5.30        —
+mono       orchid    standard    12.65     4.72     5.30        —
+dark       glacier   increased   13.15     6.84     6.17    12.39
+light      glacier   increased   11.85     5.80     5.25    12.77
+camel      glacier   increased   11.19     5.57     5.05    12.45
+blueprint  glacier   increased   13.56     6.83     6.16    12.70
+forest     glacier   increased   12.40     6.08     5.48    12.99
+ember      glacier   increased   13.53     6.67     6.01    12.98
+tide       glacier   increased   12.96     6.16     5.55    13.43
+mono       glacier   increased   13.33     6.20     5.59    13.71

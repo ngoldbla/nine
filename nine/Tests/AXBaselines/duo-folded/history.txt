@@ -1,0 +1,20 @@
+# nine accessibility tree — screen: history
+# device: iPhone Duo   runtime: 27.1   sim-use: v0.12.0
+#
+# Regenerate: nine/scripts/ax-snapshot.py --record
+
+[Content]
+  Button "Sheet Grabber" = "Expanded"  (183,174 100x24)
+  StaticText "History"  (30,212 95x34)
+  StaticText "Solve a board and it lands here — time, difficulty and points."  (30,278 324x36)
+  StaticText "LAST 12 WEEKS"  (30,330 105x14)
+[Bottom]
+  StaticText "0"  (75,581 15x26)
+  StaticText "0"  (188,581 15x26)
+  StaticText "0:00"  (283,581 50x26)
+  StaticText "points"  (66,612 33x13)
+  StaticText "solved"  (178,612 35x13)
+  StaticText "best time"  (283,612 49x13)
+  Button "Game Center, Sign in via Settings to compete"  (30,663 330x74)
+
+# 11 elements in 2 containers

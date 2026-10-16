@@ -1,0 +1,13 @@
+# mode: en   runtime: 27.1   device: iPhone Duo   sim-use: v0.12.0
+# role        x,y     w x h   label
+Button       24,167 334x101 "4 of 53 filled., Continue, Steady \u00b7 7%"
+Button       24,318 103x177 "Gentle, Singles & scans"
+Button       24,640 103x112 "How to play"
+Button       42,530 298x64  "Play together, On a FaceTime call, everyone gets this board"
+Button      139,318 103x177 "Steady, Pairs & box lines"
+Button      139,640 103x112 "History"
+Button      255,318 103x177 "Sharp, X-wings & deep logic"
+Button      255,640 103x112 "Technique School"
+GenericElement   0,143 382x28  ""
+GenericElement 172,124  39x7   ""
+StaticText   28,286  39x24  "Play"

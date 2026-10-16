@@ -1,0 +1,11 @@
+# mode: rtl   runtime: 27.1   device: iPhone Duo   sim-use: v0.12.0
+# role        x,y     w x h   label
+Button       81,114  45x45  "Place 1"
+Button       81,163  45x45  "Place 4"
+Button       81,211  45x45  "Place 7"
+Button      130,114  45x45  "Place 2"
+Button      130,163  45x45  "Place 5"
+Button      130,211  45x45  "Place 8"
+Button      178,114  45x45  "Place 3"
+Button      178,163  45x45  "Place 6"
+Button      178,211  45x45  "Place 9"
