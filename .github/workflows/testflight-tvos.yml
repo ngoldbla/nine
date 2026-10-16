@@ -84,6 +84,20 @@ jobs:
           sudo xcode-select -s "$XC"
           xcodebuild -version
 
+      - name: Install the Metal Toolchain
+        run: |
+          set -euo pipefail
+          # Since Xcode 26 the Metal compiler is a separate component, and the
+          # xcode-27 image's Xcode 27.1 ships without it: the first release dry
+          # run died compiling Sources/App/Afterglow.metal with "missing Metal
+          # Toolchain". Downloaded only when absent.
+          if xcrun metal --version >/dev/null 2>&1; then
+            echo "Metal Toolchain present"
+          else
+            xcodebuild -downloadComponent MetalToolchain
+          fi
+          xcrun metal --version
+
       - name: Install XcodeGen
         run: brew install xcodegen
 
