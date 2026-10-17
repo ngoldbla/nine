@@ -86,8 +86,8 @@ sets are manual — sizes and tools are in `RELEASE.md`. PNGs are gitignored.
 
 ## Traps
 
-- **Build numbers** are `commit count × 10` + 0 tvOS / 1 iOS / 2 Mac, computed
-  in the `beta` lane. `release` takes `build:` explicitly — never compute it
+- **Build numbers** are `(commit count + 100) × 10` + 0 tvOS / 1 iOS / 2 Mac,
+  computed in the `beta` lane; CI uploads from `main` only. `release` takes `build:` explicitly — never compute it
   from HEAD. Never rewrite this repo's history (see `CLAUDE.md`).
 - **`release` without `submit:true` stages only.** Submitting for review is
   outward-facing: confirm with the user before passing `submit:true`, every time.

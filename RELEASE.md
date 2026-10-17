@@ -56,7 +56,7 @@ bundle exec fastlane ios release platform:ios build:1231 submit:true   # …and 
 needs no credentials — run it anywhere, including a Linux container.
 `release` has no default build number on purpose: HEAD's commit count is not
 the number of the build that was tested. Use the number TestFlight shows
-(`commit count × 10`, +1 iOS, +2 Mac). Approval never auto-releases —
+(`(commit count + 100) × 10`, +1 iOS, +2 Mac; builds before 2026-10-17 had no +100). Approval never auto-releases —
 `automatic_release: false` — so going live is always a human's button.
 
 ## Screenshots

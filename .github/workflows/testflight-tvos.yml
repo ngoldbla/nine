@@ -9,8 +9,8 @@
 # match(readonly) fetches the shared Apple Distribution cert + per-app tvOS App
 # Store profiles from the private couch-suite-certificates repo (read-only SSH
 # deploy key); gym archives with manual distribution signing (entitlements bake
-# in — no ad-hoc re-sign); pilot uploads. Build number = git commit count × 10
-# plus a per-platform offset (iOS +1) so a universal app's platforms never
+# in — no ad-hoc re-sign); pilot uploads. Build number = (git commit count + 100)
+# × 10 plus a per-platform offset (iOS +1) so a universal app's platforms never
 # collide on one ASC record (monotonic; computed in-CI, never committed back
 # → no self-trigger loop).
 #
@@ -160,6 +160,14 @@ jobs:
           fi
           UPLOAD="upload:true"
           [ "${INPUT_VALIDATE_ONLY:-false}" = "true" ] && UPLOAD="upload:false"
+          # Only main uploads. A squash-merged branch counts more commits than
+          # main will have after the merge, so a branch upload takes a number
+          # main reaches later and collides with (iOS 861, 2026-10-13). Branch
+          # dispatches may still dry-run with validate_only.
+          if [ "$UPLOAD" = "upload:true" ] && [ "$GITHUB_REF" != "refs/heads/main" ]; then
+            echo "::error::Uploads run from main only (got $GITHUB_REF). Re-run with validate_only=true, or merge first."
+            exit 1
+          fi
 
           # setup_ci (in the lane) creates a temp keychain on CI; match installs the
           # cert into it read-only. No manual cert import needed.
