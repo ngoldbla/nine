@@ -56,7 +56,7 @@ bundle exec fastlane ios release platform:ios build:1231 submit:true   # …and 
 needs no credentials — run it anywhere, including a Linux container.
 `release` has no default build number on purpose: HEAD's commit count is not
 the number of the build that was tested. Use the number TestFlight shows
-(`commit count × 10`, +1 iOS, +2 Mac). Approval never auto-releases —
+(`(commit count + 100) × 10`, +1 iOS, +2 Mac; builds before 2026-10-17 had no +100). Approval never auto-releases —
 `automatic_release: false` — so going live is always a human's button.
 
 ## Screenshots
@@ -161,6 +161,33 @@ Before release, carried from earlier PRDs:
       no release notes on a first version) — `fastlane/metadata/en-US/` is a first draft written from
       the README, PRDs and the #58 removal. Read it against the build you are
       shipping; `release_notes.txt` especially is per-release.
+
+1.2 to external TestFlight (iOS + Mac; not App Store review):
+
+- [x] **Builds** (2026-10-16: the push of #61, `6e23320`, uploaded tvOS 750,
+      iOS 751 and Mac 752 as 1.2; all processed. They sit below 1.1's iOS 861,
+      which went up from an 86-commit branch while main stood at 74 — fixed
+      2026-10-17 by the +100 base in `BUILD_BASE_COMMITS` and main-only
+      uploads, so the next main build is 1760/1761/1762.)
+- [x] **Gate** (2026-10-17: `swift test` in `nine/` 126 tests and `couchkit/`
+      35 green; both `strings.py` checks green; `store_check` green for iOS +
+      Mac. `platform:all` fails only on the tvOS screenshot set, which does
+      not exist yet.)
+- [x] **Simulator check of HEAD** (2026-10-17, Xcode 27.1: iOS launches on the
+      iPhone Duo folded, with widgets and watch embedded; NineWatch launches to
+      a board; the Mac Release build launches to the shelf. The open-Duo
+      spread was not checked — Device Hub's posture needs a person.)
+- [x] **iOS 751 external beta** (approved before 2026-10-17, in Friends &
+      Family, What to Test "Adding Duo support".)
+- [x] **Mac 752 external beta** (2026-10-17: export compliance already "no
+      non-exempt encryption"; What to Test set; added to Friends & Family;
+      submitted for Beta App Review — waiting for review.)
+- [ ] **tvOS 750 stays internal.** The owner found it not playable on
+      2026-10-17; it is not sent to external beta review until that is fixed.
+- [ ] **First-run copy** still says "Boards, streak and stats follow you" and
+      "One purchase · iPhone, iPad, Mac & Apple TV" (`firstrun.ledger.sync`,
+      `firstrun.onePurchase`). The streak went in #58 and Apple TV is not sold;
+      fix before 1.2 goes to App Store review.
 
 Later (PRD-35, "The Store Tells the Story"): localized store pages for the nine
 shipped languages, app preview videos, custom product pages.

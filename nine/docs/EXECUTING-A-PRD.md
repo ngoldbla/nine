@@ -210,22 +210,20 @@ CloudKit additionally needs `aps-environment` and the Push capability, because
 
 ### Build numbers collide across branch and merge
 
-`CFBundleVersion` = `git rev-list --count HEAD × 10 + platform offset`
+`CFBundleVersion` = `(git rev-list --count HEAD + 100) × 10 + platform offset`
 (tvOS +0, iOS +1, macOS +2). The repo **squash-merges**, so a feature branch
-already computes the count main will have *after* the merge.
+computes the count main will have *after* the merge only if it is one commit
+ahead; a longer branch counts every commit and runs ahead of main.
 
 - Merging to `main` triggers `beta_all` for the whole suite. That is the normal
   way to ship.
 - A branch `workflow_dispatch` with `validate_only: true` is safe.
-- A branch dispatch that **uploads** consumes the post-merge build number. If you
-  do that (the only option when `MATCH_PASSWORD` is unavailable locally), merge
-  with **`[skip ci]` in the squash title** — otherwise ASC rejects the duplicates
-  and the failure can abort the run before the four sibling apps upload.
-
-```bash
-gh workflow run "TestFlight (Couch Suite)" --ref <branch> \
-  -f app=nine -f platform=all -f validate_only=false
-```
+- A branch dispatch that **uploads** is refused by the workflow since
+  2026-10-17. It used to be the way to ship when `MATCH_PASSWORD` was
+  unavailable locally (merging with `[skip ci]` in the squash title), until the
+  1.1 fix went up from an 86-commit branch as iOS 861 while main stood at 74 —
+  a number main would have reached, and collided with, eleven merges later.
+  Merge first and let the push to `main` upload.
 
 Note the workflow has a concurrency group: back-to-back dispatches cancel the
 queued one.

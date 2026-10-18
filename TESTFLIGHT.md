@@ -29,11 +29,20 @@ Icons are deterministic pixel art rendered by `scripts/generate_brand_assets.swi
 
 ## Build numbers
 
-`CFBundleVersion` is `git rev-list --count HEAD × 10`, plus a per-platform offset
-— tvOS +0, iOS +1, macOS +2. App Store Connect enforces uniqueness per app
-record, **not** per platform, so a universal app's three builds must never share
-a number; the disjoint trains are what keep them apart (commit 23 → tvOS 230,
-iOS 231, mac 232).
+`CFBundleVersion` is `(git rev-list --count HEAD + 100) × 10`, plus a
+per-platform offset — tvOS +0, iOS +1, macOS +2. App Store Connect enforces
+uniqueness per app record, **not** per platform, so a universal app's three
+builds must never share a number; the disjoint trains are what keep them apart
+(commit 76 → tvOS 1760, iOS 1761, mac 1762).
+
+The +100 (`BUILD_BASE_COMMITS` in the Fastfile) was added on 2026-10-17. The
+repo squash-merges, so a branch with several commits counts higher than `main`
+will right after the merge: the 1.1 fix went up from an 86-commit branch as iOS
+861 while `main` stood at 74. That left `main`'s next builds numbered below 861
+and its 86th commit headed for a duplicate. The base lifts `main` above every
+number ASC holds, and the workflow now refuses to upload from any ref but
+`main`; branch dispatches can still run with `validate_only: true`. Never lower
+the base.
 
 It is computed in CI and never committed back, so there is no self-trigger loop.
 The workflow checks out at `fetch-depth: 0` for this reason — a shallow clone

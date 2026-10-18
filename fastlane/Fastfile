@@ -44,6 +44,10 @@ APPS = {
                                   "com.couchsuite.nine.watchkitapp"] }
 }.freeze
 
+# Added to `git rev-list --count HEAD` before the ×10 + platform offset in
+# `beta`. Never lower it: that would hand out numbers ASC already holds.
+BUILD_BASE_COMMITS = 100
+
 # ------------------------------------------------------------- App Store
 #
 # Everything below `beta_all` is the store half: metadata, screenshots, age
@@ -246,9 +250,17 @@ platform :ios do
     # share a number. Disjoint trains (PR #10): commit-count*10 for tvOS, +1 for
     # iOS, +2 for mac (commit 23 → tvOS 230, iOS 231, mac 232; always above the
     # pre-scheme builds ≤22).
+    #
+    # The count is lifted by BUILD_BASE_COMMITS (2026-10-17). The repo
+    # squash-merges, so a multi-commit branch counts higher than main ever will
+    # right after the merge: the 1.1 fix was uploaded from an 86-commit branch
+    # as iOS 861 while main stood at 74, leaving main's next builds numbered
+    # below it and its 86th commit set to collide with it. The base puts main
+    # back above every number ASC holds (main commit 76 → 1760/1761/1762), and
+    # the workflow now refuses uploads from any ref but main so it stays there.
     train = { "tvos" => 0, "ios" => 1, "mac" => 2 }.fetch(plat)
     commit_count = sh("git", "-C", File.expand_path("..", __dir__), "rev-list", "--count", "HEAD").strip
-    build = (Integer(commit_count) * 10 + train).to_s
+    build = ((Integer(commit_count) + BUILD_BASE_COMMITS) * 10 + train).to_s
 
     # Embedded extensions ship on iOS only (the widget is filtered out of the
     # tvOS and macOS dependency graphs in project.yml).
