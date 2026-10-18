@@ -1534,7 +1534,7 @@ COMMENTS = {
     "firstrun.ledger.themes": "One line of the welcome card's list. %1$lld is how many colour themes ship, %2$lld how many accent colours — both counted from the code, so the sentence cannot go stale. \"Yours\" means unlocked, with nothing to buy. PLURAL: two independent counts, one per number — inflect 'theme' and 'accent' separately.",
     "firstrun.ledger.sync": "One line of the welcome card's list, about iCloud sync. A fragment, no full stop.",
     "firstrun.ledger.covenant": "One line of the welcome card's list, and the promise the whole app is built on. A fragment, no full stop.",
-    "firstrun.onePurchase": "The line under the welcome card's list: one price covers every platform. The device names are Apple's and stay as they are printed in this language.",
+    "firstrun.onePurchase": "The line under the welcome card's list: one price covers every platform Nine is sold on. Name only those platforms. The device names are Apple's and stay as they are printed in this language.",
     "firstrun.begin": "The welcome card's only button. A verb in the imperative, one word.",
     "firstrun.beat.title": "Heading of the playable first-launch lesson: one square, one digit.",
     "firstrun.beat.skip": "The escape hatch in the corner of the first-launch lesson. A verb in the imperative, one word.",
