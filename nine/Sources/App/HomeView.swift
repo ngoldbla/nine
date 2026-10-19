@@ -27,6 +27,13 @@ struct HomeView: View {
     var body: some View {
         ZStack {
             shelf
+                // The first-run manual must be the only focusable thing on
+                // screen (HelpKit's contract). Left live, the primary card's
+                // default-focus claim races the overlay's, and one stick nudge
+                // walks focus onto a card hidden under the scrim — after which
+                // A presses an invisible card and Menu leaves the app, so the
+                // manual reads as a window that will not close (1.2 playtest).
+                .disabled(!model.helpSeen)
             // History is the suite's one secondary surface on the shelf, opened
             // from a card and reachable by remote and pad alike (PRD-5 §2.3).
             GlassSheet(isPresented: $showHistory) {
@@ -38,9 +45,9 @@ struct HomeView: View {
                 BoardsSheetContent(model: model, onClose: { showBoards = false })
             }
             // First-run manual. The shelf cards use native focus (no
-            // couchRemote surface), so the overlay simply sits on top and
-            // owns the remote while shown; on dismiss the cards regain
-            // focus naturally.
+            // couchRemote surface); the shelf is disabled above while this
+            // is shown, so the overlay owns the remote alone and on dismiss
+            // the cards regain focus naturally.
             // Above the sheets and below the first-run manual: an ambient
             // surface must never cover a thing the player asked for, and must
             // never cover the one screen that explains the remote.

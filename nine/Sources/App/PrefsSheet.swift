@@ -125,6 +125,10 @@ struct PrefsSheetContent: View {
     /// escape hatch here until the TV gets an IA pass of its own. iOS and
     /// macOS pass nil: they have Home in the control bar and the menu bar.
     var onNewGame: (@MainActor (Difficulty) -> Void)? = nil
+    /// tvOS only, in-game: save and return to the shelf. A gamepad has no
+    /// Menu of its own — its Circle is undo/erase, and PS / Home belongs to
+    /// the system — so this is a controller player's way out of a board.
+    var onHome: (@MainActor () -> Void)? = nil
 
     @Environment(\.colorScheme) private var colorScheme
 
@@ -519,6 +523,10 @@ struct PrefsSheetContent: View {
                     .couchText(CouchTypography.caption,
                                Color.primary.opacity(Metrics.hintTone))
                     .padding(.horizontal, Metrics.margin)
+                if let onHome {
+                    sheetPill(Strings.string("game.control.home"), action: onHome)
+                        .padding(.horizontal, Metrics.margin)
+                }
             }
             .padding(.top, Metrics.sectionTop)
         }
@@ -530,10 +538,18 @@ struct PrefsSheetContent: View {
         _ difficulty: Difficulty,
         _ start: @escaping @MainActor (Difficulty) -> Void
     ) -> some View {
+        sheetPill(Strings.difficulty(difficulty)) { start(difficulty) }
+    }
+
+    /// The sheet's one pill shape — the new-game bands and Home.
+    private func sheetPill(
+        _ title: String,
+        action: @escaping @MainActor () -> Void
+    ) -> some View {
         Button {
-            start(difficulty)
+            action()
         } label: {
-            Text(Strings.difficulty(difficulty))
+            Text(title)
                 .font(CouchTypography.caption)
                 // Cap the line and let a tight locale shrink by a hair rather
                 // than grow a second line and break the row's height.

@@ -1308,7 +1308,7 @@ COMMENTS = {
     "shelf.grace.hint": "VoiceOver hint on the streak-held card: tapping it only makes it go away. A verb phrase in the third person, as VoiceOver hints are.",
     "shelf.grace.label": "VoiceOver label of the streak-held card, joining its heading and its body into one spoken sentence. %1$@ is `shelf.grace.title`, %2$@ `shelf.grace.body`.",
     "shelf.ambient.empty": "The ambient chip beside the board when the player has neither points nor a streak. Flat and factual, never an encouragement to go and play.",
-    "game.control.home": "VoiceOver label of the chevron that saves the board and returns to the shelf, and the text of the same chip on the Mac. \"Home\" is the app's start screen, not a house.",
+    "game.control.home": "VoiceOver label of the chevron that saves the board and returns to the shelf, the text of the same chip on the Mac, and the Home button in the Apple TV settings sheet during a controller game. \"Home\" is the app's start screen, not a house.",
     "game.control.hint": "VoiceOver label of the lightbulb button, which shows one coaching card. A noun.",
     "game.control.pencil": "VoiceOver label of the pencil button, which switches digit entry to small corner notes. \"Pencil marks\" is the sudoku term for those notes.",
     "game.control.autoNotes": "VoiceOver label of the wand button, which fills every empty square's pencil marks automatically.",

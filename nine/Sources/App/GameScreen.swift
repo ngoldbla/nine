@@ -136,7 +136,13 @@ struct GameScreen: View {
             core
         } else {
             core.couchRemote(chrome: chrome, eightWay: true, interceptsBack: true) { gesture in
-                handle(gesture)
+                // A pad's first Circle lands here before adoption flips the
+                // body; it must undo, not quit.
+                if case .back = gesture {
+                    backUnlessPadCircle { handle(gesture) }
+                } else {
+                    handle(gesture)
+                }
             }
         }
     }
@@ -175,8 +181,11 @@ struct GameScreen: View {
             } else {
                 padCore.couchRemote(chrome: chrome, interceptsBack: true) { gesture in
                     // A pad session ignores every board gesture from the
-                    // remote; only Menu/Back still leaves (save + home).
-                    if case .back = gesture { pad.handleBack() }
+                    // remote; only the Siri Remote's Menu still leaves
+                    // (save + home). The pad's own Circle is undo/erase.
+                    if case .back = gesture {
+                        backUnlessPadCircle { pad.handleBack() }
+                    }
                 }
             }
         }
@@ -205,10 +214,17 @@ struct GameScreen: View {
                 .overlay(alignment: .bottom) { padHintView.padding(.bottom, 108) }
             completionChip
             GlassSheet(isPresented: padPrefsBinding) {
-                PrefsSheetContent(model: model, onNewGame: startPadNewGame)
+                PrefsSheetContent(model: model, onNewGame: startPadNewGame, onHome: {
+                    pad.showPrefs = false
+                    model.goHome()
+                })
             }
             if showPadTutorial {
-                PadTutorialView(model: padTutorial, accent: accent)
+                PadTutorialView(model: padTutorial, accent: accent, onBack: {
+                    // Circle cancels the tutorial's rose; only the remote's
+                    // Menu skips the whole tutorial.
+                    backUnlessPadCircle { [padTutorial] in padTutorial.finished = true }
+                })
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -216,6 +232,19 @@ struct GameScreen: View {
 
     private var padPrefsBinding: Binding<Bool> {
         Binding(get: { pad.showPrefs }, set: { pad.showPrefs = $0 })
+    }
+
+    /// Run a Back action only if it came from the Siri Remote's Menu, not a
+    /// gamepad's Circle. tvOS delivers a pad's B / Circle to UIKit as Menu as
+    /// well as to PadKit, so without this every Circle tap undid a move *and*
+    /// saved-and-quit to the shelf (1.2 playtest). The UIKit command can beat
+    /// PadKit's 60 Hz poll to the edge, so wait a few frames before asking.
+    private func backUnlessPadCircle(_ action: @escaping @MainActor () -> Void) {
+        Task { @MainActor in
+            try? await Task.sleep(nanoseconds: 60_000_000)
+            if model.padReader.changedRecently(.circle, within: 0.3) { return }
+            action()
+        }
     }
 
     /// Point the reader at whichever surface is live: the tutorial while it

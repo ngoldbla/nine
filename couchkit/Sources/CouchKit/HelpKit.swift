@@ -190,7 +190,9 @@ public struct HelpOverlay: View {
 
     private static var dismissHint: String {
         #if os(tvOS)
-        "Click to start"
+        // A controller's A / Cross arrives as the same select press, so name
+        // it — "Click" alone means nothing to a player holding a gamepad.
+        "Click or press A to start"
         #else
         "Tap to start"
         #endif

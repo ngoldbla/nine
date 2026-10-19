@@ -1696,6 +1696,8 @@ final class PadTutorialModel {
             toggleHighlight()
         case .r3:
             commit(digit: 5)
+        case .options:
+            skip()
         default:
             break
         }
@@ -1726,7 +1728,9 @@ final class PadTutorialModel {
     }
 
     /// The "Skip this step" affordance (Options), so nobody is ever stuck.
-    func skip() { advance() }
+    func skip() {
+        if step == .difficulty { finished = true } else { advance() }
+    }
 
     // MARK: Progression
 
@@ -1769,6 +1773,9 @@ final class PadTutorialModel {
 struct PadTutorialView: View {
     let model: PadTutorialModel
     let accent: Color
+    /// Menu/Back. GameScreen filters out the pad's Circle (which tvOS also
+    /// delivers as Menu) before this skips the tutorial.
+    let onBack: @MainActor () -> Void
     var grammar: TutorialGrammar = .pad
 
     // PRD-22, same as the touch tutorial: the scrim and the quiet text come
@@ -1812,7 +1819,7 @@ struct PadTutorialView: View {
         }
         // The tutorial owns the remote while shown: Menu/Back skips out of it.
         .couchRemote(interceptsBack: true) { gesture in
-            if case .back = gesture { model.finished = true }
+            if case .back = gesture { onBack() }
         }
         .task { await model.composePracticeBoardIfNeeded() }
     }

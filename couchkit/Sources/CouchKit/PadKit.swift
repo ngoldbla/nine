@@ -384,6 +384,11 @@ public final class PadReader {
     private var edgeCounts: [PadButton: Int] = [:]
     private var gestureCount = 0
     private var lastGestureDescription: String?
+    /// When each button last went down or up. tvOS *also* delivers a gamepad's
+    /// B / Circle to UIKit as the Menu press, so a screen that intercepts Back
+    /// asks `changedRecently(.circle, …)` to tell a pad Circle from a real
+    /// Siri Remote Menu.
+    private var lastEdge: [PadButton: Date] = [:]
     #endif
 
     public init() {}
@@ -423,6 +428,20 @@ public final class PadReader {
         connectObserver = nil
         disconnectObserver = nil
         teardownActive(emitDisconnect: false)
+        #endif
+    }
+
+    // MARK: Edge recency (Back disambiguation)
+
+    /// Whether `button` went down or up within the last `window` seconds.
+    /// Only rising edges and the falling edges `PadButtonSampler` reports
+    /// (Circle, L2, R2) are tracked. False when no pad is adopted.
+    public func changedRecently(_ button: PadButton, within window: TimeInterval) -> Bool {
+        #if canImport(GameController)
+        guard let at = lastEdge[button] else { return false }
+        return Date().timeIntervalSince(at) <= window
+        #else
+        return false
         #endif
     }
 
@@ -542,6 +561,7 @@ public final class PadReader {
         controller = nil
         motionBaseline = nil
         buttons.reset()
+        lastEdge.removeAll()
         if isConnected {
             isConnected = false
             if emitDisconnect {
@@ -557,7 +577,15 @@ public final class PadReader {
     /// diagnostic counters and the `--pad-probe` trace honest (Phase 0).
     private func emit(_ gesture: PadGesture) {
         gestureCount += 1
-        if case .button(let button) = gesture { edgeCounts[button, default: 0] += 1 }
+        switch gesture {
+        case .button(let button):
+            edgeCounts[button, default: 0] += 1
+            lastEdge[button] = Date()
+        case .buttonUp(let button):
+            lastEdge[button] = Date()
+        default:
+            break
+        }
         if diagnosticsEnabled {
             lastGestureDescription = String(describing: gesture)
             log.debug("gesture \(String(describing: gesture), privacy: .public)")

@@ -15412,7 +15412,7 @@
       }
     },
     "game.control.home": {
-      "comment": "VoiceOver label of the chevron that saves the board and returns to the shelf, and the text of the same chip on the Mac. \"Home\" is the app's start screen, not a house.",
+      "comment": "VoiceOver label of the chevron that saves the board and returns to the shelf, the text of the same chip on the Mac, and the Home button in the Apple TV settings sheet during a controller game. \"Home\" is the app's start screen, not a house.",
       "extractionState": "manual",
       "localizations": {
         "de": {

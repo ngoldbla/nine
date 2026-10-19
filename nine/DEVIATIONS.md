@@ -5033,3 +5033,36 @@ With the owner at Device Hub; every result and photograph is in
   the Duo's bridge warm-up runs inside Settings; and `simctl io screenshot`
   with no `--display` returned the inner panel on one folded Duo and the outer
   on another, so a folded capture now names `primary`.
+
+## 1.2 playtest — first-run manual and Circle-quits (tvOS, controller) (2026-10-19)
+
+A fresh install on a real Apple TV with a gamepad opened to a first-run
+manual that "couldn't be closed", over a shelf that couldn't be reached.
+
+- **The shelf is disabled while the first-run `HelpOverlay` is up.** HomeView
+  stacked the overlay on a live shelf, against HelpKit's own contract. The
+  overlay and the primary `ShelfCard` (`focusHalo(claimsDefaultFocus:)`) both
+  claim focus on appear and both re-claim at 350 ms, so the hidden card could
+  win; failing that, one stick nudge walked focus onto a card under the scrim.
+  From there A pressed an invisible card and Menu left the app. Simulator runs
+  never met it: every screenshot rig starts with `helpSeen` already true.
+  The dismiss chip now reads "Click or press A to start".
+- **A pad's Circle no longer also saves-and-quits.** tvOS delivers a gamepad's
+  B / Circle to UIKit as Menu *and* to PadKit, so every Circle tap undid a move
+  and then `onExitCommand` → `goHome()`. PadKit now records button edge times
+  (`PadReader.changedRecently(_:within:)`), and GameScreen's
+  `backUnlessPadCircle` waits 60 ms (UIKit can beat the 60 Hz poll) and drops a
+  Back that came with a Circle edge in the last 0.3 s. Applied to the remote
+  body (a pad's first Circle lands there before adoption), the pad body, and
+  the pad tutorial, which a Circle press used to skip outright.
+- **Controller players get Home in the prefs sheet.** With Circle no longer
+  exiting and PS / Home system-reserved, a pad had no way off a board.
+  `PrefsSheetContent.onHome` (tvOS, pad sessions only) adds a Home pill under
+  New game, reusing the translated `game.control.home`; its translator comment
+  now names this use.
+- **Options skips a pad-tutorial step.** `PadTutorialModel.skip()` was
+  documented as Options but never wired; it is now, and on the last step it
+  finishes the tutorial.
+- **Unverified on hardware.** No tvOS simulator runtime on the build Mac at the
+  time, and the simulator cannot pair a gamepad anyway; the tvOS target
+  compiles and the gate is green, but the fix awaits a real Apple TV pass.
