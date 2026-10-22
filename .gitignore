@@ -66,6 +66,9 @@ fastlane/report.xml
 fastlane/Preview.html
 fastlane/README.md
 fastlane/screenshots/**/*.png
+# Except the iPhone Duo frames: no lane can set the Duo's posture, so a
+# reshoot needs a person in Device Hub. Kept, not regenerated. See RELEASE.md.
+!fastlane/screenshots/ios-duo/**/*.png
 # `store_pull` output: what App Store Connect held, for diffing against metadata/.
 fastlane/.asc-pull/
 # site/deploy.sh --build-only output (contact address filled in).

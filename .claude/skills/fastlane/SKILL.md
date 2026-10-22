@@ -82,7 +82,10 @@ purpose.
 `STORE_SHOTS` into `fastlane/screenshots/ios/en-US/` as `NN-device-scene-appearance.png`.
 To change what the page shows, edit `STORE_SHOTS`; to add a scene, add it to
 `SCENES` in `shotlist.py` (it is the critic lane's list too). tvOS, Mac and Watch
-sets are manual — sizes and tools are in `RELEASE.md`. PNGs are gitignored.
+sets are manual — sizes and tools are in `RELEASE.md`. PNGs are gitignored, except the
+iPhone Duo set in `fastlane/screenshots/ios-duo/en-US/` — committed because
+posture needs a person, and kept out of `ios/` because deliver has no Duo
+display type yet (`RELEASE.md`, "iPhone Duo").
 
 ## Traps
 
