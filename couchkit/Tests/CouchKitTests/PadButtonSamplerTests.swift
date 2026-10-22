@@ -20,6 +20,7 @@ final class PadButtonSamplerTests: XCTestCase {
             (\.cross, .cross), (\.circle, .circle), (\.square, .square),
             (\.triangle, .triangle), (\.l1, .l1), (\.r1, .r1),
             (\.l2, .l2), (\.r2, .r2), (\.r3, .r3), (\.options, .options),
+            (\.menu, .menu),
         ]
         for (key, button) in cases {
             var s = PadButtonSampler()
@@ -57,7 +58,7 @@ final class PadButtonSamplerTests: XCTestCase {
         // Cross/square/triangle/L1/R1/R3/options are taps: releasing them is
         // dead noise, so no .buttonUp should ever be produced.
         for key: WritableKeyPath<PadButtonFrame, Bool> in
-            [\.cross, \.square, \.triangle, \.l1, \.r1, \.r3, \.options] {
+            [\.cross, \.square, \.triangle, \.l1, \.r1, \.r3, \.options, \.menu] {
             var s = PadButtonSampler()
             var frame = PadButtonFrame()
             frame[keyPath: key] = true

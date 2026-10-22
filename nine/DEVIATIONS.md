@@ -5034,6 +5034,145 @@ With the owner at Device Hub; every result and photograph is in
   with no `--display` returned the inner panel on one folded Duo and the outer
   on another, so a folded capture now names `primary`.
 
+## 1.2 playtest — first-run manual and Circle-quits (tvOS, controller) (2026-10-19)
+
+A fresh install on a real Apple TV with a gamepad opened to a first-run
+manual that "couldn't be closed", over a shelf that couldn't be reached.
+
+- **The shelf is disabled while the first-run `HelpOverlay` is up.** HomeView
+  stacked the overlay on a live shelf, against HelpKit's own contract. The
+  overlay and the primary `ShelfCard` (`focusHalo(claimsDefaultFocus:)`) both
+  claim focus on appear and both re-claim at 350 ms, so the hidden card could
+  win; failing that, one stick nudge walked focus onto a card under the scrim.
+  From there A pressed an invisible card and Menu left the app. Simulator runs
+  never met it: every screenshot rig starts with `helpSeen` already true.
+  The dismiss chip now reads "Click or press A to start".
+- **A pad's Circle no longer also saves-and-quits.** tvOS delivers a gamepad's
+  B / Circle to UIKit as Menu *and* to PadKit, so every Circle tap undid a move
+  and then `onExitCommand` → `goHome()`. PadKit now records button edge times
+  (`PadReader.changedRecently(_:within:)`), and GameScreen's
+  `backUnlessPadCircle` waits 60 ms (UIKit can beat the 60 Hz poll) and drops a
+  Back that came with a Circle edge in the last 0.3 s. Applied to the remote
+  body (a pad's first Circle lands there before adoption), the pad body, and
+  the pad tutorial, which a Circle press used to skip outright.
+- **Controller players get Home in the prefs sheet.** With Circle no longer
+  exiting and PS / Home system-reserved, a pad had no way off a board.
+  `PrefsSheetContent.onHome` (tvOS, pad sessions only) adds a Home pill under
+  New game, reusing the translated `game.control.home`; its translator comment
+  now names this use.
+- **Options skips a pad-tutorial step.** `PadTutorialModel.skip()` was
+  documented as Options but never wired; it is now, and on the last step it
+  finishes the tutorial.
+- **Unverified on hardware.** No tvOS simulator runtime on the build Mac at the
+  time, and the simulator cannot pair a gamepad anyway; the tvOS target
+  compiles and the gate is green, but the fix awaits a real Apple TV pass.
+
+## tvOS input pass — tap, swipe, side-by-side panels, SharePlay (2026-10-22)
+
+A review of the 1.2 TV build filed five things: settings did not fit on screen
+mid-game, the first-run card said "click to start" and a click did nothing,
+the remote made you click for everything, "undo" threw players out to the
+shelf, and SharePlay / Game Center were phone-and-Mac only.
+
+- **Tap, not click.** RemoteKit gained `CouchGesture.tap`: a light touch on the
+  clickpad that neither clicked nor travelled, read from the same analog stroke
+  the flick reader already sampled (it used to arrive as `.flick(.center)` and
+  the rose placed a 5). A touch that also produced a click or a move command
+  is suppressed — a click and a ring press are touches too. Nine treats tap and
+  click as one primary press (`PrimaryPressGate` dedupes the pair), so a click
+  still works, it is just never required.
+- **The rose no longer places on a swipe.** An eight-way stroke only moves the
+  petal focus and the tap commits. `RoseFocus` reconciles the two streams a real
+  remote sends: four-way move commands apply at once, and the stroke that ends
+  the same swipe rewinds them and takes one eight-way step, so a diagonal
+  settles on the corner. This spends the release's one new input concept;
+  instant flick-to-place on the TV remote is gone (the pad's right stick and
+  every touch surface keep theirs).
+- **Back no longer leaves on one press.** The first Back on a quiet board arms
+  the exit and shows "Press Back again for Home"; a second within 2.5 s saves
+  and leaves (`BackGuard`). This closes "undo quits" for every source at once —
+  the Circle edge heuristic from 1.2 stays as the first line, this is the
+  second. Home is also a pill in settings now, for remote players too.
+- **Settings and the manual sit beside the board.** `GlassSheet`'s fixed 720pt
+  tvOS panel had no scroll view and overflowed a 1080p screen top and bottom,
+  over half the board. `TVSidePanel` scales the board to 0.84 at the leading
+  edge and puts a scrolling settings panel on the trailing side; its header
+  opens a drawn **Remote** or **Controller** guide with the legend pointing at
+  the buttons. The guide is read-only and leaves the board live. The text
+  legend left the tvOS prefs sheet with it; nine obsolete catalog keys went
+  (`legend.remote.click/flick/rose`, `legend.pad.menu`, `help.tv.tagline`).
+- **First run is three steps and a real Button.** `TVWelcomeCard` replaces
+  HelpKit's `HelpOverlay` on the TV. A focused `Button` answers click, tap and
+  ✕ natively; the overlay's custom surface could lose focus, which is why ▶︎
+  (delivered without focus) dismissed it and a click did not. HelpKit itself
+  is unchanged for any other consumer.
+- **SharePlay and Game Center on the shelf.** The GroupActivities transport is
+  fenced `os(iOS) || os(tvOS)` now; NineApp listens for sessions and Game
+  Center invites on the TV as on the phone. "Play together" and "Game Center"
+  cards share a new shelf row; the board shows the presence dots, and the
+  solved screen the comets. Game Center still never authenticates at launch.
+  `Nine-tvOS.entitlements` now carries `com.apple.developer.group-session`;
+  the tvOS App Store profile was re-minted for it on 2026-10-22 (`match`,
+  `force: true`, platform tvos, Nine's app id only), and the new profile's
+  entitlements were checked to include it.
+- **A DEBUG thumb for the simulator.** Xcode 27 has no Simulator.app (Device
+  Hub runs headless) and neither `simctl` nor `axe` reaches the tvOS focus
+  engine, so `-NineRemoteInjector` listens for Darwin notifications
+  (`simctl spawn … notifyutil -p com.couchsuite.nine.inject.<cmd>`) and feeds
+  the same `handle(_:)` RemoteKit calls. Sealed out of Release by
+  `DebugSurfaceSealTests`. It cannot stand in for the touch-surface tap
+  classification or focus traversal in settings — **both need an Apple TV
+  pass** before this ships.
+
+### Round 2 — the walkthrough review (2026-10-22)
+
+A frame-by-frame review of the first pass filed seven fixes; all landed.
+
+- **Remote, option B.** Play/Pause is the pencil switch (a chip says it is on),
+  holding Play/Pause undoes, pressing and holding the clickpad opens settings.
+  tvOS reserves the TV, Siri, volume, mute and power buttons, so the remote has
+  exactly three physical controls an app can use; this spends them on the
+  jobs players reach for most. A long press leaks a `.playPause` first, so an
+  undo within 1.2 s of a pencil flip un-flips it.
+- **Controller, six jobs.** Stick/d-pad move, ✕ open/place, □ pencil, △ undo,
+  Options (`buttonMenu`, new `PadButton.menu`) or Create settings, ○ Back with
+  the two-press guard. Retired: right-stick flick and R3, L1/R1 jumps, L2/R2
+  peek, Triangle highlight, Circle hold-to-erase, the ghost rose. The five-beat
+  pad tutorial is gone; the first controller session opens the Controller guide
+  instead (`padTutorialSeen` now records that).
+- **Circle cannot leave a board.** `PadEventShield` hosts the pad body under a
+  `GCEventViewController` with `controllerUserInteractionEnabled = false`
+  (except while settings, which need the focus engine, are open), so tvOS never
+  turns Circle into Menu there. It silences the Siri Remote too, which is why
+  it is pad-session only. On the shelf Circle is still the system's Back —
+  tvOS requires the root screen to exit on Back. **Unverified on hardware.**
+- **Nothing sits on the board.** Timer and pencil chip top-leading, SharePlay
+  dots top-trailing, every note (undo, hint, Back-again, disconnected)
+  bottom-leading, in the margin the 956pt board leaves.
+- **Rose stand-off.** The board blurs 5pt and takes the theme's scrim while the
+  rose is up; the rose sits on `RoseLens`'s plate with one shadow.
+- **No crescent on the armed petal** (every platform's rose). The focused petal
+  no longer grows 1.1×: Liquid Glass in a glass container draws its shape in
+  the container's space, so the petal's glass scaled about a different point
+  than its face and showed as a pale crescent down-and-right of it. The armed
+  face is now one opaque accent disc drawn over the material, with its dish
+  shading dropped.
+- **Settings rebuilt** as `TVSettingsList`: one row style whose focus wash, rim
+  and lift stay inside the row; theme and accent open swatch strips that
+  preview on the board and restore on Back. `PrefsSheetContent` no longer
+  renders on tvOS.
+- **Guides on Apple's symbols** (`appletvremote.gen4.fill`,
+  `gamecontroller.fill`), with control positions measured off the rendered
+  glyphs so each leader line ends in a dot on its button. Flat by agreement:
+  Sony publishes no renders licensed for third-party apps.
+- **Welcome is four things** — wordmark, three steps, Start — and "▶︎" is drawn
+  as the Play/Pause glyph everywhere on the TV (`GlyphText`), because a bare
+  triangle read as "swipe right".
+- **The shelf is a pager** (`TVShelf`): one mode per screen, a board art in the
+  band's hue whose digits arrive in a scatter and then hold still, swipe left /
+  right between Continue, Gentle, Steady and Sharp, and the secondary doors in
+  a Liquid Glass row reached by swiping down.
+
 ## 2026-10-22 — the AX lane's baselines re-recorded, and the History title it had stopped seeing
 
 `ax-tree` in `nine-accessibility.yml` had failed on every Nine PR since
@@ -5072,6 +5211,10 @@ byte-identical to CI's.
   harness's swipe, not from the app. The baseline pins what that swipe produces
   today (`"Expanded"`), and a sim-use release that changes it again will show
   up as the grabber's value on a single line.
+- **Supersedes #65's History baseline.** #65 (7b19b54) re-recorded the same
+  seven files from CI's capture through the old filter, and accepted History
+  without its heading as "the new instrument's view of a sheet". After the
+  merge with `main`, all seven are re-recorded with the filter above.
 - **Not re-recorded: `duo-folded/`.** These baselines are local only (iOS 27.1,
   and the posture needs a person at Device Hub). They will show the same
   `[Top]` additions the next time someone runs them by hand.

@@ -1,14 +1,27 @@
 // GameScreen.swift — the board screen and the complete remote grammar
-// (PRD §4.4). One focusable surface (`.couchRemote`); the cursor lives
-// in-canvas; the rose is an input layer that captures gestures while open.
+// (PRD §4.4, reworked by the tvOS input pass). One focusable surface
+// (`.couchRemote`); the cursor lives in-canvas; the rose is an input layer that
+// captures gestures while open.
 //
-//   swipe            move cell cursor
-//   click            open rose (entry) / place focused petal (rose open)
-//   hold-click       open rose in pencil mode
-//   flick (in rose)  place digit instantly (eight-way remotes)
-//   play/pause       undo, with a glass toast showing the reverted digit
-//   play/pause hold  prefs sheet
-//   back             cancel rose · else save + home
+//   swipe            move cell cursor · in the rose, move the petal focus
+//   tap              open the rose · in the rose, place the focused petal
+//   click            the same as tap (a click is never *required*)
+//   play/pause       pencil mode on / off (the remote's one free button is
+//                    the pencil switch; a chip in the corner says it is on)
+//   play/pause hold  undo, with a note showing the reverted digit
+//   hold-click       settings, beside the board (the controls guide is one
+//                    press further, from the panel's header)
+//   back             close the rose or panel · else arm, and a second Back
+//                    within 2.5 s saves and goes home
+//
+// Nothing the remote says is drawn on the board: the timer, the pencil chip
+// and the SharePlay dots sit in the screen's top corners and every transient
+// note in the bottom-leading one, in the margin the 956pt board leaves.
+//
+// The rose no longer places on a swipe. An eight-way stroke only *moves* the
+// focus (diagonals included — `RoseFocus` reconciles it with the four-way move
+// commands), and the tap is the commit. A swipe that was only looking can never
+// write a digit.
 //
 // PRD-5 (revised): a real controller is adopted automatically. The remote body
 // listens for pad gesture traffic and, on the first one, seeds the cursor and
@@ -26,13 +39,25 @@ struct GameScreen: View {
     @State private var chrome = ChromeVisibility()
     @State private var cursor = 40
     @State private var rose: RoseState?
-    @State private var showPrefs = false
+    /// The petal focus of the open rose, which owns the swipe/stroke
+    /// reconciliation; mirrored into `rose.focusedIndex` for the drawing.
+    @State private var roseFocus = RoseFocus()
+    /// One primary press per thumb, whether it arrived as a tap or a click.
+    @State private var pressGate = PrimaryPressGate()
+    /// Back on a quiet board arms the exit rather than taking it.
+    @State private var backGuard = BackGuard()
+    @State private var showBackHint = false
+    /// Settings or the controls guide, beside the board. Nil is the board alone.
+    @State private var panel: TVPanel?
     @State private var toast: UndoToastState?
     @State private var toastDismissal: Task<Void, Never>?
-    /// The most recent undo, kept briefly so a play/pause *long* press that
-    /// also leaked a plain `.playPause` (RemoteKit attaches both handlers)
-    /// can be rolled forward again before the prefs sheet opens.
-    @State private var lastUndo: (move: NineMove, at: Date)?
+    /// Play/Pause is the remote's pencil switch: every rose it opens writes
+    /// corner notes while this is on.
+    @State private var remotePencil = false
+    /// When Play/Pause last flipped pencil mode. A *long* press also leaks a
+    /// plain `.playPause` first (RemoteKit attaches both handlers), so an undo
+    /// that arrives just after a flip un-flips it before undoing.
+    @State private var lastPencilFlip: Date?
     /// The settings-discoverability chip, flashed on the first board of a
     /// session (the once-per-launch gate lives on the model).
     @State private var showHint = false
@@ -43,9 +68,6 @@ struct GameScreen: View {
     /// reference is stable across re-renders so `padReader.onGesture` can point
     /// at it once.
     @State private var pad: PadPlayController
-    /// The five-beat pad tutorial, shown on the first pad session ever.
-    @State private var padTutorial = PadTutorialModel()
-    @State private var showPadTutorial = false
     /// The pad discoverability chip, flashed once per launch on the first pad
     /// session (session-scoped, never persisted).
     @State private var showPadHint = false
@@ -116,7 +138,44 @@ struct GameScreen: View {
             guard model.padSession, !connected else { return }
             fallBackToRemote()
         }
+        #if DEBUG
+        .onAppear { registerInjector() }
+        #endif
     }
+
+    #if DEBUG
+    /// `-NineRemoteInjector`: the simulator's stand-in for a thumb. Gestures go
+    /// through `handle(_:)` exactly as `.couchRemote` delivers them; while
+    /// settings own the focus engine only Back reaches the board, as on a TV.
+    private func registerInjector() {
+        RemoteInjector.shared.onGesture = { gesture in
+            guard !model.padSession else { return }
+            if panel == .settings {
+                if gesture == .back { closePanel() }
+                return
+            }
+            handle(gesture)
+        }
+        RemoteInjector.shared.onCommand = { command in
+            switch command {
+            case "panel.remote": openPanel(.controls(.remote))
+            case "panel.controller": openPanel(.controls(.controller))
+            case "pref.accent":
+                let all = AccentChoice.allCases
+                let next = ((all.firstIndex(of: model.prefs.accent) ?? 0) + 1) % all.count
+                model.prefs.accent = all[next]
+            case "pref.theme":
+                let all = ThemeChoice.allCases
+                let next = ((all.firstIndex(of: model.prefs.theme) ?? 0) + 1) % all.count
+                model.prefs.theme = all[next]
+            case "pref.timer":
+                model.prefs.showTimer.toggle()
+            default:
+                break
+            }
+        }
+    }
+    #endif
 
     @ViewBuilder
     private var padProbeOverlay: some View {
@@ -129,33 +188,42 @@ struct GameScreen: View {
 
     @ViewBuilder
     private var remoteBody: some View {
-        // While the prefs sheet is up, the remote surface detaches so the
-        // tvOS focus engine can walk the sheet's controls; Back (handled by
-        // GlassSheet) brings it home again.
-        if showPrefs {
+        // While settings are up, the remote surface detaches so the tvOS focus
+        // engine can walk the panel's controls; Back brings it home again. The
+        // controls guide is read-only and leaves the board live — a player
+        // learns a gesture by doing it with its label in view.
+        if panel == .settings {
             core
+                .onExitCommand { closePanel() }
         } else {
             core.couchRemote(chrome: chrome, eightWay: true, interceptsBack: true) { gesture in
-                handle(gesture)
+                // A pad's first Circle lands here before adoption flips the
+                // body; it must undo, not quit.
+                if case .back = gesture {
+                    backUnlessPadCircle { handle(gesture) }
+                } else {
+                    handle(gesture)
+                }
             }
         }
     }
 
     private var core: some View {
         ZStack {
-            board
-                .overlay(alignment: .topLeading) { timerChip.padding(48) }
-                .overlay(alignment: .bottom) { toastView.padding(.bottom, 24) }
-                .overlay(alignment: .bottom) { hintView.padding(.bottom, 108) }
-                .overlay(alignment: .bottom) { disconnectedView.padding(.bottom, 170) }
+            stage(board)
+            screenChrome(pencil: remotePencil)
             completionChip
-            GlassSheet(isPresented: $showPrefs) {
+            sidePanel {
                 // New Game ships for remote players too (PRD-5 §2.3: a widened
-                // gate lands for everyone, not just the pad).
-                PrefsSheetContent(model: model, onNewGame: { difficulty in
-                    showPrefs = false
+                // gate lands for everyone, not just the pad). Home is offered
+                // here as well now that a single Back no longer leaves.
+                TVSettingsList(model: model, accent: accent, onNewGame: { difficulty in
+                    closePanel()
                     cursor = 40
                     model.startFree(difficulty)
+                }, onHome: {
+                    panel = nil
+                    model.goHome()
                 })
             }
         }
@@ -163,72 +231,263 @@ struct GameScreen: View {
         .onAppear { flashHint() }
     }
 
+    // MARK: - Side by side
+
+    /// The board's stage: centred alone, scaled and moved to the leading edge
+    /// while a panel shares the screen. A scale rather than a smaller board,
+    /// so the rose, the lens and the Afterglow keep the geometry they were
+    /// drawn for.
+    private func stage(_ content: some View) -> some View {
+        let open = panel != nil
+        // `scaleEffect` draws smaller without laying out smaller, so the
+        // scaled stage is given its scaled frame — otherwise it keeps claiming
+        // the full 956pt and slides under the panel.
+        let side = TVPanelMetrics.boardSide * (open ? TVPanelMetrics.boardScale : 1)
+        return content
+            .scaleEffect(open ? TVPanelMetrics.boardScale : 1)
+            .frame(width: side, height: side)
+            .frame(maxWidth: .infinity, maxHeight: .infinity,
+                   alignment: open ? .leading : .center)
+            .animation(.couchFast, value: open)
+    }
+
+    @ViewBuilder
+    private func sidePanel(@ViewBuilder settings: @escaping () -> some View) -> some View {
+        if let panel {
+            TVSidePanel(panel: panel, accent: accent, onShow: { next in
+                withAnimation(.couchFast) { self.panel = next }
+            }, settings: settings)
+            .transition(.move(edge: .trailing).combined(with: .opacity))
+        }
+    }
+
+    private func openPanel(_ next: TVPanel) {
+        withAnimation(.couchFast) {
+            rose = nil
+            panel = next
+        }
+        if next == .settings { pad.showPrefs = model.padSession }
+    }
+
+    private func closePanel() {
+        withAnimation(.couchFast) { panel = nil }
+        pad.showPrefs = false
+    }
+
+    /// SharePlay presence (PRD-28 §5): the same row of dots the phone shows,
+    /// present only inside a shared parlor, in the screen's top-trailing corner.
+    @ViewBuilder
+    private var parlorRow: some View {
+        if let room = model.parlor.room, room.isShared, model.game != nil {
+            // The phone's row at couch scale, grown from the corner it sits in.
+            ParlorPresenceRow(room: room, accent: accent)
+                .scaleEffect(1.6, anchor: .topTrailing)
+                .transition(.opacity)
+        }
+    }
+
+    // MARK: - The screen's corners
+
+    /// Everything the screen says that is not the board, in the margins the
+    /// 956pt board leaves on a 1920pt screen: the clock and the pencil switch
+    /// top-leading, the SharePlay dots top-trailing, and every transient note
+    /// stacked bottom-leading. Nothing here may sit on the board (input pass
+    /// review: "the clock overlaps the board", "the undo note covers it").
+    private func screenChrome(pencil: Bool) -> some View {
+        let open = panel != nil
+        return ZStack {
+            VStack(alignment: .leading, spacing: 14) {
+                timerChip
+                if pencil {
+                    GlassChip(Strings.string("game.chip.pencil"), systemImage: "pencil")
+                        .transition(.opacity)
+                }
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+            // The panel takes the trailing third while it is open; the dots
+            // come back with the board.
+            if !open {
+                parlorRow
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+            }
+            VStack(alignment: .leading, spacing: 12) {
+                notes
+            }
+            // Beside a centred board the margin is ~400pt and a note may wrap;
+            // under the shrunk board it is one line across the board's width.
+            .frame(width: open ? TVPanelMetrics.boardSide * TVPanelMetrics.boardScale
+                               : TVChrome.noteWidth,
+                   alignment: .leading)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomLeading)
+        }
+        .animation(.couchFast, value: pencil)
+        .allowsHitTesting(false)
+    }
+
+    @ViewBuilder
+    private var notes: some View {
+        let oneLine = panel != nil
+        if showHint {
+            CornerNote(text: Strings.string("game.tv.remoteHint"),
+                       systemImage: "questionmark.circle", oneLine: oneLine)
+        }
+        if showPadHint {
+            CornerNote(text: Strings.string("game.tv.padHint"),
+                       systemImage: "gamecontroller", oneLine: oneLine)
+        }
+        if let toast = model.padSession ? pad.undoToast : toast {
+            CornerNote(text: toast.text, systemImage: "arrow.uturn.backward", oneLine: oneLine)
+                .id(toast.id)
+        }
+        if showBackHint {
+            CornerNote(text: Strings.string("game.tv.backAgain"), systemImage: "house",
+                       oneLine: oneLine)
+        }
+        if showDisconnected {
+            CornerNote(text: Strings.string("game.tv.disconnected"),
+                       systemImage: "gamecontroller", oneLine: oneLine)
+        }
+    }
+
+    // MARK: - The rose, standing off the board
+
+    /// The board while the rose is up: dimmed and softened, so nine glass
+    /// petals stop competing with eighty-one glass cells (review: "the rose
+    /// needs a better stand-off from its highly similar board"). The theme's
+    /// own scrim recipe, so a light theme dims rather than greys.
+    private func standOff(_ board: some View, roseOpen: Bool) -> some View {
+        board
+            .blur(radius: roseOpen && !reduceMotion ? 5 : 0)
+            .overlay {
+                RoundedRectangle(cornerRadius: 44, style: .continuous)
+                    .fill(Scrim.overlay(for: tones))
+                    .opacity(roseOpen ? 0.7 : 0)
+                    .allowsHitTesting(false)
+            }
+            .animation(.couchFast, value: roseOpen)
+    }
+
+    /// The rose on its plate — one glass slab with one shadow under the nine
+    /// petals, the plate the phone's rose already stands on (`RoseLens`).
+    private func roseLayer(_ rose: RoseState, cursor: Int, game: NineGame) -> some View {
+        let center = BoardMetrics.center(of: cursor)
+        let span = CGFloat(RoseLens.plateSpan(pencil: rose.pencil, scale: 1))
+        let plate = RoundedRectangle(
+            cornerRadius: CGFloat(RoseLens.plateCornerRadius(pencil: rose.pencil, scale: 1)),
+            style: .continuous)
+        return ZStack {
+            plate
+                .fill(tones.isLight ? Color.white.opacity(0.5) : Color.black.opacity(0.32))
+                .frame(width: span, height: span)
+                .couchGlass(in: plate)
+                .shadow(color: .black.opacity(tones.isLight ? 0.25 : 0.55), radius: 30, y: 16)
+            FlickRoseView(
+                state: rose,
+                accent: accent,
+                completedDigits: Set((1...9).filter { game.isDigitComplete($0) }),
+                showsFocusRing: true,
+                digitTone: tones.digitTone
+            )
+        }
+        .position(x: center.x + 28, y: center.y + 28) // board padding inset
+        .transition(.opacity.combined(with: .scale(scale: 0.92)))
+    }
+
     // MARK: - Pad body (PRD-5)
 
     @ViewBuilder
     private var padBody: some View {
         Group {
-            // Prefs and the tutorial own the focus engine while up, so the
-            // board surface detaches (the prefs-sheet detach pattern).
-            if pad.showPrefs || showPadTutorial {
+            // Settings owns the focus engine while up, so the board surface
+            // detaches (the prefs-sheet detach pattern) and Circle — which the
+            // system still sees as Menu here — closes it.
+            if panel == .settings {
                 padCore
+                    .onExitCommand { closePanel() }
             } else {
-                padCore.couchRemote(chrome: chrome, interceptsBack: true) { gesture in
-                    // A pad session ignores every board gesture from the
-                    // remote; only Menu/Back still leaves (save + home).
-                    if case .back = gesture { pad.handleBack() }
+                // The shield stops tvOS turning Circle into Menu, so the only
+                // Circle the board sees is PadKit's, and it means Back with the
+                // two-press guard — never "leave the app" (1.2 playtest).
+                PadEventShield {
+                    padCore.couchRemote(chrome: chrome, interceptsBack: true) { gesture in
+                        if case .back = gesture {
+                            backUnlessPadCircle { padBack() }
+                        }
+                    }
+                    // A hosted controller starts a fresh environment: carry the
+                    // root's theme, scheme and tint across the boundary.
+                    .environment(\.nineTheme, model.prefs.theme)
+                    .environment(\.colorScheme, colorScheme)
+                    .tint(accent)
                 }
             }
         }
         .onAppear {
-            showPadTutorial = !model.padTutorialSeen
+            pad.onBack = { padBack() }
             pad.syncHaptics()
             syncPadRouting()
-            flashPadHint()
+            // The first controller session ever opens the Controller guide
+            // beside the board — the manual is a drawing now, not a tutorial.
+            if !model.padTutorialSeen {
+                model.padTutorialSeen = true
+                withAnimation(.couchFast) { panel = .controls(.controller) }
+            } else {
+                flashPadHint()
+            }
         }
-        .onChange(of: showPadTutorial) { syncPadRouting() }
-        .onChange(of: pad.showPrefs) { syncPadRouting() }
+        .onChange(of: pad.showPrefs) { _, wants in
+            // The pad's settings button opens the same side panel the remote
+            // uses; closing either way closes both.
+            if wants, panel != .settings { withAnimation(.couchFast) { panel = .settings } }
+            if !wants, panel == .settings { withAnimation(.couchFast) { panel = nil } }
+        }
+        .onChange(of: panel) { _, now in
+            if now != .settings, pad.showPrefs { pad.showPrefs = false }
+        }
         .onChange(of: model.prefs.controllerHaptics) { pad.syncHaptics() }
-        .onChange(of: padTutorial.finished) { _, done in
-            guard done else { return }
-            model.padTutorialSeen = true
-            showPadTutorial = false
-        }
     }
 
     private var padCore: some View {
         ZStack {
-            padBoard
-                .overlay(alignment: .topLeading) { timerChip.padding(48) }
-                .overlay(alignment: .top) { padModeChip.padding(.top, 48) }
-                .overlay(alignment: .bottom) { padToastView.padding(.bottom, 24) }
-                .overlay(alignment: .bottom) { padHintView.padding(.bottom, 108) }
+            stage(padBoard)
+            screenChrome(pencil: pad.pencilSticky)
             completionChip
-            GlassSheet(isPresented: padPrefsBinding) {
-                PrefsSheetContent(model: model, onNewGame: startPadNewGame)
-            }
-            if showPadTutorial {
-                PadTutorialView(model: padTutorial, accent: accent)
+            sidePanel {
+                TVSettingsList(model: model, accent: accent, onNewGame: startPadNewGame, onHome: {
+                    closePanel()
+                    model.goHome()
+                })
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
-    private var padPrefsBinding: Binding<Bool> {
-        Binding(get: { pad.showPrefs }, set: { pad.showPrefs = $0 })
+    /// Back during a pad session — Circle, or the Siri Remote's Menu: close
+    /// what is open, else the same two-press exit the remote grammar uses.
+    private func padBack() {
+        if panel != nil { closePanel(); return }
+        if pad.learningRose != nil { pad.learningRose = nil; return }
+        guardedExit()
     }
 
-    /// Point the reader at whichever surface is live: the tutorial while it
-    /// teaches, the board otherwise. Both targets are stable references.
+    /// Run a Back action only if it came from the Siri Remote's Menu, not a
+    /// gamepad's Circle. tvOS delivers a pad's B / Circle to UIKit as Menu as
+    /// well as to PadKit, so without this every Circle tap undid a move *and*
+    /// saved-and-quit to the shelf (1.2 playtest). The UIKit command can beat
+    /// PadKit's 60 Hz poll to the edge, so wait a few frames before asking.
+    private func backUnlessPadCircle(_ action: @escaping @MainActor () -> Void) {
+        Task { @MainActor in
+            try? await Task.sleep(nanoseconds: 60_000_000)
+            if model.padReader.changedRecently(.circle, within: 0.3) { return }
+            action()
+        }
+    }
+
+    /// Point the reader at the board's controller grammar (a stable reference).
     private func syncPadRouting() {
         guard model.padSession else { installAdoptionListener(); return }
-        if showPadTutorial {
-            model.padReader.onGesture = { [padTutorial] gesture in padTutorial.handle(gesture) }
-            setRoutingLabel("tutorial")
-        } else {
-            model.padReader.onGesture = { [pad] gesture in pad.handle(gesture) }
-            setRoutingLabel("pad-grammar")
-        }
+        model.padReader.onGesture = { [pad] gesture in pad.handle(gesture) }
+        setRoutingLabel("pad-grammar")
     }
 
     /// Listen for real pad gesture traffic while playing on the remote; the
@@ -258,7 +517,9 @@ struct GameScreen: View {
         pad.learningRose = nil
         pad.showPrefs = false
         withAnimation(.couchFast) { rose = nil }
-        showPrefs = false
+        // The controls guide follows the device that is now in charge.
+        if case .controls = panel { panel = .controls(.controller) }
+        if panel == .settings { panel = nil }
         model.padSession = true
         // Light the DualSense bar to the accent on the session flip (Phase 3.4;
         // nil-safe no-op on Xbox pads / no light).
@@ -273,7 +534,8 @@ struct GameScreen: View {
     private func fallBackToRemote() {
         cursor = pad.cursor
         withAnimation(.couchFast) { rose = nil }
-        showPrefs = false
+        if case .controls = panel { panel = .controls(.remote) }
+        if panel == .settings { panel = nil }
         pad.showPrefs = false
         pad.learningRose = nil
         model.padSession = false
@@ -288,10 +550,10 @@ struct GameScreen: View {
         }
     }
 
-    /// Flash the pad discoverability chip once per launch on the first pad
-    /// session (session-scoped; the tutorial owns the first-ever teaching).
+    /// Flash the pad discoverability chip once per launch on a pad session
+    /// (session-scoped; the first-ever session gets the guide instead).
     private func flashPadHint() {
-        guard !padHintFlashed, !showPadTutorial else { return }
+        guard !padHintFlashed else { return }
         padHintFlashed = true
         withAnimation(.couchFast) { showPadHint = true }
         Task {
@@ -301,50 +563,17 @@ struct GameScreen: View {
     }
 
     private func startPadNewGame(_ difficulty: Difficulty) {
-        pad.showPrefs = false
-        pad.highlightDigit = nil
+        closePanel()
         pad.learningRose = nil
         pad.cursor = 40
         model.startFree(difficulty) // keeps padSession on
     }
 
-    @ViewBuilder
-    private var padModeChip: some View {
-        if pad.pencilSticky {
-            GlassChip(Strings.string("game.chip.pencil"), systemImage: "pencil")
-                .transition(.opacity)
-        }
-    }
-
-    @ViewBuilder
-    private var padToastView: some View {
-        if let toast = pad.undoToast {
-            GlassChip(toast.text, systemImage: "arrow.uturn.backward")
-                .transition(.opacity.combined(with: .move(edge: .bottom)))
-                .id(toast.id)
-        }
-    }
-
-    @ViewBuilder
-    private var padHintView: some View {
-        if showPadHint {
-            GlassChip(Strings.string("game.tv.padHint"), systemImage: "gamecontroller")
-                .transition(.opacity.combined(with: .move(edge: .bottom)))
-        }
-    }
-
-    @ViewBuilder
-    private var disconnectedView: some View {
-        if showDisconnected {
-            GlassChip(Strings.string("game.tv.disconnected"), systemImage: "gamecontroller")
-                .transition(.opacity.combined(with: .move(edge: .bottom)))
-        }
-    }
 
     @ViewBuilder
     private var padBoard: some View {
         if let game = model.game {
-            BoardView(
+            standOff(BoardView(
                 game: game,
                 cursor: pad.cursor,
                 accent: accent,
@@ -356,16 +585,15 @@ struct GameScreen: View {
                 },
                 previewDigit: pad.previewDigit,
                 previewPencil: pad.learningRose?.pencil ?? false,
-                // Same-number highlight is the Triangle toggle in a pad session.
+                // Same-number highlight, as on the remote: the cursor's digit.
                 highlightDigit: model.prefs.numberHighlight ? pad.highlightDigit : nil,
-                dimmedExcept: pad.peekDigit,
                 channelRules: model.currentRules,
                 // Gyro trophy: DualSense/DualShock tilt steers the sheen after
                 // the sweep settles (PRD-5 §2.2). No motion → a calm centered
                 // highlight, which keeps the loop alive but harmless.
                 waveOrigin: model.lastPlacedCell,
                 afterglowTilt: { model.padReader.motionTilt(at: $0) }
-            )
+            ), roseOpen: pad.learningRose != nil)
             .overlay { padRoseOverlay(game: game) }
         } else {
             GlassChip(Strings.string("status.composing"), systemImage: "sparkles")
@@ -374,27 +602,8 @@ struct GameScreen: View {
 
     @ViewBuilder
     private func padRoseOverlay(game: NineGame) -> some View {
-        let center = BoardMetrics.center(of: pad.cursor)
         if let rose = pad.learningRose {
-            FlickRoseView(
-                state: rose,
-                accent: accent,
-                completedDigits: Set((1...9).filter { game.isDigitComplete($0) }),
-                showsFocusRing: true,
-                digitTone: tones.digitTone
-            )
-            .position(x: center.x + 28, y: center.y + 28)
-        } else if !pad.shimmer.isEmpty {
-            // Ghost rose: the two candidate petals shimmer, nothing placed.
-            FlickRoseView(
-                state: RoseState(pencil: false, shimmerDigits: pad.shimmer),
-                accent: accent,
-                completedDigits: [],
-                showsFocusRing: false,
-                digitTone: tones.digitTone
-            )
-            .position(x: center.x + 28, y: center.y + 28)
-            .allowsHitTesting(false)
+            roseLayer(rose, cursor: pad.cursor, game: game)
         }
     }
 
@@ -403,7 +612,7 @@ struct GameScreen: View {
     @ViewBuilder
     private var board: some View {
         if let game = model.game {
-            BoardView(
+            standOff(BoardView(
                 game: game,
                 cursor: cursor,
                 accent: accent,
@@ -423,21 +632,10 @@ struct GameScreen: View {
                 // Afterglow: the wave detonates from the winning cell; no
                 // tilt source on tvOS — the sheen settles and the loop stops.
                 waveOrigin: model.lastPlacedCell
-            )
+            ), roseOpen: rose != nil)
             .overlay {
                 if let rose {
-                    let center = BoardMetrics.center(of: cursor)
-                    FlickRoseView(
-                        state: rose,
-                        accent: accent,
-                        completedDigits: Set((1...9).filter { game.isDigitComplete($0) }),
-                        showsFocusRing: true,
-                        digitTone: tones.digitTone
-                    )
-                    .position(
-                        x: center.x + 28, // board padding inset
-                        y: center.y + 28
-                    )
+                    roseLayer(rose, cursor: cursor, game: game)
                 }
             }
         } else {
@@ -465,22 +663,7 @@ struct GameScreen: View {
         }
     }
 
-    @ViewBuilder
-    private var toastView: some View {
-        if let toast {
-            GlassChip(toast.text, systemImage: "arrow.uturn.backward")
-                .transition(.opacity.combined(with: .move(edge: .bottom)))
-                .id(toast.id)
-        }
-    }
 
-    @ViewBuilder
-    private var hintView: some View {
-        if showHint {
-            GlassChip(Strings.string("game.tv.remoteHint"), systemImage: "questionmark.circle")
-                .transition(.opacity.combined(with: .move(edge: .bottom)))
-        }
-    }
 
     /// Flash the settings-discoverability chip once per launch, on the first
     /// board only (session-scoped by design — never persisted).
@@ -501,6 +684,15 @@ struct GameScreen: View {
                 if timeline.date.timeIntervalSince(solvedAt) > 2.4 {
                     VStack(spacing: 24) {
                         Spacer()
+                        // PRD-28 §6 on the TV: once every board in the parlor
+                        // is done, everybody's comet, side by side. The section
+                        // draws nothing alone or before the room completes.
+                        if let members = model.parlor.room?.members {
+                            ParlorCometsSection(members: members, tones: tones, accent: accent)
+                                .padding(24)
+                                .couchGlass(in: RoundedRectangle(cornerRadius: 32, style: .continuous))
+                                .scaleEffect(1.4)
+                        }
                         GlassChip(completionText, systemImage: "checkmark")
                             .transition(.opacity)
                             .padding(.bottom, 90)
@@ -520,6 +712,13 @@ struct GameScreen: View {
     private func handle(_ gesture: CouchGesture) {
         guard model.game != nil else { return }
 
+        // Anything but Back disarms a pending exit: Back, a move, then Back is
+        // two separate thoughts, not a double press.
+        if gesture != .back, backGuard.isArmed {
+            backGuard.disarm()
+            withAnimation(.couchAmbient) { showBackHint = false }
+        }
+
         if model.solvedAt != nil {
             if case .back = gesture { model.goHome() }
             return
@@ -536,29 +735,31 @@ struct GameScreen: View {
         switch gesture {
         case .swipe(let direction):
             moveCursor(direction)
+        case .tap:
+            primary(.tap) { openRose() }
         case .click:
-            openRose(pencil: false)
+            primary(.click) { openRose() }
         case .holdBegan:
-            // Hold on a writable empty cell = pencil rose. Hold anywhere you
-            // can't write = prefs — this is also the four-way path to the
-            // sheet, since `.playPauseLongPress` only exists with the 8-way
-            // reader (see DEVIATIONS.md).
-            if canOpenPencilRose {
-                openRose(pencil: true)
-            } else {
-                showPrefs = true
-            }
+            // Press and hold the clickpad, anywhere: settings. It is also the
+            // four-way remotes' only route, since `.playPauseLongPress` needs
+            // the 8-way reader (see DEVIATIONS.md).
+            openPanel(.settings)
         case .playPause:
-            performUndo()
+            withAnimation(.couchFast) { remotePencil.toggle() }
+            lastPencilFlip = Date()
         case .playPauseLongPress:
-            // A long press may have leaked a `.playPause` first and undone a
-            // move the player never asked to lose — roll it forward again.
-            if let last = lastUndo, Date().timeIntervalSince(last.at) < 1.2 {
-                redo(last.move)
+            // The long press leaked a `.playPause` first — un-flip it.
+            if let flip = lastPencilFlip, Date().timeIntervalSince(flip) < 1.2 {
+                withAnimation(.couchFast) { remotePencil.toggle() }
             }
-            showPrefs = true
+            lastPencilFlip = nil
+            performUndo()
         case .back:
-            model.goHome()
+            if panel != nil {
+                closePanel()
+            } else {
+                guardedExit()
+            }
         case .flick, .holdEnded:
             // Cardinal flicks already arrive as .swipe; acting on .flick too
             // would double-move the cursor.
@@ -567,27 +768,25 @@ struct GameScreen: View {
     }
 
     private func handleRose(_ gesture: CouchGesture) {
-        guard var state = rose else { return }
+        guard rose != nil else { return }
+        let now = Date.timeIntervalSinceReferenceDate
         switch gesture {
-        case .flick(let direction):
-            // The click that opened the rose is itself a touch; when the
-            // finger lifts quickly it classifies as a center tap. Swallow
-            // center flicks inside the grace window — a digit misfire is the
-            // one unforgivable bug (PRD §4.3).
-            if direction == .center, Date().timeIntervalSince(state.openedAt) < 0.4 {
-                return
-            }
-            commit(digit: RoseGeometry.digit(for: direction))
         case .swipe(let direction):
-            // The d-pad always walks the petals — on every remote. Real Siri
-            // Remotes report eight-way, but the flick classifier drops
-            // ambiguous strokes on the floor, so swiping with a visible
-            // ring + preview is the path players can always trust; a clean
-            // flick still places instantly above.
-            state.focusedIndex = RoseGeometry.moveFocus(state.focusedIndex, direction)
-            rose = state
+            // Applied at once so the ring answers the thumb; the stroke that
+            // ends this swipe may still settle it on a diagonal.
+            let step = Self.step(direction)
+            roseFocus.swipe(dx: step.dx, dy: step.dy, at: now)
+            syncRoseFocus()
+        case .flick(let direction):
+            // The analog stroke only ever *moves* the focus now. Placing is
+            // the tap's job, so a swipe that was only looking writes nothing.
+            let step = Self.step(direction)
+            roseFocus.stroke(dx: step.dx, dy: step.dy, at: now)
+            syncRoseFocus()
+        case .tap:
+            primary(.tap) { commit(digit: roseFocus.digit) }
         case .click:
-            commit(digit: state.focusedIndex + 1)
+            primary(.click) { commit(digit: roseFocus.digit) }
         case .back:
             withAnimation(.couchFast) { rose = nil }
         case .playPause, .playPauseLongPress, .holdBegan, .holdEnded:
@@ -595,31 +794,70 @@ struct GameScreen: View {
         }
     }
 
-    private var canOpenPencilRose: Bool {
-        guard let game = model.game else { return false }
-        return !game.isGiven(cursor) && game.entry(at: cursor) == 0
+    /// Run a primary action once per thumb, whichever of tap or click said it.
+    private func primary(_ source: PrimaryPressGate.Source, _ action: () -> Void) {
+        guard pressGate.accept(source, at: Date.timeIntervalSinceReferenceDate) else { return }
+        action()
     }
 
-    private func openRose(pencil: Bool) {
+    /// The first Back on a quiet board arms the exit and says so; a second
+    /// inside the window saves and goes home. See `BackGuard`.
+    private func guardedExit() {
+        if backGuard.press(at: Date.timeIntervalSinceReferenceDate) {
+            showBackHint = false
+            model.goHome()
+            return
+        }
+        withAnimation(.couchFast) { showBackHint = true }
+        Task {
+            try? await Task.sleep(nanoseconds: UInt64(BackGuard.window * 1_000_000_000))
+            if backGuard.hasExpired(at: Date.timeIntervalSinceReferenceDate) {
+                backGuard.disarm()
+                withAnimation(.couchAmbient) { showBackHint = false }
+            }
+        }
+    }
+
+
+    private func syncRoseFocus() {
+        guard var state = rose else { return }
+        state.focusedIndex = roseFocus.index
+        rose = state
+    }
+
+    /// Screen-space steps, down positive — the keypad's own orientation.
+    private static func step(_ direction: Direction4) -> (dx: Int, dy: Int) {
+        switch direction {
+        case .up: return (0, -1)
+        case .down: return (0, 1)
+        case .left: return (-1, 0)
+        case .right: return (1, 0)
+        }
+    }
+
+    private static func step(_ direction: Direction8OrCenter) -> (dx: Int, dy: Int) {
+        switch direction {
+        case .center: return (0, 0)
+        case .up: return (0, -1)
+        case .down: return (0, 1)
+        case .left: return (-1, 0)
+        case .right: return (1, 0)
+        case .upLeft: return (-1, -1)
+        case .upRight: return (1, -1)
+        case .downLeft: return (-1, 1)
+        case .downRight: return (1, 1)
+        }
+    }
+
+    private func openRose() {
         guard let game = model.game, !game.isGiven(cursor) else { return }
-        // Notes only make sense in empty cells.
-        if pencil, game.entry(at: cursor) != 0 { return }
+        // Notes only make sense in empty cells; on a filled one the pencil
+        // switch steps aside and the rose writes a digit over it.
+        let pencil = remotePencil && game.entry(at: cursor) == 0
+        roseFocus = RoseFocus()
         withAnimation(.couchFast) {
             rose = RoseState(pencil: pencil)
         }
-    }
-
-    /// Re-perform an undone move (place/pencil re-apply cleanly; erase moves
-    /// cannot occur — v1 has no erase gesture).
-    private func redo(_ move: NineMove) {
-        switch move.kind {
-        case .place: model.place(move.digit, at: move.cell)
-        case .pencil: model.togglePencil(move.digit, at: move.cell)
-        case .erase: break
-        }
-        lastUndo = nil
-        toastDismissal?.cancel()
-        toast = nil
     }
 
     private func commit(digit: Int) {
@@ -646,7 +884,6 @@ struct GameScreen: View {
     private func performUndo() {
         guard let move = model.undoMove() else { return }
         let next = UndoToastState(text: UndoPhrase.forMove(move))
-        lastUndo = (move, Date())
         withAnimation(.couchFast) { toast = next }
         toastDismissal?.cancel()
         toastDismissal = Task {

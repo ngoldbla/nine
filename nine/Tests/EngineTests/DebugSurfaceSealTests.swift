@@ -52,7 +52,24 @@ final class DebugSurfaceSealTests: XCTestCase {
     }
 
     func testTheSurfaceRigCannotBeReachedInRelease() throws {
-        let names = ["DebugSurface", "NineDebugSurface", "openDebugSurface"]
+        let sightings = try sweep(names: ["DebugSurface", "NineDebugSurface", "openDebugSurface"],
+                                  what: "a launch argument that opens surfaces")
+        // A seal that finds nothing proves nothing: the rig must exist for
+        // the sweep to be checking it.
+        XCTAssertGreaterThan(sightings, 3)
+    }
+
+    /// The tvOS input pass's simulator thumb: Darwin notifications that drive
+    /// the board. A shipping build must not listen for them.
+    func testTheRemoteInjectorCannotBeReachedInRelease() throws {
+        let sightings = try sweep(names: ["RemoteInjector", "NineRemoteInjector"],
+                                  what: "a notification listener that drives the board")
+        XCTAssertGreaterThan(sightings, 4)
+    }
+
+    /// Every sighting of `names` must sit inside an `#if DEBUG`. Returns how
+    /// many there were.
+    private func sweep(names: [String], what: String) throws -> Int {
         var sightings = 0
         for (path, text) in try sources() {
             var depth = 0
@@ -69,13 +86,11 @@ final class DebugSurfaceSealTests: XCTestCase {
                 for name in names where line.contains(name) {
                     sightings += 1
                     XCTAssertNotNil(debugDepth,
-                                    "\(path): \(name) is outside #if DEBUG — a launch "
-                                        + "argument that opens surfaces must not ship")
+                                    "\(path): \(name) is outside #if DEBUG — \(what) "
+                                        + "must not ship")
                 }
             }
         }
-        // A seal that finds nothing proves nothing: the rig must exist for
-        // the sweep to be checking it.
-        XCTAssertGreaterThan(sightings, 3)
+        return sightings
     }
 }

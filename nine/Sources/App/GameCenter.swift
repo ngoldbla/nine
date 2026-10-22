@@ -85,13 +85,17 @@ final class GameCenter: NSObject {
     /// until proven otherwise, so the surface is absent by default.
     private(set) var canSendBoard = false
 
-    func authenticate() {
+    /// - Parameter thenShowDashboard: open the dashboard once signed in. The
+    ///   Apple TV shelf's Game Center card uses it, so one press on a signed-out
+    ///   TV goes sign-in → dashboard rather than sign-in → nothing.
+    func authenticate(thenShowDashboard: Bool = false) {
         GKLocalPlayer.local.authenticateHandler = { [weak self] viewController, _ in
             Task { @MainActor in
                 guard let self else { return }
                 if let viewController { Self.present(viewController) }
                 self.isAuthenticated = GKLocalPlayer.local.isAuthenticated
                 guard self.isAuthenticated else { return }
+                if thenShowDashboard, viewController == nil { self.showDashboard() }
                 self.registerParlorListener()
                 await self.loadParlorDefinition()
             }

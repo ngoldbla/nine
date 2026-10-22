@@ -319,6 +319,31 @@ struct RootView: View {
             }
         }
         #endif
+        #if os(tvOS)
+        #if DEBUG
+        .onAppear { RemoteInjector.shared.installIfRequested() }
+        #endif
+        // A board somebody sent through Game Center is offered on the shelf's
+        // "Play together" card rather than opened over whatever is on screen
+        // (PRD-28 §7's rule, on the TV too).
+        .onAppear {
+            GameCenter.shared.onInvite = { [model] invite in model.parlor.offer(invite) }
+        }
+        // PRD-28 §2 on the TV: every SharePlay session for the life of the
+        // process — a FaceTime call handed to the Apple TV lands here exactly
+        // as it does on the phone, and the board composes from the invite.
+        .task {
+            for await session in NineParlorActivity.sessions() {
+                let invite = session.activity.invite
+                model.openParlorInvite(invite)
+                model.parlor.join(
+                    invite: invite,
+                    fillable: model.parlorFillable,
+                    over: GroupParlorTransport(session: session)
+                )
+            }
+        }
+        #endif
         // tvOS deliberately does NOT authenticate at launch: while signed out,
         // GameKit re-presents its full-screen welcome sheet on every launch —
         // an app-opening takeover on the calmest screen in the house (observed

@@ -876,10 +876,18 @@ struct FlickRoseView: View {
                 ZStack {
                     // The key under the thumb, one rung up: `Elevation.card`
                     // over `Elevation.track`, in the accent because it is state.
-                    // Drawn under the dish rather than over it so the scoop
-                    // still reads while the key is armed.
+                    //
+                    // **The armed key drops its dish.** The dish is lit from
+                    // the top-leading corner — dark there, up to 30% white at
+                    // the bottom-trailing rim on paper — and laid over the
+                    // accent it left a pale crescent along one edge, which read
+                    // as a selection disc that had missed its petal (tvOS input
+                    // pass review). A key that is armed is a flat field of the
+                    // accent, edge to edge; the scoop comes back when it rests.
                     Circle().fill(focusTint.opacity(focused ? 1 : 0))
-                    Circle().fill(dishShading)
+                    if !focused {
+                        Circle().fill(dishShading)
+                    }
                     Circle().fill(glyphWell)
                 }
                 .frame(width: petalSize, height: petalSize)
@@ -939,12 +947,37 @@ struct FlickRoseView: View {
             }
             .modifier(CompletedIndicator(
                 active: complete, tone: digitTone, scale: scale, petalSize: petalSize))
+            // **The armed key's face, drawn over the glass, edge to edge.** Any
+            // tint painted *under* the material shows the material's own rim
+            // light and specular at one edge — on paper that read as a pale
+            // crescent beside the selection, as if the disc had missed its
+            // petal (tvOS input pass review). An opaque face on top cannot be
+            // shown through, so the armed petal is one clean disc.
+            .overlay {
+                if focused {
+                    ZStack {
+                        Circle().fill(isLight ? Color.white : Color(white: 0.10))
+                        Circle().fill(accent.opacity(isLight ? 0.50 : 0.46))
+                        Text("\(digit)")
+                            .font(.system(size: glyphSize, weight: .bold, design: .rounded))
+                            .foregroundStyle(complete ? digitTone.opacity(Self.completedInk)
+                                             : erasable ? accent : digitTone)
+                    }
+                    .allowsHitTesting(false)
+                    .accessibilityHidden(true)
+                }
+            }
             .overlay {
                 Circle()
                     .strokeBorder(accent.opacity(focused ? 0.95 : 0), lineWidth: max(2, 4 * scale))
             }
             .modifier(EraseIndicator(active: erasable, accent: accent, scale: scale, petalSize: petalSize))
-            .scaleEffect(focused ? 1.1 : 1.0)
+            // No grow-on-focus. Liquid Glass inside a glass container draws its
+            // shape in the container's space, so a `scaleEffect` here grew the
+            // petal's face about its centre and its *glass* about another
+            // point — the glass came out larger and down-and-right of the face,
+            // a pale crescent beside every armed petal (tvOS input pass
+            // review). The accent face, its ring and its glow carry focus.
             .modifier(ShimmerPulse(active: shimmering, accent: accent))
             .offset(x: offset.x * spacing, y: offset.y * spacing)
             .animation(.couchFast, value: focused)
