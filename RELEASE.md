@@ -184,10 +184,11 @@ Before release, carried from earlier PRDs:
       submitted for Beta App Review — waiting for review.)
 - [ ] **tvOS 750 stays internal.** The owner found it not playable on
       2026-10-17; it is not sent to external beta review until that is fixed.
-- [ ] **First-run copy** still says "Boards, streak and stats follow you" and
+- [x] **First-run copy** said "Boards, streak and stats follow you" and
       "One purchase · iPhone, iPad, Mac & Apple TV" (`firstrun.ledger.sync`,
-      `firstrun.onePurchase`). The streak went in #58 and Apple TV is not sold;
-      fix before 1.2 goes to App Store review.
+      `firstrun.onePurchase`). The streak went in #58 and Apple TV is not sold.
+      (2026-10-22: both lines dropped those words in all ten languages; put
+      Apple TV back when it is sold.)
 
 Later (PRD-35, "The Store Tells the Story"): localized store pages for the nine
 shipped languages, app preview videos, custom product pages.
