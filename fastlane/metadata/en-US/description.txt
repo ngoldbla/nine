@@ -17,6 +17,7 @@ Finish a board and watch it play back as a comet across the grid, with a debrief
 
 MADE FOR EVERY SCREEN
 • iPhone and iPad: touch-first, with Apple Pencil handwriting and a drafting table on iPad.
+• iPhone Duo: open it and the board spreads across the inner display, with the fold on a box line and the pad beside it.
 • Mac: keyboard-native, with a menu bar, a History window and a compact always-on-top desk mode.
 • Apple Watch: zoom into one box at a time and dial digits with the Crown.
 • Home Screen widget with a board you can play.
