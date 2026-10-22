@@ -3,6 +3,8 @@
 #
 # Regenerate: nine/scripts/ax-snapshot.py --record
 
+[Top]
+  GenericElement "Dynamic Island, Empty"  (138,14 125x37)
 Group "Digit rose"
     Button "Place 1"  (167,219 47x47)
     Button "Place 2"  (218,219 47x47)
@@ -14,4 +16,4 @@ Group "Digit rose"
     Button "Place 8"  (218,321 47x47)
     Button "Place 9"  (270,321 47x47)
 
-# 9 elements in 1 container
+# 10 elements in 2 containers

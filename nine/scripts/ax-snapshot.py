@@ -201,10 +201,19 @@ def normalize(data, screen, runtime):
     grouped = []
     by_header = {}
     for entry in data["entries"]:
-        if entry.get("region", {}).get("kind") == "Top":
-            continue  # clock, battery, Wi-Fi bars
-        # …and the same three again, geometrically, because the region test
-        # alone does not hold on a sheet.
+        # The status bar — clock, battery, Wi-Fi bars — is dropped by geometry
+        # alone, not by `describe-ui`'s `Top` region.
+        #
+        # **The region test hid the History sheet's title.** `Top` is not "the
+        # status bar"; it is whatever `describe-ui` files above the content, and
+        # once the sheet stands at its large detent that is the grabber and the
+        # "History" heading. Dropping the region took both out of every capture
+        # from sim-use 0.12 on, and the diff read as the heading vanishing from
+        # the app. The same test had always hidden the game screen's own top
+        # chrome. Measured with a raw dump, 2026-10-22: both elements present,
+        # both under `Top`.
+        #
+        # The region test alone also never held on a sheet.
         #
         # **This is why `prefs.txt` and `history.txt` used to rot by the
         # minute.** With a sheet up, `describe-ui` files the status bar under
@@ -256,9 +265,17 @@ def element_line(entry):
         entry.get("role", "?"),
         ' "%s"' % mask(entry.get("label", "")),
     ]
+    # The game's running clock, in the tree since the `Top` region stopped
+    # being dropped. Each screen relaunches into the frozen game and the clock
+    # resumes, so its value is however long this run took to get there (1:41
+    # on one screen, 2:22 on the next). Its frame stays: the digits are
+    # monospaced, so the width holds until ten minutes, which no capture reaches.
+    clock = entry.get("label") == "time"
     if "value" in entry:
-        parts.append(' = "%s"' % mask(entry["value"]))
+        parts.append(' = "%s"' % ("<elapsed>" if clock else mask(entry["value"])))
     states = entry.get("states") or []
+    if clock:
+        states = ['value="<elapsed>"' if s.startswith("value=") else s for s in states]
     if states:
         parts.append(" [%s]" % ",".join(sorted(states)))
     parts.append(

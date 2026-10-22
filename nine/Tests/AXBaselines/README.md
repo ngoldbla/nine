@@ -34,6 +34,12 @@ runner image was upgraded — re-record and say so. If cell lines moved, somethi
 in `Sources/App/BoardAccessibility.swift`, `Sources/Shared/BoardSpeech.swift` or
 a game screen changed the tree, and the question is whether that was intended.
 
+`[Top]` is whatever `describe-ui` files above the content: the game's and the
+shelf's top bars, and the History sheet's grabber and title once it stands at
+its large detent. Only the status bar is dropped, by geometry (anything wholly
+above y=50). The game clock reads `"<elapsed>"` because it resumes on every
+relaunch.
+
 `prefs.txt` lists board cells behind the sheet. `describe-ui` finds elements by
 point hit-test and a hit-test ignores AX modality, so that is a structural
 fingerprint, not a claim that VoiceOver can reach them.

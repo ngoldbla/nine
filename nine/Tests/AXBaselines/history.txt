@@ -3,6 +3,9 @@
 #
 # Regenerate: nine/scripts/ax-snapshot.py --record
 
+[Top]
+  Button "Sheet Grabber" = "Expanded" [value="Expanded"]  (163,57 76x25)
+  StaticText "History"  (22,96 95x34)
 [Content]
   StaticText "Solve a board and it lands here — time, difficulty and points."  (22,162 324x36)
   StaticText "LAST 12 WEEKS"  (22,214 105x14)
@@ -14,4 +17,4 @@
   StaticText "best time"  (299,512 49x13)
   Button "Game Center, Sign in via Settings to compete"  (22,563 358x74)
 
-# 9 elements in 1 container
+# 11 elements in 2 containers

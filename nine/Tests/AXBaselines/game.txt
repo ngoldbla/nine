@@ -3,6 +3,13 @@
 #
 # Regenerate: nine/scripts/ax-snapshot.py --record
 
+[Top]
+  GenericElement "Dynamic Island, Empty"  (138,14 125x37)
+  Button "Home"  (24,70 44x44)
+  StaticText "Steady"  (76,85 40x14)
+  GenericElement "time" = "<elapsed>"  (178,80 45x24)
+  GenericElement "errors" = "1"  (308,84 25x16)
+  GenericElement "49 squares to go"  (343,84 35x16)
 Group "Box 1"
     Button "Row 1, column 1" = "4" [value="4"]  (16,162 41x41)
     Button "Row 1, column 2" = "5, given" [value="5, given"]  (57,162 41x41)
@@ -110,7 +117,7 @@ Group "Box 9"
   Button "Undo"  (235,780 44x44)
   Button "Settings"  (291,780 44x44)
 
-# 95 elements in 11 containers
+# 101 elements in 12 containers
 
 # actions rotor + hint, one cell per value branch
 

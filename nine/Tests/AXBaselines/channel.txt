@@ -3,6 +3,10 @@
 #
 # Regenerate: nine/scripts/ax-snapshot.py --record
 
+[Top]
+  GenericElement "Dynamic Island, Empty"  (138,14 125x37)
+  StaticText "Nine"  (24,79 60x34)
+  Button "Settings"  (326,74 44x44)
 [Content]
   Button "Previous channel"  (79,134 44x44)
   Heading "Thermo, page 2 of 3"  (171,146 60x20)
@@ -15,4 +19,4 @@
   Heading "How to play"  (190,429 73x16)
   StaticText "Digits rise from the bulb to the tip of this 4-cell thermometer, which puts a floor and a ceiling on every square along it."  (190,453 170x130)
 
-# 10 elements in 1 container
+# 13 elements in 2 containers
