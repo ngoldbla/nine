@@ -1,12 +1,12 @@
 # nine accessibility tree — screen: prefs
-# device: iPhone 17 Pro   runtime: 26.5   sim-use: 0.11.0
+# device: iPhone 17 Pro   runtime: 26.5   sim-use: 0.16.0
 #
 # Regenerate: nine/scripts/ax-snapshot.py --record
 
 Group "dismiss popup"
     GenericElement "Dynamic Island, Empty"  (138,14 125x37)
 [Content]
-  Button "Sheet Grabber" = "Half screen"  (165,291 73x24)
+  Button "Sheet Grabber" = "Half screen" [value="Half screen"]  (165,291 73x24)
   StaticText "Nine"  (29,328 58x32)
   Heading "PLAY"  (29,384 34x15)
   CheckBox "Timer" = "1" [selected]  (29,404 344x50)

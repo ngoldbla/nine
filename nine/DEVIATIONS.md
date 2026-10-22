@@ -5033,3 +5033,45 @@ With the owner at Device Hub; every result and photograph is in
   the Duo's bridge warm-up runs inside Settings; and `simctl io screenshot`
   with no `--display` returned the inner panel on one folded Duo and the outer
   on another, so a folded capture now names `primary`.
+
+## 2026-10-22 — the AX lane's baselines re-recorded, and the History title it had stopped seeing
+
+`ax-tree` in `nine-accessibility.yml` had failed on every Nine PR since
+2026-08-03, not since PRD-37 (#58's own run already shows the History diff
+below, byte for byte), always reporting "7 accessibility tree(s) drifted".
+Each screen was classified from the full captured dumps of run 39824940573
+(the PR #66 run), then reproduced locally on a stock iPhone 17 Pro, iOS 26.5,
+with the exact sim-use CI installs (0.16.0, from the release tarball, so the
+machine's Homebrew copy was left alone). The local `history` dump was
+byte-identical to CI's.
+
+- **Six screens were the instrument, not the app.** Only line two changed
+  (`sim-use: 0.11.0` → `0.16.0`), plus 0.16.0 now repeats each element's value
+  in its state list (`= "4" [value="4"]`). With both stripped, `game`,
+  `game-quiet`, `game-rose`, `prefs`, `home` and `channel` were identical to
+  their baselines.
+- **`history` looked like a regression and was the harness hiding it.** In the
+  diff the sheet's grabber and its "History" heading vanished and the content
+  moved up 230pt. The screenshot showed both on screen, at the large detent: the
+  capture's trailing `SCROLL_BOTTOM` swipe now drags the sheet to full height
+  (since 0.12; the baseline was recorded at the half detent with 0.11). A raw
+  `describe-ui` read on that screen lists `Button "Sheet Grabber" = "Expanded"`
+  and `StaticText "History"`, both filed under the `Top` region, and
+  `normalize()` dropped `Top` wholesale as "the status bar". **Not an app
+  defect.** Re-recording as it stood would have committed a History baseline
+  with no heading in it.
+- **Fixed in the harness, not by re-recording around it.** `normalize()` now
+  drops the status bar only by its existing geometric test (wholly above
+  y=50), so `[Top]` is in every baseline. That also brings in what the region
+  test had always hidden: the game screen's top bar (Home, difficulty, clock,
+  errors, squares to go) and the shelf's title and Settings button. The game
+  clock resumes on each relaunch (1:41 on one screen, 2:22 on the next), so its
+  value is masked to `<elapsed>`. Its frame is kept, since the digits are
+  monospaced.
+- **The History baseline is now at the large detent.** The detent comes from the
+  harness's swipe, not from the app. The baseline pins what that swipe produces
+  today (`"Expanded"`), and a sim-use release that changes it again will show
+  up as the grabber's value on a single line.
+- **Not re-recorded: `duo-folded/`.** These baselines are local only (iOS 27.1,
+  and the posture needs a person at Device Hub). They will show the same
+  `[Top]` additions the next time someone runs them by hand.

@@ -1,8 +1,12 @@
 # nine accessibility tree — screen: home
-# device: iPhone 17 Pro   runtime: 26.5   sim-use: 0.11.0
+# device: iPhone 17 Pro   runtime: 26.5   sim-use: 0.16.0
 #
 # Regenerate: nine/scripts/ax-snapshot.py --record
 
+[Top]
+  GenericElement "Dynamic Island, Empty"  (138,14 125x37)
+  StaticText "Nine"  (24,79 60x34)
+  Button "Settings"  (326,74 44x44)
 [Content]
   Button "Previous channel" [disabled]  (79,134 44x44)
   Heading "Classic, page 1 of 3"  (173,146 56x20)
@@ -19,4 +23,4 @@
   Button "History"  (146,674 110x112)
   Button "Technique School"  (268,674 110x112)
 
-# 14 elements in 1 container
+# 17 elements in 2 containers
