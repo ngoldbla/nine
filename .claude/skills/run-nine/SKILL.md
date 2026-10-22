@@ -69,10 +69,29 @@ osascript -e 'tell application "Simulator" to activate' -e 'delay 0.5' \
   -e 'tell application "System Events" to key code 124'   # 124=→ 123=← 126=↑ 125=↓ 36=Return 53=Esc
 ```
 
-Nine's grammar: arrows walk the board, Return opens the flick rose on the
-selected cell, a swipe toward a petal previews that digit and Return places it,
-Esc goes back, and a long press on play/pause opens the prefs sheet.
-`nine/PRD.md` and `nine/docs/EXECUTING-A-PRD.md` are the full references.
+Nine's grammar (tvOS input pass): swipe walks the board, a **tap** on the
+touch surface (or a click) opens the rose, a swipe moves the petal focus and a
+tap places it, ▶︎ undoes, holding ▶︎ opens settings beside the board, and Back
+closes the rose or panel — on a quiet board one Back arms the exit and a
+second leaves. `nine/PRD.md` and `nine/docs/EXECUTING-A-PRD.md` are the full
+references.
+
+**Xcode 27: there is no Simulator.app** (Device Hub runs headless), and
+neither AppleScript nor `axe` can reach the tvOS focus engine. Launch a Debug
+build with `-NineRemoteInjector` and drive it with Darwin notifications:
+
+```bash
+xcrun simctl launch CouchTV com.couchsuite.nine -NineRemoteInjector
+xcrun simctl spawn CouchTV notifyutil -p com.couchsuite.nine.inject.tap
+# commands: up down left right tap click hold playPause playPauseLong back
+#           flick.<upLeft|up|…|downRight>  welcome.start  free.<gentle|steady|sharp>
+#           panel.remote panel.controller  pref.accent pref.theme pref.timer
+```
+
+It feeds the same handler RemoteKit does; it cannot exercise the touch-surface
+tap classifier or focus traversal inside settings — those need an Apple TV.
+`xcrun simctl io CouchTV recordVideo` records. A `simctl launch` straight after
+a terminate sometimes lands on the tvOS home screen; screenshot and relaunch.
 
 **sim-use caveat:** `sim-use screenshot`/`describe-ui` connect but the tvOS AX tree
 reports only the host `PineBoard` shell (no app-level elements), and `sim-use tap

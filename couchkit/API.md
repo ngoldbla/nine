@@ -377,8 +377,9 @@ extension View {
 ```swift
 public enum CouchGesture: Sendable, Equatable {
     case swipe(Direction4)          // discrete flick (system move command)
-    case flick(Direction8OrCenter)  // 3×3 rose; needs eightWay: true
+    case flick(Direction8OrCenter)  // 3×3 rose stroke; needs eightWay: true; never .center
     case click                      // clickpad press
+    case tap                        // light touch, no click, no travel; needs eightWay: true
     case holdBegan, holdEnded       // long-press on clickpad
     case playPause
     case playPauseLongPress         // suite-wide prefs sheet (8-way reader only)

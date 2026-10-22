@@ -1,4 +1,5 @@
-// PadSession.swift — the controller-locked board grammar (PRD-5 §2.1, §4 Step 2).
+// PadSession.swift — the controller-locked board grammar (PRD-5 §2.1, cut to
+// the minimum by the tvOS input pass).
 //
 // A reference-type controller (not view `@State`) owns the pad-play state,
 // because the gesture stream arrives from PadKit's reader — an external event
@@ -6,18 +7,21 @@
 // re-renders) and points `padReader.onGesture` at `handle(_:)`; every mutation
 // flows through the same `AppModel` paths the remote and touch grammars use.
 //
-// The complete grammar, thumb-for-thumb with the rose players already know:
-//   left stick     move cursor with analog momentum (glide crosses a box)
-//   d-pad          single-step cursor (precision fallback)
-//   right stick    flick a digit 1–9 by rose direction (the cell is always armed)
-//   R3             place 5 (center petal)
-//   Cross          open the visual rose (learning mode: petals + flick/d-pad)
-//   Circle         erase user entry / cancel rose
-//   Square         sticky pencil toggle
-//   Triangle       same-number highlight of the digit under the cursor
-//   L1 / R1        previous / next empty cell
-//   L2 / R2 (hold) peek — dim all but the highlighted kind
-//   Options        prefs sheet
+// Six jobs, the same six the Siri Remote does, one control each:
+//   left stick / d-pad   move the cursor · in the rose, move the petal focus
+//   Cross                open the rose · place the focused petal
+//   Square               pencil mode on / off
+//   Triangle             undo
+//   Options (☰) / Create settings
+//   Circle               Back: close the rose or panel · else arm, and a
+//                        second Circle within 2.5 s saves and goes home
+//
+// Everything else was retired by the input pass, on purpose: the right-stick
+// flick and R3, the L1/R1 empty-cell jumps, the L2/R2 peek, Triangle's
+// same-number highlight (the cursor's own digit lights its kind, as on the
+// remote) and Circle's hold-to-erase. Each was a second way to do something or
+// a feature no beta player found; together they made a guide nobody could
+// read from the sofa.
 #if os(tvOS)
 import SwiftUI
 import CouchKit
@@ -28,35 +32,23 @@ final class PadPlayController {
     @ObservationIgnored let model: AppModel
     @ObservationIgnored let haptics: ControllerHaptics
 
-    /// The armed cell. Always writable-or-not; a right-stick flick places here.
+    /// The armed cell.
     var cursor = 40
-    /// Square toggles sticky pencil — flicks now place corner marks (PRD-5).
+    /// Square toggles pencil mode — the rose then writes corner notes.
     var pencilSticky = false
-    /// Triangle-driven same-number highlight (distinct from the remote's
-    /// cursor-park highlight — the pad has a dedicated button).
-    var highlightDigit: Int?
-    /// L2 is held: peek dims all but the highlighted kind.
-    var peekHeld = false
-    /// Cross opens the visual rose for learning; a flick or d-pad+Cross places.
+    /// Cross opens the rose; the stick or d-pad walks it and Cross places.
     var learningRose: RoseState?
-    /// Ghost-rose shimmer after an ambiguous flick — the two candidate petals
-    /// glow and nothing is placed (the never-misfire covenant, PRD-5 §2.1).
-    var shimmer: Set<Int> = []
-    /// Options opened the prefs sheet; while up, the pad drives the sheet's
-    /// focus and board gestures are parked.
+    /// Options opened settings; while up, the pad drives the panel's focus and
+    /// board gestures are parked.
     var showPrefs = false
-    /// The glass toast shown after a Circle-tap undo (mirrors the remote's
-    /// undo toast; auto-clears like `shimmer`).
+    /// The glass toast shown after a Triangle undo.
     var undoToast: UndoToastState?
 
-    @ObservationIgnored private var shimmerClear: Task<Void, Never>?
+    /// Circle, meaning Back. GameScreen owns what Back does (the panel, the
+    /// rose, the two-press exit), so the pad only reports it.
+    @ObservationIgnored var onBack: (@MainActor () -> Void)?
+
     @ObservationIgnored private var undoToastClear: Task<Void, Never>?
-    /// Circle is a tap/hold: a hold task fires an erase; a release before it
-    /// fires is an undo. `circleConsumed` stops the release from double-acting.
-    @ObservationIgnored private var circleHold: Task<Void, Never>?
-    private var circleConsumed = false
-    /// Hold threshold before Circle switches from undo (tap) to erase.
-    private static let circleHoldThreshold: UInt64 = 400_000_000
 
     init(model: AppModel) {
         self.model = model
@@ -67,66 +59,56 @@ final class PadPlayController {
     /// Mirror the "Controller haptics" pref (call when it or the screen changes).
     func syncHaptics() { haptics.enabled = model.prefs.controllerHaptics }
 
-    /// The kind to spotlight while peeking: the explicit highlight, else the
-    /// digit under the cursor. Nil dims nothing.
-    var peekDigit: Int? {
-        guard peekHeld else { return nil }
-        if let highlightDigit { return highlightDigit }
-        let d = model.game?.entry(at: cursor) ?? 0
-        return d != 0 ? d : nil
-    }
-
-    /// The digit a flick/click into the learning rose would place, ghosted.
+    /// The digit Cross would place, ghosted into the cell.
     var previewDigit: Int? {
         guard let learningRose else { return nil }
         return learningRose.focusedIndex + 1
+    }
+
+    /// Same-number highlight, the remote's way: the cursor's own digit.
+    var highlightDigit: Int? {
+        guard let digit = model.game?.entry(at: cursor), digit != 0 else { return nil }
+        return digit
     }
 
     // MARK: - Gesture entry
 
     func handle(_ gesture: PadGesture) {
         guard model.game != nil, model.solvedAt == nil else { return }
-        // With prefs up the pad navigates the sheet via the focus engine;
-        // Options toggles it closed, everything else is parked.
+        // With settings up the pad navigates the panel via the focus engine;
+        // the settings button closes it, Circle is Back, the rest is parked.
         if showPrefs {
-            if case .button(.options) = gesture { showPrefs = false }
+            switch gesture {
+            case .button(.options), .button(.menu): showPrefs = false
+            case .button(.circle): onBack?()
+            default: break
+            }
             return
         }
         switch gesture {
-        case .move(let direction, let glide):
-            move(direction, glide: glide)
-        case .flick(let direction):
-            placeFlick(direction)
-        case .flickAmbiguous(let a, let b):
-            shimmerCandidates(a, b)
+        case .move(let direction, _):
+            move(direction)
         case .button(let button):
             press(button)
-        case .buttonUp(let button):
-            switch button {
-            case .l2, .r2: peekHeld = false // R2 is a first-class peek alias (Phase 3)
-            case .circle: circleUp()
-            default: break
-            }
-        case .connect, .disconnect:
+        case .flick, .flickAmbiguous, .buttonUp, .connect, .disconnect:
+            // The right stick no longer places, and no button has a hold.
             break
         }
     }
 
     // MARK: - Movement
 
-    private func move(_ direction: Direction4, glide: Bool) {
+    private func move(_ direction: Direction4) {
         if var rose = learningRose {
-            // In learning mode the d-pad walks the petals; the stick is ignored
-            // so a stray glide can't scrub the rose.
-            guard !glide else { return }
+            // The stick walks the petals too, one step per detent — a gentle
+            // push is one petal, which is the only distance the rose has.
             rose.focusedIndex = RoseGeometry.moveFocus(rose.focusedIndex, direction)
             learningRose = rose
             return
         }
         let before = cursor
         cursor = BoardMetrics.moveCursor(cursor, direction, wrap: false)
-        // One detent tick per box crossed while gliding (PRD-5 §2.2).
-        if glide, cursor != before, boxIndex(cursor) != boxIndex(before) {
+        if cursor != before, boxIndex(cursor) != boxIndex(before) {
             haptics.detent()
         }
     }
@@ -137,11 +119,6 @@ final class PadPlayController {
     }
 
     // MARK: - Placement
-
-    private func placeFlick(_ direction: Direction8OrCenter) {
-        clearShimmer()
-        commit(digit: RoseGeometry.digit(for: direction))
-    }
 
     private func commit(digit: Int) {
         guard let game = model.game, !game.isGiven(cursor) else { return }
@@ -167,82 +144,32 @@ final class PadPlayController {
     private func press(_ button: PadButton) {
         switch button {
         case .cross:
-            // In learning mode Cross confirms the focused petal (d-pad + ✕ to
-            // place); otherwise it opens the visual rose on the cursor cell.
             if let rose = learningRose {
                 commit(digit: rose.focusedIndex + 1)
             } else {
-                openLearningRose()
+                openRose()
             }
         case .circle:
-            circleDown()
+            onBack?()
         case .square:
             pencilSticky.toggle()
         case .triangle:
-            toggleHighlight()
-        case .r3:
-            clearShimmer()
-            commit(digit: 5) // center petal
-        case .l1:
-            jumpEmpty(forward: false)
-        case .r1:
-            jumpEmpty(forward: true)
-        case .l2, .r2:
-            // Peek is held on either trigger — R2 is a first-class alias of L2
-            // so right-handed players get the same reach (PRD-5 Phase 3).
-            peekHeld = true
-        case .options:
+            performUndo()
+        case .options, .menu:
+            learningRose = nil
             showPrefs = true
+        case .r3, .l1, .r1, .l2, .r2:
+            break
         }
     }
 
-    private func openLearningRose() {
+    private func openRose() {
         guard let game = model.game, !game.isGiven(cursor) else { return }
         if pencilSticky, game.entry(at: cursor) != 0 { return } // notes need an empty cell
         learningRose = RoseState(pencil: pencilSticky)
     }
 
-    private func toggleHighlight() {
-        guard let digit = model.game?.entry(at: cursor), digit != 0 else { return }
-        highlightDigit = (highlightDigit == digit) ? nil : digit
-    }
-
-    private func jumpEmpty(forward: Bool) {
-        guard let game = model.game else { return }
-        cursor = BoardMetrics.nextEmptyCell(from: cursor, in: game, forward: forward)
-    }
-
-    // MARK: - Circle: tap undoes, hold erases
-
-    private func circleDown() {
-        circleConsumed = false
-        // Rose open: Circle still cancels it immediately (unchanged feel), and
-        // the release must not then undo.
-        if learningRose != nil {
-            learningRose = nil
-            circleConsumed = true
-            return
-        }
-        // Arm the hold: if Circle is still down past the threshold, erase.
-        circleHold?.cancel()
-        circleHold = Task { [weak self] in
-            try? await Task.sleep(nanoseconds: Self.circleHoldThreshold)
-            guard !Task.isCancelled, let self else { return }
-            self.circleConsumed = true
-            if self.model.erase(at: self.cursor) { self.haptics.placement() }
-        }
-    }
-
-    private func circleUp() {
-        circleHold?.cancel()
-        circleHold = nil
-        // A hold (or a rose-cancel) already acted — the release is a no-op.
-        guard !circleConsumed else { circleConsumed = false; return }
-        performUndo()
-    }
-
-    /// Take back the last move with a glass toast (mirrors the remote screen's
-    /// play/pause undo; the toast auto-clears like `shimmer`).
+    /// Take back the last move with a glass toast (mirrors the remote's undo).
     private func performUndo() {
         guard let move = model.undoMove() else { return }
         haptics.placement()
@@ -254,30 +181,6 @@ final class PadPlayController {
             guard !Task.isCancelled else { return }
             if self?.undoToast?.id == next.id { self?.undoToast = nil }
         }
-    }
-
-    // MARK: - Ghost rose
-
-    private func shimmerCandidates(_ a: Direction8OrCenter, _ b: Direction8OrCenter) {
-        shimmer = [RoseGeometry.digit(for: a), RoseGeometry.digit(for: b)]
-        shimmerClear?.cancel()
-        shimmerClear = Task { [weak self] in
-            try? await Task.sleep(nanoseconds: 1_400_000_000)
-            guard !Task.isCancelled else { return }
-            self?.shimmer = []
-        }
-    }
-
-    private func clearShimmer() {
-        shimmerClear?.cancel()
-        if !shimmer.isEmpty { shimmer = [] }
-    }
-
-    /// Back (Menu) while playing: cancel the rose, else exit to the shelf.
-    func handleBack() {
-        if showPrefs { showPrefs = false; return }
-        if learningRose != nil { learningRose = nil; return }
-        model.goHome()
     }
 }
 

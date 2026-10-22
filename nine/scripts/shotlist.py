@@ -516,11 +516,12 @@ def duo_launch(name):
     return on_board, (["-NineDebugSurface", surface] if surface else [])
 
 
-def capture_duo(udid, scene, out_dir, device_key, appearance, posture):
+def capture_duo(udid, scene, out_dir, device_key, appearance, posture, errors=True):
     """A Duo scene by launch alone, waited for by the clock rather than by the
     accessibility tree, which cannot see the open Duo's inner panel."""
     resume, launch_args = duo_launch(scene["name"])
-    prefs = dict(PREFS_ON, resumeOnLaunch=resume)
+    base = PREFS_ON if errors else ninestate.PREFS_ERRORS_OFF
+    prefs = dict(base, resumeOnLaunch=resume)
     simrig.relaunch(udid, BUNDLE_ID, ninestate.quiet_blobs(prefs), launch_args)
     path = os.path.join(out_dir, "%s-%s-%s.png" % (device_key, appearance, scene["name"]))
     display = simrig.screenshot_display(posture)
@@ -630,6 +631,9 @@ def main():
                         help="photograph on this simulator instead of the device's "
                              "own (e.g. a Duo already set to the posture, with "
                              "--no-erase: Device Hub's posture is set by hand)")
+    parser.add_argument("--errors", default="on", choices=("on", "off"),
+                        help="Duo lanes: whether wrong digits are marked (store "
+                             "frames of the outer panel are taken with them off)")
     parser.add_argument("--list", action="store_true", help="print the scenes and exit")
     args = parser.parse_args()
 
@@ -679,7 +683,7 @@ def main():
                 run(["xcrun", "simctl", "ui", udid, "appearance", appearance], check=False)
                 for scene in scenes:
                     path = capture_duo(udid, scene, out_dir, device_key, appearance,
-                                       spec["posture"])
+                                       spec["posture"], errors=args.errors == "on")
                     print("  %s" % path)
                     written.append(path)
             continue

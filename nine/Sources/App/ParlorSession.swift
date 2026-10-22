@@ -160,11 +160,14 @@ final class ParlorSession {
 
 // MARK: - The live transport (SharePlay)
 
-// `#if os(iOS)` rather than `#if canImport(GroupActivities)`: the framework
-// imports on macOS and tvOS too, and PRD-28 §9 ships this on iOS only. PRD-30
-// records the same distinction for ActivityKit, where `canImport` was true on
-// the Mac and the build then failed on the conformance.
-#if os(iOS)
+// `#if os(iOS) || os(tvOS)` rather than `#if canImport(GroupActivities)`: the
+// framework imports on macOS too, and the Mac's parlor is a different design.
+// PRD-28 §9 shipped this on iOS only; the tvOS input pass brought it to the TV,
+// where a parlor arrives from a FaceTime call handed to the Apple TV (or placed
+// on it with Continuity Camera) and is started from the shelf's "Play
+// together" card. PRD-30 records why `canImport` is the wrong fence: on the
+// Mac it was true and the build then failed on the conformance.
+#if os(iOS) || os(tvOS)
 
 /// The activity every participant is in.
 ///

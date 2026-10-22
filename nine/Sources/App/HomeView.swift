@@ -26,13 +26,15 @@ struct HomeView: View {
 
     var body: some View {
         ZStack {
-            shelf
-                // The first-run manual must be the only focusable thing on
-                // screen (HelpKit's contract). Left live, the primary card's
-                // default-focus claim races the overlay's, and one stick nudge
-                // walks focus onto a card hidden under the scrim — after which
-                // A presses an invisible card and Menu leaves the app, so the
-                // manual reads as a window that will not close (1.2 playtest).
+            TVShelf(model: model, accent: accent,
+                    isActive: model.helpSeen && !showHistory && !showBoards && !showAmbient,
+                    actions: shelfActions,
+                    onActivity: { lastActivity = .now })
+                // The first-run card must be the only focusable thing on
+                // screen. Left live, the shelf's focus claim races the card's,
+                // and one stick nudge walks focus under the scrim — after which
+                // A presses something invisible and Menu leaves the app, so the
+                // card reads as a window that will not close (1.2 playtest).
                 .disabled(!model.helpSeen)
             // History is the suite's one secondary surface on the shelf, opened
             // from a card and reachable by remote and pad alike (PRD-5 §2.3).
@@ -59,18 +61,27 @@ struct HomeView: View {
                 .transition(.opacity)
             }
             if !model.helpSeen {
-                HelpOverlay(
-                    // The wordmark, not a word: `ShareCardMetrics.wordmark` is
-                    // the same decision on the share card.
-                    title: Phrase.wordmark,
-                    tagline: Strings.string("help.tv.tagline"),
-                    rows: NineLegend.full
-                        + (model.padConnected ? [NineLegend.padConnectedRow] : [])
-                ) {
+                TVWelcomeCard(model: model, accent: accent) {
                     model.helpSeen = true
+                }
+                .transition(.opacity)
+            }
+        }
+        #if DEBUG
+        // `-NineRemoteInjector`: the shelf's native-focus actions, which have
+        // no remote gesture to stand in for them in the simulator.
+        .onAppear {
+            RemoteInjector.shared.onCommand = { command in
+                switch command {
+                case "welcome.start": model.helpSeen = true
+                case "free.gentle": model.startFree(.gentle)
+                case "free.steady": model.startFree(.steady)
+                case "free.sharp": model.startFree(.sharp)
+                default: break
                 }
             }
         }
+        #endif
         // Every remote gesture on the shelf is activity. `onMoveCommand` fires
         // on focus movement, which is the only thing a player does here that
         // is not a tap — and the taps reset it themselves, because they all
@@ -101,177 +112,127 @@ struct HomeView: View {
         model.library.played.contains { model.replays.replay(for: $0.id) != nil }
     }
 
-    private var shelf: some View {
-        // Scrolls so the added History row never crowds the void off the
-        // bottom on a 1080p panel; the focus engine still centers cards.
-        ScrollView(showsIndicators: false) {
-            VStack(spacing: 64) {
-                header
-                if model.savedFree != nil {
-                    continueCard
-                }
-                freePlayRow
-                extrasRow
-            }
-            .padding(80)
-            .frame(maxWidth: .infinity)
-        }
-    }
-
-    private var header: some View {
-        HStack(spacing: 28) {
-            Text(verbatim: Phrase.wordmark)
-                .couchText(CouchTypography.title)
-            Spacer()
-        }
-    }
-
-    // MARK: - Continue (free play in progress)
-
-    /// The hero when present: with the Today card gone this is the shelf's one
-    /// board-in-hand card, so it takes the primary width and default focus.
-    @ViewBuilder
-    private var continueCard: some View {
-        if let (game, difficulty) = model.savedFree {
-            ShelfCard(width: 620, height: 300, isPrimary: true,
-                      action: { model.continueSaved() }) {
-                VStack(alignment: .leading, spacing: 18) {
-                    Text(Strings.string("shelf.continue.title"))
-                        .couchText(CouchTypography.title)
-                    Text(Strings.difficulty(difficulty))
-                        .font(CouchTypography.caption)
-                        .foregroundStyle(.secondary)
-                    Spacer()
-                    HStack(spacing: 20) {
-                        GlassRing(progress: game.fillFraction)
-                            .frame(width: 64, height: 64)
-                        // `.formatted(.percent)`, not `"\(n)%"`: Turkish leads
-                        // with the sign, French spaces it, and Arabic wants its
-                        // own numerals (PRD-20 Task 8).
-                        Text(Int(game.fillFraction * 100).formatted(.percent))
-                            .font(CouchTypography.caption)
-                            .foregroundStyle(.secondary)
-                    }
-                }
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-            }
-        }
-    }
-
-    // MARK: - Free play
-
-    /// One row of three. Three cards at 360 + two 44pt gaps is 1168pt inside a
-    /// 1920pt shelf's 1800pt safe area, so the row fits and stays centred.
-    /// The deep-end row (Nocturne/Tempest/Abyss) was removed on 2026-08-02:
-    /// the shelf offers exactly three difficulties. The engine keeps all six
-    /// bands — boards already saved at the deep bands still decode and open.
-    private var freePlayRow: some View {
-        HStack(spacing: 44) {
-            ForEach(Difficulty.rowBands, id: \.self) { difficulty in
-                difficultyCard(difficulty)
-            }
-        }
-    }
-
-    // MARK: - Extras (History)
-
-    private var extrasRow: some View {
-        HStack(spacing: 44) {
-            // Pad Play is retired: a gamepad drives shelf focus natively and the
-            // controller grammar is adopted in-game on the first real gesture.
-            ShelfCard(width: 440, height: 150, action: { showBoards = true }) {
-                extraTile(symbol: "square.stack.3d.up",
-                          title: Strings.string("boards.title"),
-                          subtitle: boardsSubtitle)
-            }
-            ShelfCard(width: 440, height: 150, action: {
+    /// The shelf's secondary doors, in the order the glass row shows them.
+    private var shelfActions: [ShelfAction] {
+        var actions = [
+            ShelfAction(id: "boards", symbol: "square.stack.3d.up",
+                        title: Strings.string("boards.title")) { showBoards = true },
+            ShelfAction(id: "history", symbol: "trophy",
+                        title: Strings.string("history.title")) {
                 // Authenticate here, not at launch: opening History is the
-                // player choosing to engage Game Center, so the system sheet
-                // is expected — at launch it was an unprompted takeover.
+                // player choosing to engage Game Center.
                 GameCenter.shared.authenticate()
                 showHistory = true
-            }) {
-                extraTile(symbol: "trophy",
-                          title: Strings.string("history.title"),
-                          subtitle: Strings.string("shelf.history.subtitle"))
+            },
+            ShelfAction(id: "parlor", symbol: "shareplay", title: ParlorPhrase.start,
+                        action: startParlor),
+            ShelfAction(id: "gamecenter", symbol: "gamecontroller.fill",
+                        title: Strings.string("history.gameCenter.title"),
+                        action: openGameCenter),
+        ]
+        // PRD-26. Present only when there is something to replay.
+        if hasReplays {
+            actions.append(ShelfAction(id: "replays", symbol: "sparkles",
+                                       title: DebriefPhrase.replay) {
+                lastActivity = .now
+                withAnimation(.couchFast) { showAmbient = true }
+            })
+        }
+        return actions
+    }
+
+    /// Start (or accept) a parlor. The board opens either way: a parlor that
+    /// could not be started — no FaceTime call, or the system sheet declined —
+    /// is a solitary board on the same seed, the degradation the phone takes.
+    private func startParlor() {
+        let invite = model.parlor.takePendingInvite() ?? model.freshParlorInvite
+        Task {
+            if await ParlorSession.activate(invite) == false {
+                model.openParlorInvite(invite)
             }
-            // PRD-26. Shown only when there is something to replay — a card
-            // that opens an empty screen is worse than no card, and the shelf
-            // already refuses to render a 0% ring for the same reason.
-            if hasReplays {
-                ShelfCard(width: 440, height: 150, action: {
-                    lastActivity = .now
-                    withAnimation(.couchFast) { showAmbient = true }
-                }) {
-                    extraTile(symbol: "sparkles",
-                              title: DebriefPhrase.replay,
-                              subtitle: Strings.string("shelf.replays.subtitle"))
+        }
+    }
+
+    /// The dashboard when signed in; the system sign-in otherwise.
+    private func openGameCenter() {
+        if GameCenter.shared.isAuthenticated {
+            GameCenter.shared.showDashboard()
+        } else {
+            GameCenter.shared.authenticate(thenShowDashboard: true)
+        }
+    }
+}
+
+// MARK: - First run
+
+/// The Apple TV's first thirty seconds (tvOS input pass).
+///
+/// It replaces CouchKit's `HelpOverlay` and its seven-row legend, which had
+/// two faults the 1.2 beta found on a real television: it was a manual, which
+/// is what the app is trying not to need, and it said "Click … to start" over
+/// a custom focus surface that could lose focus to the shelf beneath it — so a
+/// click did nothing while ▶︎, which reaches the app without focus, did.
+///
+/// Now it is three steps that are the whole game, one line pointing at the
+/// rest, and a **real `Button`** with default focus. A focused Button answers a
+/// click, a tap and a controller's ✕ natively, so the one way out of the first
+/// screen is the one control on it that cannot be missed.
+struct TVWelcomeCard: View {
+    let model: AppModel
+    let accent: Color
+    let onStart: @MainActor () -> Void
+
+    @FocusState private var startFocused: Bool
+    @Environment(\.colorScheme) private var colorScheme
+
+    private var steps: [(symbol: String, text: String)] { [
+        ("arrow.up.and.down.and.arrow.left.and.right", Strings.string("tv.welcome.move")),
+        ("hand.tap", Strings.string("tv.welcome.open")),
+        ("circle.grid.3x3", Strings.string("tv.welcome.place")),
+    ] }
+
+    var body: some View {
+        ZStack {
+            Scrim.overlay(for: model.prefs.theme.tones(for: colorScheme))
+                .ignoresSafeArea()
+            // Four things and nothing else (input pass review: "very few
+            // pieces of info"): the name, the three moves that are the game,
+            // and the way in. Undo and settings are taught by the first board's
+            // hint, where they are useful, and the controls guide has the rest.
+            VStack(alignment: .leading, spacing: 44) {
+                Text(verbatim: Phrase.wordmark)
+                    .couchText(CouchTypography.display)
+                VStack(alignment: .leading, spacing: 30) {
+                    ForEach(steps, id: \.text) { step in
+                        HStack(spacing: 30) {
+                            Image(systemName: step.symbol)
+                                .font(.system(size: 44, weight: .semibold))
+                                .foregroundStyle(accent)
+                                .frame(width: 64)
+                                .accessibilityHidden(true)
+                            Text(step.text)
+                                .couchText(CouchTypography.body)
+                        }
+                    }
                 }
-            }
-        }
-    }
-
-    private func extraTile(symbol: String, title: String, subtitle: String) -> some View {
-        HStack(spacing: 20) {
-            Image(systemName: symbol)
-                .font(.system(size: 40, weight: .semibold))
-                .foregroundStyle(.secondary)
-            VStack(alignment: .leading, spacing: 4) {
-                Text(title)
-                    .font(CouchTypography.body)
-                Text(subtitle)
-                    .font(CouchTypography.caption)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.85)
-            }
-            Spacer(minLength: 0)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
-    }
-
-    private var boardsSubtitle: String {
-        let n = model.partials.count
-        return n == 0
-            ? Strings.string("shelf.boards.subtitleEmpty")
-            : Strings.string("shelf.boards.subtitleCount", .int(n))
-    }
-
-    private func difficultyCard(_ difficulty: Difficulty) -> some View {
-        // Three cards at 360 + two 44pt gaps is 1168pt inside a 1920pt shelf's
-        // 1800pt safe area, so each row fits and stays centred. Focus travel is
-        // unchanged — it follows the stacks.
-        ShelfCard(width: 360, height: 300, action: { model.startFree(difficulty) }) {
-            VStack(spacing: 20) {
-                // Concentric with the slab it is dropped into: `ShelfCard` is a
-                // 40pt corner with 36pt of padding, which is `Radius.inner` of
-                // those two and not `MiniBoard`'s 24/18 default.
-                MiniBoard(difficulty: difficulty, accent: accent,
-                          corner: Radius.inner(40, inset: 36))
-                    .frame(width: 132, height: 132)
-                if model.composing == .free(difficulty) {
-                    statusLabel(Strings.string("status.composing"), symbol: "sparkles")
-                } else {
-                    Text(Strings.difficulty(difficulty))
+                Button(action: onStart) {
+                    Text(Strings.string("tv.welcome.start"))
                         .font(CouchTypography.body)
-                        .foregroundStyle(.primary)
+                        .padding(.horizontal, 56)
+                        .padding(.vertical, 8)
                 }
+                .focused($startFocused)
+                .frame(maxWidth: .infinity)
             }
+            .padding(72)
+            .frame(maxWidth: 1180)
+            .couchGlass(in: RoundedRectangle(cornerRadius: 56, style: .continuous))
         }
+        .onAppear { startFocused = true }
+        // Back from the first screen closes it too, rather than leaving the
+        // app on its very first frame.
+        .onExitCommand { onStart() }
     }
-
-    // MARK: - Helpers
-
-    private func statusLabel(_ text: String, symbol: String) -> some View {
-        HStack(spacing: 12) {
-            Image(systemName: symbol)
-                .font(.system(size: 26, weight: .semibold))
-            Text(text)
-                .font(CouchTypography.caption)
-        }
-        .foregroundStyle(.secondary)
-    }
-
 }
 
 /// The one string on this screen that is never translated.
@@ -322,19 +283,27 @@ extension Difficulty {
     static var rowBands: [Difficulty] { [.gentle, .steady, .sharp] }
 }
 
-/// The remote grammar, spelled out once. The full set feeds the first-run
-/// HelpOverlay; the compact set tops the prefs sheet, so the sheet doubles
-/// as the manual ever after.
+/// Every grammar, spelled out once. The TV's two feed the controls guide
+/// (`TVSidePanel`); the touch and keyboard sets top their prefs sheets, so each
+/// sheet doubles as the manual ever after.
 enum NineLegend {
-    static var full: [LegendRow] { [
-        row("arrow.up.and.down.and.arrow.left.and.right", "legend.remote.swipe"),
-        row("hand.tap", "legend.remote.click"),
-        row("circle.grid.3x3", "legend.remote.rose"),
-        row("arrow.up.right", "legend.remote.flick"),
-        row("playpause", "legend.remote.playPause"),
-        row("playpause.fill", "legend.remote.holdPlayPause"),
-        row("arrow.backward", "legend.remote.back"),
-    ] }
+    /// The Siri Remote's five jobs in Nine (tvOS input pass, review option B:
+    /// Play/Pause is the pencil switch, its hold is undo, and pressing and
+    /// holding the clickpad opens settings). Named rather than ordered, so the
+    /// controls guide can point each one at its own button.
+    struct Remote {
+        let swipe, tap, hold, back, playPause, holdPlayPause: LegendRow
+    }
+
+    static var remote: Remote {
+        Remote(
+            swipe: row("arrow.up.and.down.and.arrow.left.and.right", "legend.remote.swipe"),
+            tap: row("hand.tap", "legend.remote.tap"),
+            hold: row("hand.point.up.left", "legend.remote.hold"),
+            back: row("chevron.left", "legend.remote.back"),
+            playPause: row("playpause", "legend.remote.playPause"),
+            holdPlayPause: row("playpause.fill", "legend.remote.holdPlayPause"))
+    }
 
     /// One legend row from one catalog scope. Every row is the same shape — a
     /// glyph, a gesture, what it does — so the two keys are derived from one
@@ -349,9 +318,6 @@ enum NineLegend {
                   gesture: Strings.string(scope + ".gesture"),
                   action: Strings.string(scope + ".action"))
     }
-
-    /// The four rows a player actually reaches for, for the prefs sheet.
-    static var compact: [LegendRow] { let all = full; return [all[0], all[1], all[4], all[5]] }
 
     /// The touch grammar (iOS/iPadOS): same concepts, finger-native verbs.
     static var touch: [LegendRow] { [
@@ -380,59 +346,27 @@ enum NineLegend {
     /// The rows the macOS Settings scene keeps as its manual.
     static var keyboardCompact: [LegendRow] { let all = keyboard; return [all[0], all[1], all[3], all[5]] }
 
-    /// The controller grammar (tvOS pad session, PRD-5): the right stick *is*
-    /// the rose (one deflection per digit), Circle taps undo and holds erase.
-    /// Symbols are gamecontroller glyphs available at the tvOS deployment floor.
-    static var pad: [LegendRow] { [
-        row("l.joystick", "legend.pad.move"),
-        row("r.joystick", "legend.pad.place"),
-        row("xmark", "legend.pad.cross"),
-        row("arrow.uturn.backward", "legend.pad.circle"),
-        row("square", "legend.pad.square"),
-        row("triangle", "legend.pad.triangle"),
-        row("eye", "legend.pad.peek"),
-        row("gamecontroller", "legend.pad.create"),
-        row("arrow.backward", "legend.pad.menu"),
-    ] }
+    /// The controller's six jobs — the same jobs as the remote, one control
+    /// each (tvOS input pass: triggers, bumpers, the right stick and the
+    /// highlight/erase holds are gone). Named so the guide can point each one.
+    struct Pad {
+        let move, cross, square, triangle, circle, options: LegendRow
+    }
 
-    /// The extra first-run row on Apple TV, shown only with a controller
-    /// attached. Built by the same helper so it cannot drift from the nine
-    /// above it.
-    static var padConnectedRow: LegendRow { row("gamecontroller", "legend.pad.controller") }
-
-    /// The rows the pad prefs sheet keeps as its manual.
-    static var padCompact: [LegendRow] { let all = pad; return [all[0], all[1], all[3], all[7]] }
-}
-
-#if os(tvOS)
-/// A floating glass slab with the suite focus treatment. Focusable through
-/// `focusHalo`; a clickpad press fires `action`.
-private struct ShelfCard<Content: View>: View {
-    let width: CGFloat
-    let height: CGFloat
-    var isPrimary = false
-    let action: @MainActor () -> Void
-    @ViewBuilder let content: Content
-
-    var body: some View {
-        content
-            .padding(36)
-            .frame(width: width, height: height)
-            .couchGlassInteractive(in: RoundedRectangle(cornerRadius: 40, style: .continuous))
-            .clipShape(RoundedRectangle(cornerRadius: 40, style: .continuous))
-            .focusHalo(
-                in: RoundedRectangle(cornerRadius: 40, style: .continuous),
-                claimsDefaultFocus: isPrimary
-            )
-            .onTapGesture { action() }
+    static var padGuide: Pad {
+        Pad(
+            move: row("dpad.fill", "legend.pad.move"),
+            cross: row("xmark", "legend.pad.cross"),
+            square: row("square", "legend.pad.square"),
+            triangle: row("triangle", "legend.pad.triangle"),
+            circle: row("circle", "legend.pad.circle"),
+            options: row("line.3.horizontal", "legend.pad.create"))
     }
 }
 
-#endif
-
 /// A difficulty preview: a 9×9 board whose *picture* is the band's ruleset.
-/// Deterministic (CouchHash), so the shelf never flickers. Shared by the TV
-/// shelf, the touch home, the Mac shelf and the tutorial's difficulty guide.
+/// Deterministic (CouchHash), so the shelf never flickers. Shared by the touch
+/// home, the Mac shelf and the tutorial's difficulty guide.
 ///
 /// **Three things this used to get wrong, all of them measured.**
 ///

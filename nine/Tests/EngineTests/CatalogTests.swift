@@ -425,9 +425,11 @@ final class CatalogTests: XCTestCase {
         // that when the string names exactly one.
         // 22 → 14 on 2026-08-02: the eight streak/daily plurals left with the
         // daily system.
-        XCTAssertEqual(pluralised, 14,
+        // 14 → 13 for the tvOS input pass: `shelf.boards.subtitleCount` left
+        // with the card shelf it captioned.
+        XCTAssertEqual(pluralised, 13,
                        "English carries a different number of whole-string plurals than "
-                       + "the 14 this catalog was built with — if that is deliberate, "
+                       + "the 13 this catalog was built with — if that is deliberate, "
                        + "move the number; if it is not, a plural has been flattened at "
                        + "the source and every locale followed it")
         XCTAssertEqual(substituted, 3,
