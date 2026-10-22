@@ -66,6 +66,7 @@ the number of the build that was tested. Use the number TestFlight shows
 | iOS | 6.9" iPhone | 1320×2868 | `store_screenshots_capture` (iPhone 17 Pro Max simulator) |
 | iOS | 13" iPad | 2064×2752 | `store_screenshots_capture` (iPad Pro 13-inch (M5) simulator) |
 | iOS | Apple Watch | 422×514 (Ultra 3, 49mm) or 416×496 (Series 11, 46mm) | manual — see below |
+| *with Duo support* iOS | iPhone Duo, open (inner) + folded (outer) | 2853×2007 + 1398×2034 | manual, kept in git — `fastlane/screenshots/ios-duo/en-US/`, see **iPhone Duo** below |
 | macOS | Mac | 2880×1800 (or 2560×1600, 1440×900, 1280×800) | `scripts/mac-store-shots.sh` (Release build, seeded state; park the pointer at the left edge first) |
 | *later* tvOS | Apple TV | 3840×2160 | manual — `.claude/skills/run-nine` + `xcrun simctl io <udid> screenshot` |
 
@@ -93,6 +94,48 @@ Four frames tell the story: the home list, a board mid-solve, one box zoomed
 in with the Crown dial turning, and the solve celebration. In the Simulator,
 the Crown is the scroll wheel / two-finger scroll over the watch face. Number
 the files `20-…` onward so they sort after the phone and iPad sets.
+
+**iPhone Duo** (taken for 1.2; not uploaded). The eight frames — board, coach
+and Technique School dark plus board light, once per posture — live in
+`fastlane/screenshots/ios-duo/en-US/` with a README naming each one. They are
+the only committed store PNGs (a `.gitignore` exception), because a reshoot
+needs a person: nothing scriptable sets the Duo's posture (PRD-37 §1.6).
+
+They are kept out of `screenshots/ios/` because fastlane 2.237.0's deliver has
+no display type for 2853×2007 or 1398×2034, so `store_check` and
+`store_screenshots` would reject the whole iOS set. When the Duo-native
+version ships:
+
+1. Check whether a newer fastlane, or App Store Connect itself, offers an
+   iPhone Duo display type.
+2. If deliver supports it, move the frames into `screenshots/ios/en-US/`
+   (numbered after the iPhone and iPad sets), add the type's prefix to
+   `required` and `allowed` in `store_screenshot_problems`, run `store_check`,
+   then `store_screenshots`.
+3. If only ASC supports it, upload them by hand in App Store Connect after
+   `store_screenshots`, which replaces every set it manages.
+
+To reshoot (Xcode 27.1; one person at Device Hub for the two posture
+presses):
+
+```bash
+export DEVELOPER_DIR=/Applications/Xcode-27.1.app/Contents/Developer
+cd nine
+python3 scripts/shotlist.py --device duo-open   --appearance both --scenes game,coach,school
+python3 scripts/shotlist.py --device duo-folded --appearance both --scenes game,coach,school \
+        --errors off --no-build --no-erase
+# keep dark game/coach/school + light game from each; name them NN-<device>-<scene>-<appearance>.png
+```
+
+Each run stops at a prompt until Device Hub's posture matches; it reads
+stdin, so it needs a terminal (or a pty) to answer. **If Device Hub's
+posture buttons do nothing**, check `xcrun devicectl list devices` before
+anything else. On 2026-10-22 CoreDeviceService had been up for eight days
+and was serving a stale list: it still showed deleted simulators and not the
+new one, so Device Hub's buttons went nowhere. Killing `CoreDeviceService`
+fixed it. It relaunches on demand and running simulators are not touched.
+Relaunching Device Hub alone did not help. Also run the Device Hub that
+matches the runtime: Xcode 27.0's lists the 27.1 Duos but cannot drive them.
 
 The iOS capture reuses `nine/scripts/shotlist.py` — the same seeded, frozen
 container the AX, contrast and localization lanes photograph against, status bar
