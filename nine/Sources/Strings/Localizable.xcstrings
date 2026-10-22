@@ -15412,7 +15412,7 @@
       }
     },
     "game.control.home": {
-      "comment": "VoiceOver label of the chevron that saves the board and returns to the shelf, and the text of the same chip on the Mac. \"Home\" is the app's start screen, not a house.",
+      "comment": "VoiceOver label of the chevron that saves the board and returns to the shelf, the text of the same chip on the Mac, and the Home button in the Apple TV settings sheet during a controller game. \"Home\" is the app's start screen, not a house.",
       "extractionState": "manual",
       "localizations": {
         "de": {
@@ -15939,6 +15939,72 @@
         }
       }
     },
+    "game.tv.backAgain": {
+      "comment": "A chip shown on the Apple TV board after one press of the Siri Remote's Back button: a second press within a few seconds saves the board and returns to the start screen. \"Back\" is the remote's button name; \"Home\" is the app's start screen.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Noch einmal Zurück für den Start"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Press Back again for Home"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Pulsa Atrás otra vez para ir al inicio"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Appuyez encore sur Retour pour l'accueil"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Premi di nuovo Indietro per la home"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "もう一度「戻る」でホームへ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "홈으로 가려면 뒤로를 한 번 더 누르세요"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Druk nogmaals op Terug voor start"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Pressione Voltar de novo para o início"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "再按一次返回键回到首页"
+          }
+        }
+      }
+    },
     "game.tv.disconnected": {
       "comment": "A chip shown when a game controller drops mid-game and the Siri Remote takes over. A statement of fact, not an error.",
       "extractionState": "manual",
@@ -16006,133 +16072,133 @@
       }
     },
     "game.tv.padHint": {
-      "comment": "A chip flashed once when a game controller takes over on Apple TV. The three names are controller buttons — keep whatever this language's controller documentation calls them. Middle dots separate the three.",
+      "comment": "A note shown when a game controller takes over on Apple TV. ✕ □ △ ☰ are the controller's button symbols — keep them; translate only the words. Middle dots separate the four.",
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Rechter Stick setzt · Kreis widerruft · Create für Einstellungen"
+            "value": "✕ Ziffern · □ Notizen · △ Rückgängig · ☰ Einstellungen"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Right stick places · Circle undoes · Create for settings"
+            "value": "✕ digits · □ pencil · △ undo · ☰ settings"
           }
         },
         "es": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "El stick derecho coloca · Círculo deshace · Create para los ajustes"
+            "value": "✕ dígitos · □ lápiz · △ deshacer · ☰ ajustes"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Le stick droit place · Rond annule · Create pour les réglages"
+            "value": "✕ chiffres · □ crayon · △ annuler · ☰ réglages"
           }
         },
         "it": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "La levetta destra inserisce · Cerchio annulla · Create per le impostazioni"
+            "value": "✕ cifre · □ matita · △ annulla · ☰ impostazioni"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "右スティックで入力 · ○ボタンで取り消し · CREATE ボタンで設定"
+            "value": "✕ 数字 · □ メモ · △ 取り消し · ☰ 設定"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "오른쪽 스틱으로 놓기 · 동그라미로 실행 취소 · 크리에이트로 설정"
+            "value": "✕ 숫자 · □ 연필 · △ 실행 취소 · ☰ 설정"
           }
         },
         "nl": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Rechterstick plaatst · Cirkel maakt ongedaan · Create voor instellingen"
+            "value": "✕ cijfers · □ potlood · △ ongedaan maken · ☰ instellingen"
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Analógico direito coloca · Círculo desfaz · Create abre os ajustes"
+            "value": "✕ dígitos · □ lápis · △ desfazer · ☰ ajustes"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "右摇杆填数 · 圆圈键撤销 · 创建键打开设置"
+            "value": "✕ 数字 · □ 笔记 · △ 撤销 · ☰ 设置"
           }
         }
       }
     },
     "game.tv.remoteHint": {
-      "comment": "A chip flashed once per launch on the Apple TV board. \"Click\" is the Siri Remote's clickpad press; ▶︎ is the play/pause key and stays as the glyph.",
+      "comment": "A note shown once per launch beside the Apple TV board. \"Tap\" is a light touch on the Siri Remote's touch surface. ▶︎ stands for the Play/Pause button — keep the character; the app draws the button's icon in its place. Pressing it toggles pencil (corner-note) mode; holding it undoes; holding the clickpad down opens settings. Middle dots separate the parts.",
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Feld klicken für Ziffern · ▶︎ halten für Einstellungen"
+            "value": "Tippen für Ziffern · ▶︎ Notizen · ▶︎ halten: Rückgängig · Touchfläche halten: Einstellungen"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Click a cell for digits · Hold ▶︎ for settings"
+            "value": "Tap for digits · ▶︎ pencil · Hold ▶︎ to undo · Hold the clickpad for settings"
           }
         },
         "es": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Haz clic en una casilla para los números · Mantén ▶︎ para los ajustes"
+            "value": "Toca para dígitos · ▶︎ lápiz · Mantén ▶︎ para deshacer · Mantén el panel táctil para ajustes"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Cliquez une case pour les chiffres · Maintenez ▶︎ pour les réglages"
+            "value": "Touchez pour les chiffres · ▶︎ crayon · Maintenez ▶︎ pour annuler · Maintenez la surface pour les réglages"
           }
         },
         "it": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Clicca una casella per le cifre · Tieni premuto ▶︎ per le impostazioni"
+            "value": "Tocca per le cifre · ▶︎ matita · Tieni premuto ▶︎ per annullare · Tieni premuta la superficie per le impostazioni"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "マスをクリックして数字 · ▶︎ 長押しで設定"
+            "value": "タップで数字 · ▶︎でメモ · ▶︎長押しで取り消し · タッチ面長押しで設定"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "칸을 클릭해 숫자 열기 · ▶︎ 길게 눌러 설정"
+            "value": "탭하면 숫자 · ▶︎ 연필 · ▶︎ 길게 누르면 실행 취소 · 터치 표면 길게 누르면 설정"
           }
         },
         "nl": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Klik op een vakje voor cijfers · Houd ▶︎ ingedrukt voor instellingen"
+            "value": "Tik voor cijfers · ▶︎ potlood · Houd ▶︎ vast: ongedaan maken · Houd het aanraakoppervlak vast voor instellingen"
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Clique numa célula para os dígitos · Segure ▶︎ para os ajustes"
+            "value": "Toque para dígitos · ▶︎ lápis · Segure ▶︎ para desfazer · Segure a superfície para ajustes"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "点按格子选数字 · 长按 ▶︎ 打开设置"
+            "value": "轻点选数字 · ▶︎ 笔记 · 按住 ▶︎ 撤销 · 按住触控面打开设置"
           }
         }
       }
@@ -18249,72 +18315,6 @@
         }
       }
     },
-    "help.tv.tagline": {
-      "comment": "The tagline under Nine's name on the Apple TV first-run card. \"Couch\" means played from the sofa, on a television — the whole app's posture in one word. A fragment with a full stop.",
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Sudoku fürs Sofa."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Couch sudoku."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Sudoku de sofá."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Le sudoku du canapé."
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Sudoku da divano."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "ソファで解く数独。"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "소파에서 즐기는 스도쿠."
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Sudoku voor op de bank."
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Sudoku de sofá."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "沙发数独。"
-          }
-        }
-      }
-    },
     "history.close": {
       "comment": "VoiceOver label of the ✕ that leaves the History sheet on Apple TV.",
       "extractionState": "manual",
@@ -20032,265 +20032,133 @@
       }
     },
     "legend.pad.circle.action": {
-      "comment": "What Circle does, pressed and held.",
+      "comment": "Game controller guide: Circle closes the digit ring or a panel; on the board, pressing it twice saves and returns to the start screen.",
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Widerrufen · halten löscht das Feld"
+            "value": "Schließen · zweimal für Start"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Undo · hold to erase the cell"
+            "value": "Close · twice for Home"
           }
         },
         "es": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Deshacer · mantener para borrar la casilla"
+            "value": "Cerrar · dos veces para inicio"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Annuler · maintenir pour effacer la case"
+            "value": "Fermer · deux fois pour l'accueil"
           }
         },
         "it": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Annulla · tieni premuto per svuotare la casella"
+            "value": "Chiudi · due volte per la home"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "取り消す · 長押しでマスを消去"
+            "value": "閉じる · 2回でホーム"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "실행 취소 · 길게 눌러 칸 지우기"
+            "value": "닫기 · 두 번 누르면 홈"
           }
         },
         "nl": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Ongedaan maken · ingedrukt houden wist het vakje"
+            "value": "Sluiten · twee keer voor start"
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Desfazer · segure para apagar a célula"
+            "value": "Fechar · duas vezes para o início"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "撤销 · 长按清除格子"
+            "value": "关闭 · 按两次回首页"
           }
         }
       }
     },
     "legend.pad.circle.gesture": {
-      "comment": "Left column of the game controller legend: a face button, pressed or held.",
+      "comment": "Game controller guide, button name: the PlayStation Circle (○) button.",
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Kreis drücken · halten"
+            "value": "Kreis"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Circle tap · hold"
+            "value": "Circle"
           }
         },
         "es": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Pulsar Círculo · mantener"
+            "value": "Círculo"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Rond : appui · maintien"
+            "value": "Rond"
           }
         },
         "it": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Cerchio: premi · tieni premuto"
+            "value": "Cerchio"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "○ボタン · 長押し"
+            "value": "○ボタン"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "동그라미 누르기 · 길게 누르기"
+            "value": "원"
           }
         },
         "nl": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Cirkel tik · houd vast"
+            "value": "Cirkel"
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Toque no Círculo · segurar"
+            "value": "Círculo"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "圆圈键点按 · 长按"
-          }
-        }
-      }
-    },
-    "legend.pad.controller.action": {
-      "comment": "The controller row of the first-run legend: nothing has to be set up, and the controller's own tutorial appears on the board.",
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Einfach losspielen — die Anleitung erscheint im Spiel"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Just start playing — the guide appears in-game"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Empieza a jugar sin más: la guía aparece en la partida"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Commencez à jouer — le guide apparaît dans la partie"
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Inizia a giocare — la guida compare durante la partita"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "そのまま始められます。案内はゲーム中に出ます"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "그냥 시작하면 돼요 — 안내는 게임 안에서 나와요"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Begin gewoon te spelen — de uitleg verschijnt in het spel"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "É só começar a jogar — o guia aparece no jogo"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "直接开始玩 —— 指引会在局中出现"
-          }
-        }
-      }
-    },
-    "legend.pad.controller.gesture": {
-      "comment": "Left column of the first-run legend on Apple TV, shown only when a game controller is connected. A noun.",
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Controller"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Controller"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Mando"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Manette"
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Controller"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "コントローラ"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "컨트롤러"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Controller"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Controle"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "手柄"
+            "value": "圆圈"
           }
         }
       }
@@ -20362,67 +20230,67 @@
       }
     },
     "legend.pad.create.gesture": {
-      "comment": "Left column of the game controller legend: the button Sony calls Create and Microsoft calls View. Use this language's name for it.",
+      "comment": "Game controller guide, button name: the ☰ OPTIONS button (Menu on Xbox). Keep the name printed in this language's controller documentation.",
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Create"
+            "value": "OPTIONS"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Create"
+            "value": "Options"
           }
         },
         "es": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Create"
+            "value": "OPTIONS"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Create"
+            "value": "OPTIONS"
           }
         },
         "it": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Create"
+            "value": "OPTIONS"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "CREATE ボタン"
+            "value": "OPTIONS"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "크리에이트"
+            "value": "OPTIONS"
           }
         },
         "nl": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Create"
+            "value": "OPTIONS"
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Create"
+            "value": "OPTIONS"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "创建键"
+            "value": "OPTIONS"
           }
         }
       }
@@ -20559,138 +20427,6 @@
         }
       }
     },
-    "legend.pad.menu.action": {
-      "comment": "What Menu does: keeps the board and returns to the start screen. A fragment.",
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Sichern + Start"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Save + home"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Guardar + inicio"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Enregistrer + accueil"
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Salva + home"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "保存してホームへ"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "저장 + 홈"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Bewaren + start"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Salvar + início"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "保存 + 首页"
-          }
-        }
-      }
-    },
-    "legend.pad.menu.gesture": {
-      "comment": "Left column of the game controller legend: the button that leaves a game on Apple TV.",
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Menü"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Menu"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Menú"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Menu"
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Menu"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "メニュー"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "메뉴"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Menu"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Menu"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "菜单键"
-          }
-        }
-      }
-    },
     "legend.pad.move.action": {
       "comment": "What the left stick does.",
       "extractionState": "manual",
@@ -20823,332 +20559,68 @@
         }
       }
     },
-    "legend.pad.peek.action": {
-      "comment": "What holding a trigger does: everything except one digit fades while held. \"Peek\" is a noun here.",
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Kurzblick — alles außer einer Ziffer abdunkeln"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Peek — dim all but one kind"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Vistazo: atenuar todo menos un número"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Aperçu — estomper tout sauf un chiffre"
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Sbircia — attenua tutto tranne una cifra"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "のぞく — その数字以外を暗く"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "엿보기 — 한 숫자만 남기고 어둡게"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Kijkje — alles behalve één soort dimmen"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Espiar — escurecer tudo, menos um dígito"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "速览 —— 只留一种数字，其余变暗"
-          }
-        }
-      }
-    },
-    "legend.pad.peek.gesture": {
-      "comment": "Left column of the game controller legend: either trigger, held. Button names.",
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "L2 · R2 halten"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hold L2 · R2"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Mantener L2 · R2"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Maintenir L2 · R2"
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Tieni premuto L2 · R2"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "L2 · R2 長押し"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "L2 · R2 길게 누르기"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Houd L2 · R2 ingedrukt"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Segurar L2 · R2"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "长按 L2 · R2"
-          }
-        }
-      }
-    },
-    "legend.pad.place.action": {
-      "comment": "What a right-stick flick does. \"R3\" is the name of the right stick's click, which places a 5.",
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Ziffer setzen (R3 = 5)"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Place a digit (R3 = 5)"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Colocar un número (R3 = 5)"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Placer un chiffre (R3 = 5)"
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Inserisci una cifra (R3 = 5)"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "数字を置く（R3 は 5）"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "숫자 놓기 (R3 = 5)"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Cijfer plaatsen (R3 = 5)"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Colocar um dígito (R3 = 5)"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "填入数字（R3 = 5）"
-          }
-        }
-      }
-    },
-    "legend.pad.place.gesture": {
-      "comment": "Left column of the game controller legend: a quick deflection of the right stick.",
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Rechten Stick schnippen"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Right stick flick"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Golpe del stick derecho"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Coup de stick droit"
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Colpo di levetta destra"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "右スティックのフリック"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "오른쪽 스틱 튕기기"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Zwiep rechterstick"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Toque no analógico direito"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "轻推右摇杆"
-          }
-        }
-      }
-    },
     "legend.pad.square.action": {
-      "comment": "What Square does: switches to corner notes and stays there until pressed again.",
+      "comment": "Game controller guide: Square switches pencil mode, in which digits go in as small corner notes.",
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Dauerhafter Bleistift"
+            "value": "Notizen ein / aus"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sticky pencil"
+            "value": "Pencil on / off"
           }
         },
         "es": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Lápiz fijo"
+            "value": "Lápiz sí / no"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Crayon permanent"
+            "value": "Crayon activé / désactivé"
           }
         },
         "it": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Matita fissa"
+            "value": "Matita on / off"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "メモモード固定"
+            "value": "メモ オン / オフ"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "연필 고정"
+            "value": "연필 켬 / 끔"
           }
         },
         "nl": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Vast potlood"
+            "value": "Potlood aan / uit"
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Lápis fixo"
+            "value": "Lápis ligado / desligado"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "常开笔记"
+            "value": "笔记 开 / 关"
           }
         }
       }
@@ -21220,67 +20692,67 @@
       }
     },
     "legend.pad.triangle.action": {
-      "comment": "What Triangle does: highlights every copy of the selected digit.",
+      "comment": "Game controller guide: Triangle takes back the last move. A verb.",
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Alle gleichen Ziffern aufleuchten lassen"
+            "value": "Widerrufen"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Light up all of a digit"
+            "value": "Undo"
           }
         },
         "es": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Iluminar todas las copias de un número"
+            "value": "Deshacer"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Allumer toutes les copies du chiffre"
+            "value": "Annuler"
           }
         },
         "it": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Illumina tutte le copie di una cifra"
+            "value": "Annulla"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "同じ数字をすべて光らせる"
+            "value": "取り消す"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "같은 숫자 모두 밝히기"
+            "value": "실행 취소"
           }
         },
         "nl": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Alle gelijke cijfers laten oplichten"
+            "value": "Ongedaan maken"
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Acender todas as cópias de um dígito"
+            "value": "Desfazer"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "点亮所有相同的数字"
+            "value": "撤销"
           }
         }
       }
@@ -21352,67 +20824,67 @@
       }
     },
     "legend.remote.back.action": {
-      "comment": "What Back does: keeps the board and returns to the start screen. Two nouns joined by a plus sign — a fragment, not a sentence.",
+      "comment": "What Back does on the Apple TV board: closes the rose or a panel; on a quiet board, pressing it twice saves and returns to the start screen. A fragment; middle dot separates the two.",
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Sichern + Start"
+            "value": "Schließen · zweimal für Start"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Save + home"
+            "value": "Close · twice for Home"
           }
         },
         "es": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Guardar + inicio"
+            "value": "Cerrar · dos veces para inicio"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Enregistrer + accueil"
+            "value": "Fermer · deux fois pour l'accueil"
           }
         },
         "it": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Salva + home"
+            "value": "Chiudi · due volte per la home"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "保存してホームへ"
+            "value": "閉じる · 2回でホーム"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "저장 + 홈"
+            "value": "닫기 · 두 번 누르면 홈"
           }
         },
         "nl": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Bewaren + start"
+            "value": "Sluiten · twee keer voor start"
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Salvar + início"
+            "value": "Fechar · duas vezes para o início"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "保存 + 首页"
+            "value": "关闭 · 按两次回首页"
           }
         }
       }
@@ -21483,272 +20955,8 @@
         }
       }
     },
-    "legend.remote.click.action": {
-      "comment": "What a clickpad press does. \"Rose\" is Nine's circular digit picker.",
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Ziffernrose öffnen"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Open the digit rose"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Abrir la rosa de números"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Ouvrir la rose des chiffres"
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Apri la rosa delle cifre"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "数字のリングを開く"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "숫자 꽃 열기"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Cijferroos openen"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Abrir a rosa de dígitos"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "打开数字花环"
-          }
-        }
-      }
-    },
-    "legend.remote.click.gesture": {
-      "comment": "Left column of the Siri Remote control legend: pressing the clickpad. A noun.",
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Klicken"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Click"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Clic"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Clic"
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Clic"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "クリック"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "클릭"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Klik"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Clique"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "点按"
-          }
-        }
-      }
-    },
-    "legend.remote.flick.action": {
-      "comment": "What a flick does: writes the digit with no confirmation step.",
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Sofort setzen"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Place instantly"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Colocar al instante"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Placer aussitôt"
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Inserisci subito"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "すぐに置く"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "바로 놓기"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Direct plaatsen"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Colocar na hora"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "立即填入"
-          }
-        }
-      }
-    },
-    "legend.remote.flick.gesture": {
-      "comment": "Left column of the Siri Remote control legend. The parenthesis names the remote generation that can report diagonal directions.",
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Schnippen (8-Wege-Fernbedienung)"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Flick (8-way remote)"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Deslizamiento rápido (mando de 8 direcciones)"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Glissé rapide (télécommande 8 directions)"
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Scorrimento rapido (telecomando a 8 direzioni)"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "フリック（8方向対応リモコン）"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "튕기기 (8방향 리모컨)"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Zwiep (8-weg-afstandsbediening)"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Deslize rápido (controle de 8 direções)"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "轻扫（八向遥控器）"
-          }
-        }
-      }
-    },
-    "legend.remote.holdPlayPause.action": {
-      "comment": "What holding play/pause does: opens this app's settings sheet.",
+    "legend.remote.hold.action": {
+      "comment": "Apple TV controls guide: what pressing and holding the clickpad does. A noun.",
       "extractionState": "manual",
       "localizations": {
         "de": {
@@ -21809,6 +21017,138 @@
           "stringUnit": {
             "state": "needs_review",
             "value": "设置"
+          }
+        }
+      }
+    },
+    "legend.remote.hold.gesture": {
+      "comment": "Apple TV controls guide, gesture column: pressing the clickpad down and keeping it pressed.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Drücken und halten"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Press and hold"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Mantener pulsado"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Appui prolongé"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Tieni premuto"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "押し続ける"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "길게 누르기"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Ingedrukt houden"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Pressionar e segurar"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "按住"
+          }
+        }
+      }
+    },
+    "legend.remote.holdPlayPause.action": {
+      "comment": "Apple TV controls guide: holding Play/Pause takes back the last move. A verb.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Widerrufen"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Undo"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Deshacer"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Annuler"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Annulla"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "取り消す"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "실행 취소"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Ongedaan maken"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Desfazer"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "撤销"
           }
         }
       }
@@ -21880,67 +21220,67 @@
       }
     },
     "legend.remote.playPause.action": {
-      "comment": "What the play/pause key does. A verb in the imperative.",
+      "comment": "Apple TV controls guide: pressing Play/Pause switches pencil mode, in which digits go in as small corner notes.",
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Widerrufen"
+            "value": "Notizen ein / aus"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Undo"
+            "value": "Pencil on / off"
           }
         },
         "es": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Deshacer"
+            "value": "Lápiz sí / no"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Annuler"
+            "value": "Crayon activé / désactivé"
           }
         },
         "it": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Annulla"
+            "value": "Matita on / off"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "取り消す"
+            "value": "メモ オン / オフ"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "실행 취소"
+            "value": "연필 켬 / 끔"
           }
         },
         "nl": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Ongedaan maken"
+            "value": "Potlood aan / uit"
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Desfazer"
+            "value": "Lápis ligado / desligado"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "撤销"
+            "value": "笔记 开 / 关"
           }
         }
       }
@@ -22007,138 +21347,6 @@
           "stringUnit": {
             "state": "needs_review",
             "value": "▶︎"
-          }
-        }
-      }
-    },
-    "legend.remote.rose.action": {
-      "comment": "What swiping and clicking inside the picker does: show the digit before committing it.",
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Vorschau, dann setzen"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Preview, then place"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Previsualizar y colocar"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Aperçu, puis placement"
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Anteprima, poi inserisci"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "確かめてから置く"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "미리 보고 놓기"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Bekijken, dan plaatsen"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Ver antes, depois colocar"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "先预览，再填入"
-          }
-        }
-      }
-    },
-    "legend.remote.rose.gesture": {
-      "comment": "Left column of the Siri Remote control legend: two gestures in sequence, while the picker is open.",
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Streichen + Klicken (in der Rose)"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Swipe + Click (in rose)"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Deslizar + clic (en la rosa)"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Balayage + clic (dans la rose)"
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Scorrimento + clic (nella rosa)"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "スワイプ + クリック（リング内）"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "스와이프 + 클릭 (꽃 안에서)"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Veeg + Klik (in de roos)"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Deslizar + Clicar (na rosa)"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "轻扫 + 点按（花环中）"
           }
         }
       }
@@ -22271,6 +21479,138 @@
           "stringUnit": {
             "state": "needs_review",
             "value": "轻扫"
+          }
+        }
+      }
+    },
+    "legend.remote.tap.action": {
+      "comment": "Apple TV controls guide: what a light tap on the clickpad does — opens the ring of digits, and places the chosen one.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Ziffern öffnen und setzen"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open and place digits"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Abrir y colocar dígitos"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Ouvrir et placer les chiffres"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Apri e inserisci le cifre"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "数字を開いて置く"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "숫자 열기 및 놓기"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Cijfers openen en plaatsen"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Abrir e colocar dígitos"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "打开并填入数字"
+          }
+        }
+      }
+    },
+    "legend.remote.tap.gesture": {
+      "comment": "Apple TV controls guide, gesture column: a light touch on the Siri Remote's touch surface without pressing it down. A bare verb.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Tippen"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tap"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Tocar"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Toucher"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Tocca"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "タップ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "탭"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Tikken"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Tocar"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "轻点"
           }
         }
       }
@@ -28143,264 +27483,6 @@
         }
       }
     },
-    "shelf.boards.subtitleCount": {
-      "comment": "Subtitle of the Apple TV shelf's Boards tile. %1$lld is how many boards are started but unfinished, always 1 or more. PLURAL: the two English forms are identical because English does not inflect here; give your language whatever forms it needs.",
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "variations": {
-            "plural": {
-              "one": {
-                "stringUnit": {
-                  "state": "needs_review",
-                  "value": "%1$lld begonnen"
-                }
-              },
-              "other": {
-                "stringUnit": {
-                  "state": "needs_review",
-                  "value": "%1$lld begonnen"
-                }
-              }
-            }
-          }
-        },
-        "en": {
-          "variations": {
-            "plural": {
-              "one": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "%1$lld in progress"
-                }
-              },
-              "other": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "%1$lld in progress"
-                }
-              }
-            }
-          }
-        },
-        "es": {
-          "variations": {
-            "plural": {
-              "many": {
-                "stringUnit": {
-                  "state": "needs_review",
-                  "value": "%1$lld en curso"
-                }
-              },
-              "one": {
-                "stringUnit": {
-                  "state": "needs_review",
-                  "value": "%1$lld en curso"
-                }
-              },
-              "other": {
-                "stringUnit": {
-                  "state": "needs_review",
-                  "value": "%1$lld en curso"
-                }
-              }
-            }
-          }
-        },
-        "fr": {
-          "variations": {
-            "plural": {
-              "many": {
-                "stringUnit": {
-                  "state": "needs_review",
-                  "value": "%1$lld en cours"
-                }
-              },
-              "one": {
-                "stringUnit": {
-                  "state": "needs_review",
-                  "value": "%1$lld en cours"
-                }
-              },
-              "other": {
-                "stringUnit": {
-                  "state": "needs_review",
-                  "value": "%1$lld en cours"
-                }
-              }
-            }
-          }
-        },
-        "it": {
-          "variations": {
-            "plural": {
-              "many": {
-                "stringUnit": {
-                  "state": "needs_review",
-                  "value": "%1$lld in corso"
-                }
-              },
-              "one": {
-                "stringUnit": {
-                  "state": "needs_review",
-                  "value": "%1$lld in corso"
-                }
-              },
-              "other": {
-                "stringUnit": {
-                  "state": "needs_review",
-                  "value": "%1$lld in corso"
-                }
-              }
-            }
-          }
-        },
-        "ja": {
-          "variations": {
-            "plural": {
-              "other": {
-                "stringUnit": {
-                  "state": "needs_review",
-                  "value": "%1$lld件が進行中"
-                }
-              }
-            }
-          }
-        },
-        "ko": {
-          "variations": {
-            "plural": {
-              "other": {
-                "stringUnit": {
-                  "state": "needs_review",
-                  "value": "%1$lld개 진행 중"
-                }
-              }
-            }
-          }
-        },
-        "nl": {
-          "variations": {
-            "plural": {
-              "one": {
-                "stringUnit": {
-                  "state": "needs_review",
-                  "value": "%1$lld bord bezig"
-                }
-              },
-              "other": {
-                "stringUnit": {
-                  "state": "needs_review",
-                  "value": "%1$lld borden bezig"
-                }
-              }
-            }
-          }
-        },
-        "pt-BR": {
-          "variations": {
-            "plural": {
-              "many": {
-                "stringUnit": {
-                  "state": "needs_review",
-                  "value": "%1$lld em andamento"
-                }
-              },
-              "one": {
-                "stringUnit": {
-                  "state": "needs_review",
-                  "value": "%1$lld em andamento"
-                }
-              },
-              "other": {
-                "stringUnit": {
-                  "state": "needs_review",
-                  "value": "%1$lld em andamento"
-                }
-              }
-            }
-          }
-        },
-        "zh-Hans": {
-          "variations": {
-            "plural": {
-              "other": {
-                "stringUnit": {
-                  "state": "needs_review",
-                  "value": "%1$lld 张进行中"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "shelf.boards.subtitleEmpty": {
-      "comment": "Subtitle of the Apple TV shelf's Boards tile when nothing is in progress — the three things the sheet is for. A list of verbs, not a sentence.",
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Fortsetzen, Archiv, Wiederholen"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Resume, archive, replay"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Reanudar, archivar, repetir"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Reprendre, archiver, rejouer"
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Riprendi, sfoglia, rigioca"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "再開、アーカイブ、再挑戦"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "이어하기, 지난 기록, 다시 풀기"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Hervatten, archief, opnieuw spelen"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Retomar, arquivar, rejogar"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "继续、归档、重玩"
-          }
-        }
-      }
-    },
     "shelf.channel.daily": {
       "comment": "Title of a saved variant puzzle in the board list. %1$@ is a channel name (Thermo, Killer), %2$@ is a date like \"Jul 26\". The separator is a middle dot; keep the channel first — it is what makes this a different puzzle rather than a harder one.",
       "extractionState": "manual",
@@ -29319,72 +28401,6 @@
         }
       }
     },
-    "shelf.history.subtitle": {
-      "comment": "Subtitle of the Apple TV shelf's History tile — what the sheet behind it holds. A fragment, not a sentence.",
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Punkte & Bestzeiten"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Points & best times"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Puntos y mejores tiempos"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Points et meilleurs temps"
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Punti e tempi migliori"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "ポイントとベストタイム"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "점수와 최고 기록"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Punten en beste tijden"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Pontos e melhores tempos"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "积分与最佳用时"
-          }
-        }
-      }
-    },
     "shelf.points.chip": {
       "comment": "The points capsule in the shelf header. %1$lld is a lifetime points total. Very short — it shares a row with the title and the streak chip; abbreviate the unit the way this language does on a scoreboard. PLURAL: 'pt' at one, 'pts' otherwise.",
       "extractionState": "manual",
@@ -29573,72 +28589,6 @@
                 }
               }
             }
-          }
-        }
-      }
-    },
-    "shelf.replays.subtitle": {
-      "comment": "Subtitle of the Apple TV shelf's Replays tile, which opens an ambient screen replaying the player's own finished boards. \"Retraced\" means drawn again, following the same path. A fragment, not a sentence.",
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Deine Lösungen, nachgezeichnet"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Your solves, retraced"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Tus resoluciones, retrazadas"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Tes résolutions, retracées"
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Le tue soluzioni, ripercorse"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "あなたの解答をなぞる"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "나의 풀이를 되짚어 보기"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Jouw oplossingen, nagetekend"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Suas resoluções, retraçadas"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "你的解法，重新描摹"
           }
         }
       }
@@ -32283,336 +31233,6 @@
         }
       }
     },
-    "tutorial.pad.beginBody": {
-      "comment": "The tutorial's first beat on a game controller: the shared explanation followed by the button to press. %1$@ is `tutorial.goal.body`. \"Cross\" is the controller button — use the name this language's controller documentation gives it.",
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "%1$@ Drücke Kreuz, um zu beginnen."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$@ Press Cross to begin."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "%1$@ Pulsa Cruz para empezar."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "%1$@ Appuyez sur Croix pour commencer."
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "%1$@ Premi Croce per iniziare."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "%1$@ クロスボタンを押すと始まります。"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "%1$@ 시작하려면 크로스를 누르세요."
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "%1$@ Druk op Kruis om te beginnen."
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "%1$@ Pressione Cruz para começar."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "%1$@ 按叉键开始。"
-          }
-        }
-      }
-    },
-    "tutorial.pad.finish": {
-      "comment": "A chip on the controller tutorial's last beat: pressing this button closes the tutorial. \"Cross\" is a controller button name.",
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Kreuz drücken – fertig"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Press Cross — done"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Pulsa Cruz — listo"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Appuyez sur Croix — terminé"
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Premi Croce — fine"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "クロスボタンで完了"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "크로스를 누르면 완료"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Druk op Kruis — gereed"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Pressione Cruz — pronto"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "按叉键即完成"
-          }
-        }
-      }
-    },
-    "tutorial.pad.readyBody": {
-      "comment": "The tutorial's last beat on a game controller. %1$@ is `tutorial.difficulty.body`. \"Cross\" is a controller button name.",
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "%1$@ Drücke Kreuz, wenn du bereit bist."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$@ Press Cross when you're ready."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "%1$@ Pulsa Cruz cuando quieras."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "%1$@ Appuyez sur Croix quand vous le souhaitez."
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "%1$@ Premi Croce quando vuoi."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "%1$@ 準備ができたらクロスボタンを押してください。"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "%1$@ 준비되면 크로스를 누르세요."
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "%1$@ Druk op Kruis als je er klaar voor bent."
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "%1$@ Pressione Cruz quando estiver pronto."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "%1$@ 准备好后按叉键。"
-          }
-        }
-      }
-    },
-    "tutorial.pad.skip": {
-      "comment": "A chip offering the escape hatch on Apple TV. \"Menu\" is the Siri Remote's back button — use the name printed in this language's Apple TV documentation.",
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Zum Überspringen „Menü“ drücken"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Press Menu to skip the tutorial"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Pulsa Menú para saltar el tutorial"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Appuyez sur Menu pour passer le tutoriel"
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Premi Menu per saltare il tutorial"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "「メニュー」を押すとチュートリアルをスキップします"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "튜토리얼을 건너뛰려면 메뉴를 누르세요"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Druk op Menu om de uitleg over te slaan"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Pressione Menu para pular o tutorial"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "按“返回”键可跳过教程"
-          }
-        }
-      }
-    },
-    "tutorial.pad.tryIt": {
-      "comment": "A chip on the controller tutorial's first beat, naming the button that starts the playable part. \"Cross\" is a controller button name.",
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Zum Ausprobieren Kreuz drücken"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Press Cross to try it"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Pulsa Cruz para probarlo"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Appuyez sur Croix pour essayer"
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Premi Croce per provare"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "クロスボタンで試す"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "해보려면 크로스를 누르세요"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Druk op Kruis om het te proberen"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Pressione Cruz para experimentar"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "按叉键试一试"
-          }
-        }
-      }
-    },
     "tutorial.pencil.title": {
       "comment": "Heading of the tutorial beat that teaches corner notes. \"Pencil notes\" is the sudoku term for the small marks.",
       "extractionState": "manual",
@@ -32811,68 +31431,464 @@
         }
       }
     },
-    "tutorial.titlePad": {
-      "comment": "Title of the game-controller version of the tutorial on Apple TV. The dash separates the subject; use this language's punctuation.",
+    "tv.panel.controller": {
+      "comment": "Title of the Apple TV controls guide that draws a game controller, and the button that opens it. A short noun.",
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Spielanleitung – Controller"
+            "value": "Controller"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "How to play — controller"
+            "value": "Controller"
           }
         },
         "es": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Cómo jugar — mando"
+            "value": "Mando de juegos"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Comment jouer — manette"
+            "value": "Manette"
           }
         },
         "it": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Come si gioca — controller"
+            "value": "Controller"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "遊び方：コントローラ"
+            "value": "コントローラ"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "게임 방법 — 컨트롤러"
+            "value": "컨트롤러"
           }
         },
         "nl": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Speluitleg — controller"
+            "value": "Controller"
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Como jogar — controle"
+            "value": "Controle de jogo"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "玩法介绍：手柄"
+            "value": "游戏手柄"
+          }
+        }
+      }
+    },
+    "tv.panel.controlsFooter": {
+      "comment": "Footer of the Apple TV controls guide, which sits beside the board while the game stays playable. \"Back\" is the remote's button.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Weiterspielen – Zurück zum Schließen"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keep playing — press Back to close"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Sigue jugando: pulsa Atrás para cerrar"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Continuez à jouer — Retour pour fermer"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Continua a giocare — Indietro per chiudere"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "そのままプレイ — 「戻る」で閉じる"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "계속 플레이 — 뒤로를 눌러 닫기"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Speel door — druk op Terug om te sluiten"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Continue jogando — Voltar para fechar"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "继续游戏 — 按返回键关闭"
+          }
+        }
+      }
+    },
+    "tv.panel.remote": {
+      "comment": "Title of the Apple TV controls guide that draws the Siri Remote, and the button that opens it. A short noun.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Fernbedienung"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remote"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Mando"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Télécommande"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Telecomando"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "リモコン"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "리모컨"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Afstandsbediening"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Controle remoto"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "遥控器"
+          }
+        }
+      }
+    },
+    "tv.welcome.move": {
+      "comment": "First-run card on Apple TV, step one of three. \"Swipe\" means sliding a thumb across the Siri Remote's touch surface.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Streichen, um sich über das Spielfeld zu bewegen"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Swipe to move around the board"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Desliza para moverte por el tablero"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Balayez pour vous déplacer sur la grille"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Scorri per spostarti nella griglia"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "スワイプで盤面を移動"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "스와이프로 보드 안에서 이동"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Veeg om over het bord te bewegen"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Deslize para se mover pelo tabuleiro"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "轻扫在棋盘上移动"
+          }
+        }
+      }
+    },
+    "tv.welcome.open": {
+      "comment": "First-run card on Apple TV, step two. A light tap on the Siri Remote's touch surface — no need to click — opens the ring of digits.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Auf die Touchfläche tippen, um die Ziffern zu öffnen"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tap the touch surface to open the digits"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Toca la superficie táctil para abrir los dígitos"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Touchez la surface tactile pour ouvrir les chiffres"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Tocca la superficie touch per aprire le cifre"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "タッチ面をタップして数字を開く"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "터치 표면을 탭해 숫자 열기"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Tik op het aanraakoppervlak om de cijfers te openen"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Toque na superfície de toque para abrir os dígitos"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "轻点触控面打开数字"
+          }
+        }
+      }
+    },
+    "tv.welcome.place": {
+      "comment": "First-run card on Apple TV, step three: in the open ring, swipe toward a digit to choose it, then tap to write it.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Zu einer Ziffer streichen, dann tippen, um sie zu setzen"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Swipe to a digit, then tap to place it"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Desliza hasta un dígito y toca para colocarlo"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Balayez vers un chiffre, puis touchez pour le placer"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Scorri su una cifra, poi tocca per inserirla"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "数字へスワイプし、タップして置く"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "숫자로 스와이프한 뒤 탭해 놓기"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Veeg naar een cijfer en tik om het te plaatsen"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Deslize até um dígito e toque para colocá-lo"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "轻扫到一个数字,轻点填入"
+          }
+        }
+      }
+    },
+    "tv.welcome.start": {
+      "comment": "The one button on the Apple TV first-run card; it closes the card. An imperative.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Los geht's"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Start playing"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Empezar a jugar"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Commencer à jouer"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Inizia a giocare"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "プレイを始める"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "플레이 시작"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Begin met spelen"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Começar a jogar"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "开始游戏"
           }
         }
       }

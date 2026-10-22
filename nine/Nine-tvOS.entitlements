@@ -11,6 +11,14 @@
 	<true/>
 	<key>com.apple.developer.ubiquity-kvstore-identifier</key>
 	<string>$(TeamIdentifierPrefix)$(CFBundleIdentifier)</string>
+	<!-- SharePlay on Apple TV (tvOS input pass). Same capability as the iOS
+	     file's group-session key. The App ID already carried Group Activities;
+	     the tvOS AppStore profile was re-minted for it on 2026-10-22 with
+	     `match type:appstore platform:tvos app_identifier:com.couchsuite.nine
+	     force:true` (now in couch-suite-certificates), so CI's readonly match
+	     installs a profile that grants it. -->
+	<key>com.apple.developer.group-session</key>
+	<true/>
 	<key>com.apple.developer.icloud-container-identifiers</key>
 	<array>
 		<string>iCloud.com.couchsuite.nine</string>

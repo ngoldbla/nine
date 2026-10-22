@@ -22,11 +22,19 @@ import GameController
 public enum CouchGesture: Sendable, Equatable {
     /// Discrete flick: up/down/left/right (from the system move command).
     case swipe(Direction4)
-    /// 3×3 rose: 8 directions + center tap. Only delivered when the 8-way
-    /// reader is enabled and analog dpad data is available.
+    /// 3×3 rose: one of the 8 directions, from a completed stroke. Only
+    /// delivered when the 8-way reader is enabled and analog dpad data is
+    /// available. A bare touch arrives as `.tap`, never as `.flick(.center)`.
     case flick(Direction8OrCenter)
     /// Clickpad press.
     case click
+    /// A light tap on the touch surface — a touch that never clicked and
+    /// never travelled. Only delivered when the 8-way reader is enabled (it is
+    /// the only thing that can see a touch that did not press), and never for
+    /// a touch that also clicked or produced a move command: a click is also a
+    /// touch, and so is a press on the ring's edge, and neither may arrive
+    /// twice.
+    case tap
     case holdBegan
     case holdEnded
     case playPause
@@ -108,6 +116,9 @@ struct CouchRemoteModifier: ViewModifier {
             .focusable()
             .focused($focused)
             .onMoveCommand { direction in
+                // A press on the ring's edge is a touch too; it must not also
+                // classify as a tap when the finger lifts.
+                suppressTap()
                 switch direction {
                 case .up: emit(.swipe(.up))
                 case .down: emit(.swipe(.down))
@@ -117,7 +128,10 @@ struct CouchRemoteModifier: ViewModifier {
                 }
             }
             .onPlayPauseCommand { emit(.playPause) }
-            .onTapGesture { emit(.click) }
+            .onTapGesture {
+                suppressTap()
+                emit(.click)
+            }
             .onLongPressGesture(
                 minimumDuration: 0.6,
                 perform: {
@@ -153,10 +167,20 @@ struct CouchRemoteModifier: ViewModifier {
         #if canImport(GameController)
         guard eightWay, flickReader == nil else { return }
         let reader = MicroGamepadFlickReader()
-        reader.onFlick = { direction in emit(.flick(direction)) }
+        reader.onFlick = { direction in
+            emit(direction == .center ? .tap : .flick(direction))
+        }
         reader.onPlayPauseLongPress = { emit(.playPauseLongPress) }
         reader.start()
         flickReader = reader
+        #endif
+    }
+
+    /// Tell the reader the touch in progress already meant something else.
+    @MainActor
+    private func suppressTap() {
+        #if canImport(GameController)
+        flickReader?.suppressCurrentTap()
         #endif
     }
 
@@ -182,6 +206,11 @@ final class MicroGamepadFlickReader {
     var thresholds = FlickThresholds.standard
 
     private var samples: [(t: TimeInterval, x: Double, y: Double)] = []
+    /// Set when the touch in progress clicked or moved the focus. A stroke
+    /// that did either is not a tap, whatever its geometry says: the press
+    /// beat the finger's lift, and the finger's lift is the only edge the
+    /// reader sees.
+    private var tapSuppressed = false
     private var playPausePressedAt: TimeInterval?
     private var observer: (any NSObjectProtocol)?
 
@@ -203,6 +232,13 @@ final class MicroGamepadFlickReader {
         if let observer { NotificationCenter.default.removeObserver(observer) }
         observer = nil
         samples.removeAll()
+        tapSuppressed = false
+    }
+
+    /// The touch in progress clicked or moved: whatever it does on lift, it
+    /// is not a tap.
+    func suppressCurrentTap() {
+        tapSuppressed = true
     }
 
     private func configure(_ controller: GCController?) {
@@ -233,7 +269,11 @@ final class MicroGamepadFlickReader {
     }
 
     private func finishStroke(at now: TimeInterval) {
-        defer { samples.removeAll(keepingCapacity: true) }
+        let suppressed = tapSuppressed
+        defer {
+            samples.removeAll(keepingCapacity: true)
+            tapSuppressed = false
+        }
         guard let first = samples.first, let last = samples.last else { return }
         let duration = max(0.001, now - first.t)
         let result = FlickClassifier.classify8(
@@ -243,6 +283,10 @@ final class MicroGamepadFlickReader {
             thresholds: thresholds
         )
         if case .direction(let direction) = result {
+            // A still touch that clicked is a click, not a tap. A stroke that
+            // travelled keeps its direction even if a move command fired on
+            // the way — that is the swipe the reader exists to classify.
+            if direction == .center, suppressed { return }
             onFlick?(direction)
         }
         // .ambiguous / .rest: fail soft — better no digit than a wrong digit.

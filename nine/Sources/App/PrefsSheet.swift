@@ -125,6 +125,10 @@ struct PrefsSheetContent: View {
     /// escape hatch here until the TV gets an IA pass of its own. iOS and
     /// macOS pass nil: they have Home in the control bar and the menu bar.
     var onNewGame: (@MainActor (Difficulty) -> Void)? = nil
+    /// tvOS only, in-game: save and return to the shelf. A gamepad has no
+    /// Menu of its own — its Circle is undo/erase, and PS / Home belongs to
+    /// the system — so this is a controller player's way out of a board.
+    var onHome: (@MainActor () -> Void)? = nil
 
     @Environment(\.colorScheme) private var colorScheme
 
@@ -260,9 +264,13 @@ struct PrefsSheetContent: View {
             // below it (x=44 against x=29 in the shipped AX baseline), which is
             // three left rules in one 349pt panel — the title's, the card's and
             // the row content's. There are two now and both mean something.
+            // tvOS: the side panel carries its own "Settings" title, and the
+            // wordmark above it would be a second heading for one surface.
+            #if !os(tvOS)
             Text(verbatim: Phrase.wordmark)
                 .couchText(CouchTypography.title)
                 .padding(.horizontal, Metrics.margin)
+            #endif
 
             // PRD-34: five named groups — Play, Feel, Appearance, Layout,
             // About — replacing the flat list the live audit walked, where
@@ -273,8 +281,13 @@ struct PrefsSheetContent: View {
             appearanceSection
             layoutSection
             newGameSection
+            // tvOS: the manual is the controls guide now — a drawing of the
+            // remote with the words pointing at its buttons, one press away in
+            // the panel's header — and the panel prints its own Back hint.
+            #if !os(tvOS)
             legendSection
             dismissHint
+            #endif
         }
         // `headerGap`, not `sectionTop`. `contentMargins` already holds 22pt of
         // empty scroll below the last row; stacking a second 24pt block on top
@@ -285,11 +298,9 @@ struct PrefsSheetContent: View {
         // is top-aligned in a full-height panel and this padding never shows.
         .padding(.bottom, Metrics.headerGap)
 
-        #if os(tvOS)
-        return stack.frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        #else
+        // tvOS too, since the input pass: the panel scrolls, so the stack is
+        // its natural height rather than a full-height page.
         return stack.frame(maxWidth: .infinity, alignment: .topLeading)
-        #endif
     }
 
     // MARK: - Sections
@@ -439,12 +450,7 @@ struct PrefsSheetContent: View {
     }
 
     private var legendRows: [LegendRow] {
-        #if os(tvOS)
-        // Keyed on padSession, not padConnected: the sim's phantom pad
-        // reports connected but never adopts, so remote players (and the
-        // sim) keep the remote legend.
-        return model.padSession ? NineLegend.padCompact : NineLegend.compact
-        #elseif os(macOS)
+        #if os(macOS)
         return NineLegend.keyboardCompact
         #else
         return NineLegend.touchCompact
@@ -453,12 +459,7 @@ struct PrefsSheetContent: View {
 
     @ViewBuilder
     private var dismissHint: some View {
-        #if os(tvOS)
-        Text(Strings.string("sheet.dismiss.remote"))
-            .couchText(CouchTypography.caption, Color.primary.opacity(Metrics.hintTone))
-            .padding(.horizontal, Metrics.margin)
-            .padding(.top, Metrics.sectionTop)
-        #elseif os(macOS)
+        #if os(macOS)
         // The Settings window has its own chrome — no dismissal hint.
         EmptyView()
         #else
@@ -519,6 +520,10 @@ struct PrefsSheetContent: View {
                     .couchText(CouchTypography.caption,
                                Color.primary.opacity(Metrics.hintTone))
                     .padding(.horizontal, Metrics.margin)
+                if let onHome {
+                    sheetPill(Strings.string("game.control.home"), action: onHome)
+                        .padding(.horizontal, Metrics.margin)
+                }
             }
             .padding(.top, Metrics.sectionTop)
         }
@@ -530,10 +535,18 @@ struct PrefsSheetContent: View {
         _ difficulty: Difficulty,
         _ start: @escaping @MainActor (Difficulty) -> Void
     ) -> some View {
+        sheetPill(Strings.difficulty(difficulty)) { start(difficulty) }
+    }
+
+    /// The sheet's one pill shape — the new-game bands and Home.
+    private func sheetPill(
+        _ title: String,
+        action: @escaping @MainActor () -> Void
+    ) -> some View {
         Button {
-            start(difficulty)
+            action()
         } label: {
-            Text(Strings.difficulty(difficulty))
+            Text(title)
                 .font(CouchTypography.caption)
                 // Cap the line and let a tight locale shrink by a hair rather
                 // than grow a second line and break the row's height.
@@ -1088,7 +1101,7 @@ struct PrefsSheetContent: View {
     }
 
     /// The lower-right triangle — the light half of the Auto theme swatch.
-    private struct DiagonalHalf: Shape {
+    struct DiagonalHalf: Shape {
         func path(in rect: CGRect) -> Path {
             var path = Path()
             path.move(to: CGPoint(x: rect.maxX, y: rect.minY))

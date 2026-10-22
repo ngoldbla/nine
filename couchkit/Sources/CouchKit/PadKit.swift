@@ -43,7 +43,8 @@ public enum PadButton: Sendable, Equatable, Hashable {
     case r1        // next empty cell
     case l2        // peek (hold): dim all but the highlighted kind
     case r2        // peek alias of L2 (hold) — first-class R2 (PRD-5 Phase 3)
-    case options   // prefs sheet
+    case options   // prefs sheet (DualSense Create, believed — see pollButtons)
+    case menu      // prefs sheet: the ☰ Options / Xbox Menu button (`buttonMenu`)
 }
 
 // Deliberately unmapped (PRD-5 Phase 3, documented not forgotten):
@@ -191,6 +192,7 @@ public struct PadButtonFrame: Sendable, Equatable {
     public var r2: Bool
     public var r3: Bool
     public var options: Bool
+    public var menu: Bool
     public var dpadX: Double
     public var dpadY: Double
 
@@ -198,11 +200,12 @@ public struct PadButtonFrame: Sendable, Equatable {
         cross: Bool = false, circle: Bool = false, square: Bool = false,
         triangle: Bool = false, l1: Bool = false, r1: Bool = false,
         l2: Bool = false, r2: Bool = false, r3: Bool = false,
-        options: Bool = false, dpadX: Double = 0, dpadY: Double = 0
+        options: Bool = false, menu: Bool = false, dpadX: Double = 0, dpadY: Double = 0
     ) {
         self.cross = cross; self.circle = circle; self.square = square
         self.triangle = triangle; self.l1 = l1; self.r1 = r1
         self.l2 = l2; self.r2 = r2; self.r3 = r3; self.options = options
+        self.menu = menu
         self.dpadX = dpadX; self.dpadY = dpadY
     }
 }
@@ -253,6 +256,7 @@ public struct PadButtonSampler: Sendable {
         rise(frame.r2, last.r2, .r2)
         rise(frame.r3, last.r3, .r3)
         rise(frame.options, last.options, .options)
+        rise(frame.menu, last.menu, .menu)
 
         func fall(_ now: Bool, _ was: Bool, _ button: PadButton) {
             if !now && was { out.append(.buttonUp(button)) }
@@ -384,6 +388,11 @@ public final class PadReader {
     private var edgeCounts: [PadButton: Int] = [:]
     private var gestureCount = 0
     private var lastGestureDescription: String?
+    /// When each button last went down or up. tvOS *also* delivers a gamepad's
+    /// B / Circle to UIKit as the Menu press, so a screen that intercepts Back
+    /// asks `changedRecently(.circle, …)` to tell a pad Circle from a real
+    /// Siri Remote Menu.
+    private var lastEdge: [PadButton: Date] = [:]
     #endif
 
     public init() {}
@@ -423,6 +432,20 @@ public final class PadReader {
         connectObserver = nil
         disconnectObserver = nil
         teardownActive(emitDisconnect: false)
+        #endif
+    }
+
+    // MARK: Edge recency (Back disambiguation)
+
+    /// Whether `button` went down or up within the last `window` seconds.
+    /// Only rising edges and the falling edges `PadButtonSampler` reports
+    /// (Circle, L2, R2) are tracked. False when no pad is adopted.
+    public func changedRecently(_ button: PadButton, within window: TimeInterval) -> Bool {
+        #if canImport(GameController)
+        guard let at = lastEdge[button] else { return false }
+        return Date().timeIntervalSince(at) <= window
+        #else
+        return false
         #endif
     }
 
@@ -542,6 +565,7 @@ public final class PadReader {
         controller = nil
         motionBaseline = nil
         buttons.reset()
+        lastEdge.removeAll()
         if isConnected {
             isConnected = false
             if emitDisconnect {
@@ -557,7 +581,15 @@ public final class PadReader {
     /// diagnostic counters and the `--pad-probe` trace honest (Phase 0).
     private func emit(_ gesture: PadGesture) {
         gestureCount += 1
-        if case .button(let button) = gesture { edgeCounts[button, default: 0] += 1 }
+        switch gesture {
+        case .button(let button):
+            edgeCounts[button, default: 0] += 1
+            lastEdge[button] = Date()
+        case .buttonUp(let button):
+            lastEdge[button] = Date()
+        default:
+            break
+        }
         if diagnosticsEnabled {
             lastGestureDescription = String(describing: gesture)
             log.debug("gesture \(String(describing: gesture), privacy: .public)")
@@ -605,6 +637,10 @@ public final class PadReader {
             // probe couldn't run in the sim). If disproven, swap this element and
             // fix the three label surfaces — see nine/DEVIATIONS.md pad section.
             options: pad.buttonOptions?.isPressed ?? false,
+            // ☰ — DualSense Options, Xbox Menu. Reaches the app only while the
+            // system is not consuming controller input (Nine's game screen
+            // shields it during a pad session; see `PadEventShield`).
+            menu: pad.buttonMenu.isPressed,
             dpadX: Double(pad.dpad.xAxis.value),
             dpadY: Double(pad.dpad.yAxis.value)
         )
@@ -681,6 +717,7 @@ public final class PadReader {
                 .l1: pressed(pad?.leftShoulder), .r1: pressed(pad?.rightShoulder),
                 .l2: pressed(pad?.leftTrigger), .r2: pressed(pad?.rightTrigger),
                 .r3: pressed(pad?.rightThumbstickButton), .options: pressed(pad?.buttonOptions),
+                .menu: pressed(pad?.buttonMenu),
             ],
             edgeCounts: edgeCounts,
             leftStick: SIMD2(Double(pad?.leftThumbstick.xAxis.value ?? 0), Double(pad?.leftThumbstick.yAxis.value ?? 0)),
