@@ -51,6 +51,11 @@ but one filled and selected — the keypad is up) and `--vision-solve` (the same
 then the last digit lands two seconds in, through the pinch's own path).
 `--vision-coplay-demo` starts a SharePlay co-solve over a ghost transport that
 places a correct digit every 2.5 s, since no FaceTime call reaches a simulator.
+`--vision-tour` walks every board interaction (select, place, error, erase,
+undo, pencil, deselect, new game, solve) through the model's own input calls,
+because the visionOS simulator vends no HID digitizer to inject a pinch with;
+add `--vision-wait-go` to advance it one step per `tmp/vision-go` file instead
+of on timers. `nine/docs/vision/SHOTLIST.md` is the walkthrough made with them.
 
 The app icon is a `.solidimagestack` in `VisionAssets.xcassets`, **derived** from
 `Nine.icon` by `python3 nine/scripts/vision-icon.py` — actool accepts the Icon

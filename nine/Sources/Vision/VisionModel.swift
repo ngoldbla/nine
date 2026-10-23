@@ -66,6 +66,10 @@ final class VisionModel {
     @ObservationIgnored private var cloudStore: LibraryCloudStore?
     @ObservationIgnored private var kvsObserver: NSObjectProtocol?
     @ObservationIgnored private var composeGeneration = 0
+    /// Whether the window is in the room yet. DEBUG staging waits on it: the
+    /// first frame can come tens of seconds after `init` on a loaded simulator
+    /// (RealityKit's scene setup), and a timer started in `init` runs out first.
+    @ObservationIgnored private var sceneIsActive = false
     /// Whether the player has asked for Game Center on this headset. Until
     /// they have, `authenticate()` is never called: on visionOS GameKit
     /// answers it with a sign-in sheet of its own, in front of the board, and
@@ -143,11 +147,33 @@ final class VisionModel {
     /// cell but one and selects it (the keypad is up); `--vision-solve` then
     /// places the last digit through `enter`, the same path a pinch takes.
     /// `--vision-coplay-demo` starts a co-solve with one ghost participant.
+    /// `--vision-wait-go` holds staging further, until a file named
+    /// `vision-go` appears in the app's tmp directory: a recorder that starts
+    /// only once the window is up (recording slows a launch by minutes) drops
+    /// the file to say "now".
+    private func waitForScene(then seconds: Double) async {
+        while !sceneIsActive { try? await Task.sleep(for: .milliseconds(250)) }
+        if ProcessInfo.processInfo.arguments.contains("--vision-wait-go") { await waitForGo() }
+        try? await Task.sleep(for: .seconds(seconds))
+    }
+
+    private func waitForGo() async {
+        let go = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("vision-go")
+        while !FileManager.default.fileExists(atPath: go.path) {
+            try? await Task.sleep(for: .milliseconds(250))
+        }
+        try? FileManager.default.removeItem(at: go)
+    }
+
     private func stageForScreenshots() {
         let args = ProcessInfo.processInfo.arguments
+        if args.contains("--vision-tour") {
+            Task { @MainActor in await self.runTour() }
+            return
+        }
         if args.contains("--vision-coplay-demo") {
             Task { @MainActor in
-                try? await Task.sleep(for: .seconds(1))
+                await self.waitForScene(then: 2)
                 self.startGhostCoSolve()
             }
         }
@@ -163,10 +189,79 @@ final class VisionModel {
         persist()
         if args.contains("--vision-solve") {
             Task { @MainActor in
-                try? await Task.sleep(for: .seconds(2))
+                await self.waitForScene(then: 3)
                 self.enter(solution[last])
             }
         }
+    }
+
+    /// `--vision-tour`: every board interaction in order, for a recording.
+    /// No input can be injected into a visionOS simulator from a script (the
+    /// simulator vends no HID digitizer), so this walks the same model calls a
+    /// pinch on a cell or a key makes — `select`, `enter`, `erase`, `undo`,
+    /// pencil mode, `compose` — with pauses long enough to watch each answer.
+    /// It shows what the board does with a move; it does not show the gaze
+    /// highlight, the pinch itself or the system menu, which only a person can.
+    ///
+    /// With `--vision-wait-go` every pause is instead a wait for the next
+    /// `vision-go` file, so a capture script can photograph each state after
+    /// the simulator has actually drawn it.
+    private func runTour() async {
+        let stepped = ProcessInfo.processInfo.arguments.contains("--vision-wait-go")
+        func pause(_ seconds: Double) async {
+            if stepped { await waitForGo() } else { try? await Task.sleep(for: .seconds(seconds)) }
+        }
+        func openCells() -> [Int] {
+            guard let g = game else { return [] }
+            return (0..<81).filter { g.entry(at: $0) == 0 && !g.isGiven($0) }
+        }
+        // A fresh board, resting: no cell selected, so no chrome at all.
+        cursor = nil
+        await waitForScene(then: 4)
+        guard let g = game, openCells().count > 3 else { return }
+        let solution = g.puzzle.solution.cells
+        let cells = openCells()
+        let (a, b, c) = (cells[0], cells[cells.count / 2], cells[cells.count - 1])
+
+        select(a)                                   // the keypad and New Game arrive
+        await pause(2.5)
+        enter(solution[a])                          // a correct digit settles
+        await pause(2.5)
+        select(b)
+        await pause(1.5)
+        enter(solution[b] % 9 + 1)                  // a wrong digit shakes
+        await pause(2.5)
+        erase()                                     // and is erased
+        await pause(2.5)
+        enter(solution[b])
+        await pause(2)
+        undo()                                      // undo takes it back
+        await pause(2.5)
+        select(c)
+        pencilMode = true                           // pencil mode: notes, not digits
+        await pause(1.5)
+        for note in [solution[c], solution[c] % 9 + 1, (solution[c] + 3) % 9 + 1] {
+            enter(note)
+            await pause(1)
+        }
+        pencilMode = false
+        await pause(2)
+        select(c)                                   // let go: the chrome recedes
+        await pause(4)
+        compose(.steady)                            // New Game, a band
+        await pause(5)
+        // Then a solve: everything but one cell, and the last digit by hand.
+        guard var fresh = game else { return }
+        let answer = fresh.puzzle.solution.cells
+        let empty = (0..<81).filter { fresh.entry(at: $0) != answer[$0] }
+        guard let last = empty.last else { return }
+        for cell in empty.dropLast() { fresh.place(answer[cell], at: cell) }
+        game = fresh
+        persist()
+        await pause(2)
+        select(last)
+        await pause(2.5)
+        enter(answer[last])
     }
 
     private func startGhostCoSolve() {
@@ -428,6 +523,7 @@ final class VisionModel {
     /// The timer runs only while the window is in the room; coming forward is
     /// also when the library catches up with the other devices.
     func scene(active: Bool) {
+        sceneIsActive = active
         if active { syncOnForeground() }
         guard var g = game, !isSolved else { return }
         if active { g.timer.start(at: Date()) } else { g.timer.pause(at: Date()) }
