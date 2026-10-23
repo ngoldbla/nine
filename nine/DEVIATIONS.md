@@ -5270,3 +5270,41 @@ defect was where focus went.
 **Not verified here:** the GameController clickpad timer needs a physical Siri
 Remote (`XCUIRemote` presses reach UIKit, not GameController), and how much
 the dither helps on any given television's processing is a hardware question.
+
+## The app icon becomes an Icon Composer document (2026-10-23)
+
+iOS, macOS and watchOS no longer take flat PNG icons. `nine/Nine.icon` is an
+Icon Composer 2 document, named by `ASSETCATALOG_COMPILER_APPICON_NAME: Nine`
+on the app (iOS and macOS SDKs) and on `NineWatch`. This supersedes PRD-4 §1's
+margined `AppIcon-macOS` set and PRD-6's `AppIcon-watchOS`: the system now
+masks, lights and tints the icon per platform and appearance.
+
+- **Three planes, front to back.** *Spark* (the centre tile, coral, 12% larger,
+  refractive, a coloured shadow at 0.9), *Board* (the eight lavender tiles,
+  glass, quieter shadow) and *Field* (the dot grid, flat, 22%). The
+  background gradient is the document's fill, not an image.
+- **The masks are white; colour lives in `icon.json`.** Tinted and Clear
+  render by luminance, which sank the coral spark below the lavender tiles, so
+  the `tinted` specializations make the spark white and the board 62% grey.
+  watchOS position specializations pull both glass planes in from the round
+  mask (spark 0.92, board 0.82) so the lift survives there.
+- **The glyph changed shape, everywhere.** Tiles are 2 cells with 2-cell gaps
+  (the shipped map had 3) and soft corners, so the glass has surface to show
+  at 60 pt. `scripts/generate_brand_assets.swift` draws the same mark: its map
+  is the 2:2 one, `drawGlyph` reads the map as tiles (a 4-connected run of
+  one character) so each rounds once instead of notching per cell, and
+  `tileCorner: 0.16` / `sparkScale: 1.12` are the document's numbers. The Top
+  Shelf, the launch image and the Ember/Tide/Mono alternates changed with it.
+- **tvOS keeps a parallax stack, now four layers.** Icon Composer has no tvOS
+  rendition (`ictool` accepts iOS, macOS and watchOS only), so the Apple TV
+  tile stays generated. It was Front/Middle/Back with the spark inside Front;
+  it is now Spark/Board/Field/Back — the planes of `Nine.icon`, front to back —
+  so the spark is the topmost layer and travels furthest under focus, which is
+  the only lift tvOS can give it. Verified in the compiled `Assets.car` and on
+  a simulator Home Screen; the focused tilt itself needs a real Apple TV,
+  since nothing on Xcode 27 can move Home Screen focus in a simulator.
+- **The flat sets are gone, not just unused.** With `AppIcon` no longer
+  primary, `INCLUDE_ALL_APPICON_ASSETS` shipped it as a fourth alternate icon —
+  green build, wrong `CFBundleAlternateIcons`. The generator no longer emits
+  `AppIcon`, `AppIcon-macOS` or `AppIcon-watchOS`; rerunning it removes exactly
+  those three sets and leaves every other asset byte-identical.

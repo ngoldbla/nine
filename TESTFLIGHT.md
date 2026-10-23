@@ -16,7 +16,8 @@ build train under the same app.
 | Layered tvOS app icon (400×240 @1x/@2x) + App Store icon (1280×768) | `nine/Assets.xcassets/App Icon & Top Shelf Image.brandassets` |
 | Top Shelf image (1920×720) + wide (2320×720), @1x/@2x | same brand asset |
 | Launch image (1920×1080 @1x/@2x) | `nine/Assets.xcassets/Launch Image.launchimage` |
-| Flat iOS / macOS / watchOS app icons + alternate iOS icons (PRD-16) | `nine/Assets.xcassets/AppIcon*.appiconset` |
+| Layered iOS / macOS / watchOS app icon (Icon Composer, Liquid Glass) | `nine/Nine.icon` |
+| Alternate iOS icons (PRD-16) | `nine/Assets.xcassets/AppIcon-{Ember,Tide,Mono}.appiconset` |
 | Versioning (`CFBundleShortVersionString` 1.0, `CFBundleVersion` from git commit count) | `nine/project.yml` + `fastlane/Fastfile` |
 | Export-compliance answer (no non-exempt encryption) | `ITSAppUsesNonExemptEncryption: false` in `nine/project.yml` |
 | Privacy manifest (no tracking, no data collection, no required-reason APIs) | `nine/PrivacyInfo.xcprivacy` |
