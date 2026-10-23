@@ -188,6 +188,11 @@ def push_version_metadata(plat)
   meta = File.join(STORE_DIR, "metadata")
   copyright = File.join(meta, "copyright.txt")
   version.update(attributes: { copyright: File.read(copyright).strip }) if File.exist?(copyright)
+  # deliver sets the release type in the metadata step this path skips, and a
+  # version left alone defaults to AFTER_APPROVAL — tvOS 1.2 went into review
+  # that way and had to be put back. Release stays a human's button.
+  version.update(attributes: { releaseType: "MANUAL" })
+  ensure_review_detail(app, version, meta)
   version.get_app_store_version_localizations.each do |loc|
     dir = File.join(meta, loc.locale)
     next unless File.directory?(dir)
@@ -200,6 +205,30 @@ def push_version_metadata(plat)
     loc.update(attributes: attrs)
     UI.success("#{plat} #{version.version_string} #{loc.locale}: #{attrs.keys.join(', ')}")
   end
+end
+
+# A version cannot be submitted without App Review details (contact + notes),
+# and deliver writes them in the metadata step `app_info:false` skips. A
+# platform's first version has none, so copy the contact from any version that
+# has one — the contact is not in the repo — and take the notes from metadata/.
+def ensure_review_detail(app, version, meta)
+  notes_path = File.join(meta, "review_information", "notes.txt")
+  notes = File.exist?(notes_path) ? File.read(notes_path).strip : nil
+  existing = (version.fetch_app_store_review_detail rescue nil)
+  if existing
+    existing.update(attributes: { notes: notes }) if notes
+    return
+  end
+  source = app.get_app_store_versions.lazy.map { |v| (v.fetch_app_store_review_detail rescue nil) }.find(&:itself)
+  UI.user_error!("No App Review contact on any version to copy; set it in App Store Connect") unless source
+  attrs = {
+    contactFirstName: source.contact_first_name, contactLastName: source.contact_last_name,
+    contactPhone: source.contact_phone, contactEmail: source.contact_email,
+    demoAccountRequired: false
+  }
+  attrs[:notes] = notes if notes
+  Spaceship::ConnectAPI.post_app_store_review_detail(app_store_version_id: version.id, attributes: attrs)
+  UI.success("#{version.platform} #{version.version_string}: App Review details created")
 end
 
 def store_locales
