@@ -22,6 +22,10 @@ end
 # The app this repo ships: folder => Xcode scheme + bundle identifier.
 # Match profile naming:
 #   tvOS: "match AppStore <bundle> tvos"   ·   iOS: "match AppStore <bundle>"
+#   visionOS: the iOS profile. Apple mints the iOS App Store profile for the
+#   whole iOS SDK lineage — `security cms -D` on it reads Platform = [iOS, xrOS,
+#   visionOS] — and match 2.241's `platform` accepts only tvos/ios/macos/catalyst
+#   (match/options.rb), so there is no "… visionos" profile to name.
 #
 # This was a five-entry map until the four sibling Couch Suite apps moved to
 # repositories of their own (ngoldbla/{rabbit-ears,darkroom,blockhead,cartridge}).
@@ -39,7 +43,10 @@ APPS = {
   # entry in the export map — so it rides this list rather than earning a
   # mechanism of its own. It needs no `platform:` leg either: a watch app ships
   # *inside* the iOS ipa, so `beta app:nine platform:ios` already carries it.
+  # `vision_scheme`: Vision Pro is its own target (NineVision), not a fourth
+  # destination of the universal one — see project.yml.
   "nine"        => { scheme: "Nine",       bundle: "com.couchsuite.nine", ios: true, mac: true,
+                     vision_scheme: "NineVision",
                      extensions: ["com.couchsuite.nine.widgets",
                                   "com.couchsuite.nine.watchkitapp"] }
 }.freeze
@@ -145,6 +152,92 @@ def store_screenshots_root(plat)
   staged
 end
 
+# Version-level fields deliver would upload, by metadata file → ASC attribute.
+# Everything else in metadata/ is app-level (name, subtitle, privacy URLs,
+# categories) or review contact, and lives on the record `app_info:false` skips.
+VERSION_LOCALIZED_FIELDS = {
+  "description.txt" => "description", "keywords.txt" => "keywords",
+  "promotional_text.txt" => "promotionalText", "support_url.txt" => "supportUrl",
+  "marketing_url.txt" => "marketingUrl", "release_notes.txt" => "whatsNew"
+}.freeze
+
+# The editable version for a platform, after deliver has created or renamed it.
+def edit_version(plat)
+  app = Spaceship::ConnectAPI::App.find(APPS["nine"][:bundle])
+  platform = Spaceship::ConnectAPI::Platform.map(STORE_PLATFORMS.fetch(plat))
+  version = app.get_edit_app_store_version(platform: platform)
+  UI.user_error!("No editable #{plat} version on App Store Connect") unless version
+  [app, platform, version]
+end
+
+# Attach a processed build to the platform's editable version. deliver only
+# picks a build inside submit_for_review, so a staged version (submit:false)
+# used to sit with no build at all.
+def attach_build(plat, build)
+  app, platform, version = edit_version(plat)
+  candidate = Spaceship::ConnectAPI::Build.all(app_id: app.id, version: marketing_version, build_number: build)
+                                          .find { |b| b.platform.to_s == platform.to_s }
+  UI.user_error!("#{plat} build #{build} (#{marketing_version}) is not on App Store Connect") unless candidate
+  UI.user_error!("#{plat} build #{build} is #{candidate.processing_state}, not VALID yet") unless candidate.processing_state == "VALID"
+  version.select_build(build_id: candidate.id)
+  UI.success("#{plat} #{version.version_string}: build #{build} attached")
+end
+
+# Version-level text straight through the API, for when the app-level record is
+# locked. ASC locks it while any platform's version is in review (1.2: the Mac's
+# 1.1 was), and deliver's metadata step fetches it unconditionally, retrying for
+# ~10 minutes before failing. Name, subtitle, privacy URLs, categories and the
+# age rating stay as ASC has them — check with `store_pull` that they match.
+def push_version_metadata(plat)
+  app, platform, version = edit_version(plat)
+  # ASC refuses release notes on a platform's first version.
+  first = app.get_app_store_versions(filter: { platform: platform }).size == 1
+  meta = File.join(STORE_DIR, "metadata")
+  copyright = File.join(meta, "copyright.txt")
+  version.update(attributes: { copyright: File.read(copyright).strip }) if File.exist?(copyright)
+  # deliver sets the release type in the metadata step this path skips, and a
+  # version left alone defaults to AFTER_APPROVAL — tvOS 1.2 went into review
+  # that way and had to be put back. Release stays a human's button.
+  version.update(attributes: { releaseType: "MANUAL" })
+  ensure_review_detail(app, version, meta)
+  version.get_app_store_version_localizations.each do |loc|
+    dir = File.join(meta, loc.locale)
+    next unless File.directory?(dir)
+    attrs = {}
+    VERSION_LOCALIZED_FIELDS.each do |file, key|
+      next if key == "whatsNew" && first
+      path = File.join(dir, file)
+      attrs[key] = File.read(path, encoding: "UTF-8").strip if File.exist?(path)
+    end
+    loc.update(attributes: attrs)
+    UI.success("#{plat} #{version.version_string} #{loc.locale}: #{attrs.keys.join(', ')}")
+  end
+end
+
+# A version cannot be submitted without App Review details (contact + notes),
+# and deliver writes them in the metadata step `app_info:false` skips. A
+# platform's first version has none, so copy the contact from any version that
+# has one — the contact is not in the repo — and take the notes from metadata/.
+def ensure_review_detail(app, version, meta)
+  notes_path = File.join(meta, "review_information", "notes.txt")
+  notes = File.exist?(notes_path) ? File.read(notes_path).strip : nil
+  existing = (version.fetch_app_store_review_detail rescue nil)
+  if existing
+    existing.update(attributes: { notes: notes }) if notes
+    return
+  end
+  source = app.get_app_store_versions.lazy.map { |v| (v.fetch_app_store_review_detail rescue nil) }.find(&:itself)
+  UI.user_error!("No App Review contact on any version to copy; set it in App Store Connect") unless source
+  attrs = {
+    contactFirstName: source.contact_first_name, contactLastName: source.contact_last_name,
+    contactPhone: source.contact_phone, contactEmail: source.contact_email,
+    demoAccountRequired: false
+  }
+  attrs[:notes] = notes if notes
+  Spaceship::ConnectAPI.post_app_store_review_detail(app_store_version_id: version.id, attributes: attrs)
+  UI.success("#{version.platform} #{version.version_string}: App Review details created")
+end
+
 def store_locales
   meta = File.join(STORE_DIR, "metadata")
   Dir.children(meta).select { |d| File.directory?(File.join(meta, d)) } -
@@ -238,21 +331,23 @@ def store_screenshot_problems(plat)
 end
 
 platform :ios do
-  desc "Build Nine for one platform and upload to TestFlight (platform:tvos|ios|mac, upload:false = dry run)"
+  desc "Build Nine for one platform and upload to TestFlight (platform:tvos|ios|mac|vision, upload:false = dry run)"
   lane :beta do |options|
     app_key = options.fetch(:app, "nine")
     cfg = APPS[app_key] || UI.user_error!("Unknown app '#{app_key}'. One of: #{APPS.keys.join(', ')}")
     plat = options.fetch(:platform, "tvos").to_s
-    UI.user_error!("platform must be 'tvos', 'ios' or 'mac'") unless %w[tvos ios mac].include?(plat)
+    UI.user_error!("platform must be 'tvos', 'ios', 'mac' or 'vision'") unless %w[tvos ios mac vision].include?(plat)
+    UI.user_error!("#{app_key} has no visionOS build") if plat == "vision" && !cfg[:vision_scheme]
     UI.user_error!("#{app_key} has no iOS build (only: #{APPS.select { |_, c| c[:ios] }.keys.join(', ')})") if plat == "ios" && !cfg[:ios]
     UI.user_error!("#{app_key} has no macOS build (only: #{APPS.select { |_, c| c[:mac] }.keys.join(', ')})") if plat == "mac" && !cfg[:mac]
     do_upload = options.fetch(:upload, true)
     app_id  = cfg[:bundle]
-    scheme  = cfg[:scheme]
+    scheme  = plat == "vision" ? cfg[:vision_scheme] : cfg[:scheme]
     folder  = File.expand_path("../#{app_key}", __dir__)
     profile =
       case plat
-      when "ios" then "match AppStore #{app_id}"
+      # visionOS signs with the iOS profile (see the APPS comment).
+      when "ios", "vision" then "match AppStore #{app_id}"
       when "mac" then "match AppStore #{app_id} macos"
       else "match AppStore #{app_id} tvos"
       end
@@ -260,18 +355,21 @@ platform :ios do
       case plat
       when "ios" then "generic/platform=iOS"
       when "mac" then "generic/platform=macOS"
+      when "vision" then "generic/platform=visionOS"
       else "generic/platform=tvOS"
       end
     # tvOS/iOS export an .ipa; macOS a signed .pkg.
     output_name = case plat
                   when "ios" then "#{scheme}-iOS.ipa"
+                  when "vision" then "#{scheme}.ipa"
                   # gym appends .pkg itself for Mac App Store exports; naming
                   # it here yielded Nine-macOS.pkg.pkg on the first dry run.
                   when "mac" then "#{scheme}-macOS"
                   else "#{scheme}.ipa"
                   end
-    # match's platform vocabulary calls the Mac "macos".
-    match_platform = plat == "mac" ? "macos" : plat
+    # match's platform vocabulary calls the Mac "macos", and has no visionOS:
+    # the headset's profile is the iOS one.
+    match_platform = { "mac" => "macos", "vision" => "ios" }.fetch(plat, plat)
     # Build number derived from git history — monotonic, never committed back.
     # App Store Connect enforces CFBundleVersion uniqueness per app record (bundle
     # ID), NOT per platform, so a universal app's tvOS/iOS/mac builds must never
@@ -286,7 +384,11 @@ platform :ios do
     # below it and its 86th commit set to collide with it. The base puts main
     # back above every number ASC holds (main commit 76 → 1760/1761/1762), and
     # the workflow now refuses uploads from any ref but main so it stays there.
-    train = { "tvos" => 0, "ios" => 1, "mac" => 2 }.fetch(plat)
+    #
+    # visionOS is train +3 (2026-10-23). It joins the same app record as the
+    # other three (one bundle id), so it needs a fourth disjoint number, and
+    # +3 keeps every train inside the commit's own decade.
+    train = { "tvos" => 0, "ios" => 1, "mac" => 2, "vision" => 3 }.fetch(plat)
     commit_count = sh("git", "-C", File.expand_path("..", __dir__), "rev-list", "--count", "HEAD").strip
     build = ((Integer(commit_count) + BUILD_BASE_COMMITS) * 10 + train).to_s
 
@@ -335,7 +437,11 @@ platform :ios do
       # that ipa was just uploaded). Point mac at its pkg with app_platform osx;
       # iOS/tvOS pass their ipa explicitly so no stray artifact can be picked.
       upload_params = { api_key: key, app_identifier: app_id, skip_waiting_for_build_processing: true }
-      if plat == "mac"
+      if plat == "vision"
+        # pilot's own vocabulary for the headset (pilot/options.rb).
+        upload_params[:app_platform] = "xros"
+        upload_params[:ipa] = "#{folder}/dist/#{output_name}"
+      elsif plat == "mac"
         upload_params[:app_platform] = "osx"
         upload_params[:pkg] = "#{folder}/dist/#{output_name}.pkg"
       else
@@ -359,6 +465,11 @@ platform :ios do
     # the mac leg; mint with `fastlane beta app:nine platform:mac upload:false`
     # directly, then flip COUCH_SHIP_MAC=1 in CI (or drop this guard).
     beta(options.merge(platform: "mac")) if cfg[:mac] && ENV["COUCH_SHIP_MAC"] == "1"
+    # Opt-in like the Mac leg, for a human gate of the same kind: App Store
+    # Connect refuses a visionOS build until the visionOS platform has been
+    # added to the app record, and a refused upload here would fail the whole
+    # `beta_all` run on main. Set COUCH_SHIP_VISION=1 once it has been added.
+    beta(options.merge(platform: "vision")) if cfg[:vision_scheme] && ENV["COUCH_SHIP_VISION"] == "1"
   end
 
   # Retained as the name CI and muscle memory both reach for. With one app in
@@ -460,7 +571,7 @@ platform :ios do
     deliver(store_options(plat).merge(skip_metadata: true, overwrite_screenshots: true))
   end
 
-  desc "Attach an uploaded build, push metadata + screenshots, and (submit:true) send for review (platform:ios|tvos|mac build:<CFBundleVersion>)"
+  desc "Attach an uploaded build, push metadata + screenshots, and (submit:true) send for review (platform:ios|tvos|mac build:<CFBundleVersion>, app_info:false while another platform is in review)"
   lane :release do |options|
     plat = store_platform!(options)
     unless RELEASE_PLATFORMS.include?(plat) || options[:force_platform]
@@ -472,7 +583,12 @@ platform :ios do
     UI.user_error!("Pass build:<number> — the CFBundleVersion of a build already on TestFlight") if build.empty?
     store_check(platform: plat)
     submit = options.fetch(:submit, false) == true || options[:submit].to_s == "true"
+    # app_info:false — another platform's version is in review, so the shared
+    # app-level record is locked: deliver handles the version and screenshots,
+    # the version-level text goes up through the API (push_version_metadata).
+    app_info = options[:app_info].to_s != "false"
     deliver(store_options(plat).merge(
+      skip_metadata: !app_info,
       build_number: build,
       overwrite_screenshots: true,
       submit_for_review: submit,
@@ -486,6 +602,10 @@ platform :ios do
         content_rights_contains_third_party_content: false
       }
     ))
+    unless submit
+      push_version_metadata(plat) unless app_info
+      attach_build(plat, build)
+    end
     UI.success(submit ? "#{plat} #{marketing_version} (#{build}) submitted for review" :
                         "#{plat} #{marketing_version} (#{build}) staged — re-run with submit:true to send for review")
   end

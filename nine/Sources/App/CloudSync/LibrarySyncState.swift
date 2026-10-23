@@ -4,7 +4,7 @@
 // every .stateUpdate event; we store its encoded form and feed it back at
 // construction so the engine resumes its change-token position instead of
 // re-fetching the whole zone.
-#if os(iOS) || os(macOS) || os(tvOS)
+#if os(iOS) || os(macOS) || os(tvOS) || os(visionOS)
 import Foundation
 import CloudKit
 

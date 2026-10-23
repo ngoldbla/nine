@@ -1,3 +1,5 @@
 Nine needs no account, no sign-in and no permissions. Every feature works offline from first launch. Game Center and iCloud are optional: a reviewer signed out of both still has the full game.
 
 To play: tap any empty cell to open the ring of digits, then tap or flick a digit to place it. On Mac, use the arrow keys and number keys. On Apple Watch, tap a box to zoom in, tap a cell and turn the Digital Crown to choose a digit.
+
+On Apple TV, with the Siri Remote: swipe to move around the board, tap or click to open the ring of digits, swipe to choose one and tap to place it. Hold the clickpad, or swipe right past the board's edge, to open settings beside the board; Back closes it. A game controller works too (Cross places, Menu opens settings).

@@ -348,6 +348,9 @@ public struct ReplayVault: Codable, Equatable, Sendable {
         replays[boardID.uuidString]
     }
 
+    /// Every record held, oldest first — what a re-seed pushes.
+    public var all: [SolveReplay] { order.compactMap { replays[$0] } }
+
     /// Keep a replay. A record already held is **not** amended — it is either
     /// left alone or replaced whole by a strictly newer solve of the same
     /// board, which is what a daily replayed after solving produces

@@ -534,6 +534,7 @@ final class AppModel {
     /// present but no iCloud account exists the app stays purely local — sync
     /// is ambient or absent, never a modal.
     @ObservationIgnored private var cloudStore: LibraryCloudStore?
+    @ObservationIgnored private var ledgerObserver: NSObjectProtocol?
 
     #if os(macOS)
     // MARK: - Mac window state (PRD-4 §2.5)
@@ -787,6 +788,46 @@ final class AppModel {
         // hard-traps when the app isn't iCloud-entitled). An account appearing
         // later starts sync on the next foreground.
         setUpCloudSyncIfAvailable()
+        observeSharedLedgers()
+    }
+
+    // MARK: - Shared ledgers (`nine.history`, `nine.channels`)
+
+    /// The live KVS copy of a cloud-synced key, raw.
+    private func sharedBlob(_ key: String) -> Data? {
+        NSUbiquitousKeyValueStore.default.data(forKey: CouchKeyspace.namespacedKey(key))
+    }
+
+    /// Both ledgers are single KVS blobs under last-writer-wins, and
+    /// `CouchStored` reads KVS only when its local file is missing. So every
+    /// write starts from the live copy with this device's folded in
+    /// (`mergedWithShared`) — otherwise a solve recorded on the headset, or on
+    /// another phone, since this device last looked would be overwritten.
+    private func foldSharedLedgers() {
+        let h = history.mergedWithShared(sharedBlob("nine.history"))
+        if h != history { history = h }
+        let c = channels.mergedWithShared(sharedBlob("nine.channels"))
+        if c != channels { channels = c }
+    }
+
+    /// Another device wrote one of the ledgers: fold it in now, so the stats
+    /// read the union rather than waiting for this device's next solve. The
+    /// assignment writes the union back, which is what converges two devices;
+    /// a fold that changes nothing writes nothing, so it cannot ping-pong.
+    ///
+    /// Only an observer at launch — no KVS read and no decode — so the launch
+    /// budget (EXECUTING-A-PRD §2) pays nothing for it.
+    private func observeSharedLedgers() {
+        let keys: Set<String> = [CouchKeyspace.namespacedKey("nine.history"),
+                                 CouchKeyspace.namespacedKey("nine.channels")]
+        ledgerObserver = NotificationCenter.default.addObserver(
+            forName: NSUbiquitousKeyValueStore.didChangeExternallyNotification,
+            object: NSUbiquitousKeyValueStore.default, queue: .main
+        ) { [weak self] note in
+            let changed = note.userInfo?[NSUbiquitousKeyValueStoreChangedKeysKey] as? [String]
+            guard changed.map({ !keys.isDisjoint(with: $0) }) ?? true else { return }
+            MainActor.assumeIsolated { self?.foldSharedLedgers() }
+        }
     }
 
     /// Whether *this binary* is allowed to build a `CKContainer`.
@@ -805,12 +846,14 @@ final class AppModel {
     /// concerned. The right question is about the binary, so this asks the binary:
     /// its own code signature, through `SecTask`.
     ///
-    /// macOS only, and the scope is honest rather than lazy: `SecTask` is not in
-    /// the public iOS or tvOS SDK, and the trap has only ever been observed on
-    /// macOS, because it needs the combination of a signed-in host and a build
-    /// signed without the entitlement — which on iOS and tvOS means a simulator,
-    /// where there is no iCloud account to find. On those platforms the account
-    /// check alone remains correct and this returns true unchanged.
+    /// `SecTask` is not in the public iOS or tvOS SDK. Those platforms were
+    /// left on the account check alone on the grounds that a simulator has no
+    /// iCloud account to find — which stopped being true when the CloudKit
+    /// sync rig signed one into an iPhone simulator, where an unsigned
+    /// (`CODE_SIGNING_ALLOWED=NO`) build traps exactly as the Mac did. So off
+    /// macOS the binary is asked through its own Mach-O instead
+    /// (`CloudEntitlement`): the simulator's entitlements section, or the code
+    /// signature's entitlements blob.
     private var mayBuildCloudContainer: Bool {
         #if os(macOS)
         guard let task = SecTaskCreateFromSelf(nil) else { return false }
@@ -824,7 +867,7 @@ final class AppModel {
         }
         return false
         #else
-        return true
+        return CloudEntitlement.thisProcessGrantsCloudKit
         #endif
     }
 
@@ -1731,12 +1774,14 @@ final class AppModel {
         if let channelSlot {
             // A channel board's solve log goes to `nine.channels` and nowhere
             // else (PRD-24) — the classic history is never diluted.
-            var ledger = channels
+            var ledger = channels.mergedWithShared(sharedBlob("nine.channels"))
             ledger.recordFreePlay(record, on: channelSlot)
             channels = ledger
             try? channelsStore.flushNow()
         } else if !isDuel {
-            history.record(record)
+            var log = history.mergedWithShared(sharedBlob("nine.history"))
+            log.record(record)
+            history = log
             try? historyStore.flushNow()
         }
         // The board is done; keep it as a "previously played" entry.
@@ -2016,7 +2061,9 @@ final class AppModel {
                 // No moveLog to read an error count from on this path.
                 errors: nil
             )
-            history.record(record)
+            var log = history.mergedWithShared(sharedBlob("nine.history"))
+            log.record(record)
+            history = log
             try? historyStore.flushNow()
             GameCenter.shared.reportSolve(record: record, history: history)
             var cleared = shared

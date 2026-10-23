@@ -12,9 +12,9 @@
 // This held all five Couch Suite apps' specs until the four tvOS-only siblings
 // moved to their own repositories, each taking its own spec with it.
 //
-// Art direction ("pixels under glass"): Back = deep color field, Middle = faint
-// pixel grid, Front = a chunky pixel glyph in the app's in-app accent color.
-// Glyphs are the string maps below — '#' accent, '+' secondary, '.' empty.
+// Art direction ("pixels under glass"): Back = deep color field, Field = faint
+// pixel grid, Board = the glyph's accent tiles, Spark = its secondary tile on
+// top. Glyphs are the string maps below — '#' accent, '+' secondary, '.' empty.
 
 import CoreGraphics
 import Foundation
@@ -64,6 +64,12 @@ struct AppSpec {
     // stack and macOS has no `setAlternateIconName` outside Catalyst.
     var altIcons: [IconVariant] = []
     let glyph: [String]
+    // Corner radius of each glyph tile as a fraction of its shorter side, and
+    // how much larger the '+' tiles draw than their cells — the same 0.16 and
+    // 1.12 as the Spark group in `nine/Nine.icon`, so the tvOS tile, the Top
+    // Shelf and the alternates carry the mark the Icon Composer document does.
+    var tileCorner: CGFloat = 0
+    var sparkScale: CGFloat = 1
 }
 
 let specs: [AppSpec] = [
@@ -72,9 +78,9 @@ let specs: [AppSpec] = [
         backTop: RGB(r: 0.030, g: 0.030, b: 0.090), backBottom: RGB(r: 0.080, g: 0.070, b: 0.180),
         grid: RGB(r: 0.76, g: 0.70, b: 0.94),
         accent: RGB(r: 0.76, g: 0.70, b: 0.94), secondary: RGB(r: 1.0, g: 0.45, b: 0.38),
-        iosIcon: true,
-        macIcon: true,
-        watchIcon: true,
+        // No flat iOS / macOS / watchOS icon: those platforms take the Icon
+        // Composer document `nine/Nine.icon`. A leftover AppIcon.appiconset is
+        // not inert — INCLUDE_ALL_APPICON_ASSETS ships it as a fourth alternate.
         // PRD-16. Grounds lifted from the three new themes and brightened: an
         // icon is seen at 60 pt against an arbitrary wallpaper, not full-screen
         // behind glass, so the board's backgrounds read as black squares at
@@ -97,18 +103,22 @@ let specs: [AppSpec] = [
                 grid: RGB(r: 0.88, g: 0.88, b: 0.89),
                 accent: RGB(r: 0.88, g: 0.88, b: 0.89), secondary: RGB(r: 0.55, g: 0.55, b: 0.58)),
         ],
+        // 2-cell tiles with 2-cell gaps (1.2 shipped 3): the gap the Icon
+        // Composer document settled on, so the glass has surface to show.
         glyph: [
-            "##...##...##",
-            "##...##...##",
-            "............",
-            "............",
-            "##...++...##",
-            "##...++...##",
-            "............",
-            "............",
-            "##...##...##",
-            "##...##...##",
-        ]),
+            "##..##..##",
+            "##..##..##",
+            "..........",
+            "..........",
+            "##..++..##",
+            "##..++..##",
+            "..........",
+            "..........",
+            "##..##..##",
+            "##..##..##",
+        ],
+        tileCorner: 0.16,
+        sparkScale: 1.12),
 ]
 
 // MARK: - Rendering
@@ -139,8 +149,8 @@ func renderBack(_ s: AppSpec, w: Int, h: Int) -> CGContext {
     return ctx
 }
 
-/// Middle layer: faint pixel grid of small squares, transparent elsewhere.
-func renderMiddle(_ s: AppSpec, w: Int, h: Int) -> CGContext {
+/// Field layer: faint pixel grid of small squares, transparent elsewhere.
+func renderField(_ s: AppSpec, w: Int, h: Int) -> CGContext {
     let ctx = context(w: w, h: h)
     let cell = max(8, min(w, h) / 24)          // grid pitch scales with asset size
     let dot = max(1, cell / 8)                 // small square at each grid point
@@ -157,32 +167,80 @@ func renderMiddle(_ s: AppSpec, w: Int, h: Int) -> CGContext {
     return ctx
 }
 
-/// Front layer: the glyph map, centered, integer pixel size for crisp edges.
-func renderFront(_ s: AppSpec, w: Int, h: Int, coverage: CGFloat = 0.62) -> CGContext {
+/// A glyph layer: only the tiles drawn with `chars`, transparent elsewhere.
+/// The tvOS stack splits the glyph so the '+' Spark sits on its own, topmost
+/// layer and moves furthest under focus — parallax is the only depth tvOS has.
+func renderGlyph(_ s: AppSpec, w: Int, h: Int, chars: Set<Character>, coverage: CGFloat = 0.62) -> CGContext {
     let ctx = context(w: w, h: h)
-    drawGlyph(s, into: ctx, w: w, h: h, coverage: coverage, dim: 1.0)
+    drawGlyph(s, into: ctx, w: w, h: h, coverage: coverage, dim: 1.0, only: chars)
     return ctx
 }
 
-func drawGlyph(_ s: AppSpec, into ctx: CGContext, w: Int, h: Int, coverage: CGFloat, dim: CGFloat) {
+/// One tile of a glyph map: a 4-connected run of one character, in cells.
+struct GlyphTile {
+    let ch: Character
+    let rows: ClosedRange<Int>
+    let cols: ClosedRange<Int>
+}
+
+/// Rounding has to know where a tile ends, so the map is read as tiles rather
+/// than painted cell by cell — per-cell corners would notch every tile.
+func tiles(of glyph: [String]) -> [GlyphTile] {
+    let grid = glyph.map(Array.init)
+    func at(_ r: Int, _ c: Int) -> Character? {
+        grid.indices.contains(r) && grid[r].indices.contains(c) ? grid[r][c] : nil
+    }
+    var seen = Set<[Int]>()
+    var found: [GlyphTile] = []
+    for r in grid.indices {
+        for c in grid[r].indices where grid[r][c] != "." && !seen.contains([r, c]) {
+            let ch = grid[r][c]
+            var stack = [[r, c]], rows = r...r, cols = c...c
+            seen.insert([r, c])
+            while let cell = stack.popLast() {
+                rows = min(rows.lowerBound, cell[0])...max(rows.upperBound, cell[0])
+                cols = min(cols.lowerBound, cell[1])...max(cols.upperBound, cell[1])
+                for (dr, dc) in [(1, 0), (-1, 0), (0, 1), (0, -1)] {
+                    let next = [cell[0] + dr, cell[1] + dc]
+                    if at(next[0], next[1]) == ch, seen.insert(next).inserted { stack.append(next) }
+                }
+            }
+            found.append(GlyphTile(ch: ch, rows: rows, cols: cols))
+        }
+    }
+    return found
+}
+
+/// The glyph map, centered on an integer cell pitch. Each tile is one rounded
+/// rectangle (`tileCorner`); '+' tiles grow about their centre by `sparkScale`.
+func drawGlyph(
+    _ s: AppSpec, into ctx: CGContext, w: Int, h: Int, coverage: CGFloat, dim: CGFloat,
+    only chars: Set<Character> = ["#", "+"]
+) {
     let rows = s.glyph.count
     let cols = s.glyph.map(\.count).max()!
     let px = max(1, Int(min(CGFloat(w) / CGFloat(cols), CGFloat(h) / CGFloat(rows)) * coverage))
     let x0 = (w - cols * px) / 2
     let y0 = (h - rows * px) / 2
-    for (r, row) in s.glyph.enumerated() {
-        for (c, ch) in row.enumerated() {
-            let color: RGB
-            switch ch {
-            case "#": color = s.accent
-            case "+": color = s.secondary
-            default: continue
-            }
-            ctx.setFillColor(color.alpha(dim))
-            // Flip r: CoreGraphics origin is bottom-left; glyph maps read top-down.
-            ctx.fill(CGRect(
-                x: x0 + c * px, y: y0 + (rows - 1 - r) * px, width: px, height: px))
+    for tile in tiles(of: s.glyph) where chars.contains(tile.ch) {
+        let color: RGB
+        switch tile.ch {
+        case "#": color = s.accent
+        case "+": color = s.secondary
+        default: continue
         }
+        // Flip rows: CoreGraphics origin is bottom-left; glyph maps read top-down.
+        var rect = CGRect(
+            x: x0 + tile.cols.lowerBound * px, y: y0 + (rows - 1 - tile.rows.upperBound) * px,
+            width: tile.cols.count * px, height: tile.rows.count * px)
+        if tile.ch == "+" {
+            let grow = s.sparkScale - 1
+            rect = rect.insetBy(dx: -rect.width * grow / 2, dy: -rect.height * grow / 2)
+        }
+        let radius = min(rect.width, rect.height) * s.tileCorner
+        ctx.setFillColor(color.alpha(dim))
+        ctx.addPath(CGPath(roundedRect: rect, cornerWidth: radius, cornerHeight: radius, transform: nil))
+        ctx.fillPath()
     }
 }
 
@@ -237,17 +295,21 @@ func emitLayer(
 
 func emitStack(_ s: AppSpec, name: String, brand: URL, w: Int, h: Int, scales: [Int]) {
     let stack = brand.appendingPathComponent("\(name).imagestack")
-    let layers = ["Front", "Middle", "Back"]
+    // Front to back, the same planes as the groups in `nine/Nine.icon`.
+    let layers = ["Spark", "Board", "Field", "Back"]
     write(
         "{ \"layers\" : [ "
             + layers.map { "{ \"filename\" : \"\($0).imagestacklayer\" }" }.joined(separator: ", ")
             + " ], \(info) }",
         stack.appendingPathComponent("Contents.json"))
-    emitLayer(s, name: "Front", stack: stack, w: w, h: h, scales: scales) {
-        renderFront($0, w: $1, h: $2)
+    emitLayer(s, name: "Spark", stack: stack, w: w, h: h, scales: scales) {
+        renderGlyph($0, w: $1, h: $2, chars: ["+"])
     }
-    emitLayer(s, name: "Middle", stack: stack, w: w, h: h, scales: scales) {
-        renderMiddle($0, w: $1, h: $2)
+    emitLayer(s, name: "Board", stack: stack, w: w, h: h, scales: scales) {
+        renderGlyph($0, w: $1, h: $2, chars: ["#"])
+    }
+    emitLayer(s, name: "Field", stack: stack, w: w, h: h, scales: scales) {
+        renderField($0, w: $1, h: $2)
     }
     emitLayer(s, name: "Back", stack: stack, w: w, h: h, scales: scales) {
         renderBack($0, w: $1, h: $2)
@@ -350,7 +412,7 @@ func emitIOSAltIcons(_ s: AppSpec, catalog: URL) {
             folder: s.folder,
             backTop: variant.backTop, backBottom: variant.backBottom,
             grid: variant.grid, accent: variant.accent, secondary: variant.secondary,
-            glyph: s.glyph)
+            glyph: s.glyph, tileCorner: s.tileCorner, sparkScale: s.sparkScale)
         let dir = catalog.appendingPathComponent("\(variant.name).appiconset")
         let file = "\(variant.name)-1024.png"
         writePNG(renderIOSIcon(recolored, size: 1024), to: dir.appendingPathComponent(file))

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- visionOS entitlements: modelled on Nine-tvOS.entitlements, for the
+	     same reasons — Game Center, KVS (the shared appearance and the solve
+	     history), SharePlay (the co-solve) and the CloudKit library. No app
+	     group (no widgets on this target) and no sandbox (macOS-only).
+	     Every key here is already granted by the iOS App Store profile, which
+	     is the profile visionOS signs with (see project.yml), so adding the
+	     platform changed no App ID capability and needed no `match` re-mint. -->
+	<key>com.apple.developer.game-center</key>
+	<true/>
+	<key>com.apple.developer.ubiquity-kvstore-identifier</key>
+	<string>$(TeamIdentifierPrefix)$(CFBundleIdentifier)</string>
+	<key>com.apple.developer.group-session</key>
+	<true/>
+	<key>com.apple.developer.icloud-container-identifiers</key>
+	<array>
+		<string>iCloud.com.couchsuite.nine</string>
+	</array>
+	<key>com.apple.developer.icloud-services</key>
+	<array>
+		<string>CloudKit</string>
+	</array>
+	<!-- CloudKit's silent change pushes; App Store Connect rejects
+	     icloud-services without aps-environment (upload error 90575). -->
+	<key>aps-environment</key>
+	<string>production</string>
+</dict>
+</plist>

@@ -285,3 +285,61 @@ struct ChannelLedgerTests {
         #expect(broken == .classic)
     }
 }
+
+/// `nine.channels` is the second cloud-synced ledger, under the same
+/// last-writer-wins as `nine.history`, so it gets the same fold.
+@Suite("ChannelLedger merge")
+struct ChannelLedgerMergeTests {
+    private func solve(_ offset: TimeInterval) -> SolveRecord {
+        SolveRecord(date: Date(timeIntervalSinceReferenceDate: 800_000_000 + offset),
+                    difficulty: .steady, isDaily: false, seconds: 60, points: 100)
+    }
+
+    @Test func eachChannelKeepsEverySolveEitherSideHolds() {
+        var phone = ChannelLedger()
+        phone.recordFreePlay(solve(1), on: .thermo)
+        phone.recordFreePlay(solve(3), on: .thermo)
+        var mac = ChannelLedger()
+        mac.recordFreePlay(solve(2), on: .thermo)
+        mac.recordFreePlay(solve(4), on: .killer)
+        let merged = mac.merged(with: phone)
+        #expect(merged.state(for: .thermo).history.records.map(\.id)
+                == [solve(3), solve(2), solve(1)].map(\.id))
+        #expect(merged.state(for: .killer).history.records.map(\.id) == [solve(4).id])
+        #expect(merged.played == [.thermo, .killer])
+    }
+
+    @Test func aChannelKeepsItsOwnCapacity() {
+        var a = ChannelLedger()
+        var b = ChannelLedger()
+        for n in 0..<ChannelLedger.historyCapacity {
+            a.recordFreePlay(solve(Double(n * 2)), on: .killer)
+            b.recordFreePlay(solve(Double(n * 2 + 1)), on: .killer)
+        }
+        let merged = a.merged(with: b)
+        #expect(merged.state(for: .killer).history.records.count == ChannelLedger.historyCapacity)
+        #expect(merged.state(for: .killer).history.records.first?.id
+                == solve(Double(ChannelLedger.historyCapacity * 2 - 1)).id)
+    }
+
+    @Test func theStreakThatSawTheLaterDayWins() {
+        var early = ChannelLedger()
+        early.record(solve(1), on: .thermo, day: 20_600, openedOn: 20_600)
+        var late = ChannelLedger()
+        late.record(solve(2), on: .thermo, day: 20_600, openedOn: 20_600)
+        late.record(solve(3), on: .thermo, day: 20_601, openedOn: 20_601)
+        #expect(early.merged(with: late).displayedStreak(for: .thermo, today: 20_601) == 2)
+        #expect(late.merged(with: early).displayedStreak(for: .thermo, today: 20_601) == 2)
+    }
+
+    @Test func mergingIsIdempotentAndFoldsTheSharedBlob() throws {
+        var a = ChannelLedger()
+        a.recordFreePlay(solve(1), on: .thermo)
+        #expect(a.merged(with: a) == a)
+        var b = ChannelLedger()
+        b.recordFreePlay(solve(2), on: .thermo)
+        let folded = b.mergedWithShared(try CouchJSON.encode(a))
+        #expect(folded.state(for: .thermo).history.records.count == 2)
+        #expect(b.mergedWithShared(nil) == b)
+    }
+}

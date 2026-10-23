@@ -1,6 +1,7 @@
 // ScoringTests.swift — points and solve-history bookkeeping (pure, no UI).
 import Testing
 import Foundation
+import CouchCore
 @testable import NineEngine
 
 @Suite("SolveScore")
@@ -256,5 +257,76 @@ struct SolveRecordErrorsCodingTests {
                                   seconds: 500, points: 500)
         let blob = try object(JSONEncoder().encode(record))
         #expect(blob["errors"] == nil)
+    }
+}
+
+/// `SolveHistory.merged(with:)` — the union a second writer of `nine.history`
+/// takes before it writes, so it cannot drop a solve another device recorded.
+@Suite("SolveHistory merge")
+struct SolveHistoryMergeTests {
+    private func solve(_ offset: TimeInterval, points: Int = 100) -> SolveRecord {
+        SolveRecord(date: Date(timeIntervalSinceReferenceDate: 800_000_000 + offset),
+                    difficulty: .steady, isDaily: false, seconds: 300, points: points)
+    }
+
+    private func history(_ records: [SolveRecord]) -> SolveHistory {
+        var h = SolveHistory()
+        for r in records.sorted(by: { $0.date < $1.date }) { h.record(r) }
+        return h
+    }
+
+    @Test func aSolveEitherSideHoldsSurvivesOnce() {
+        let phone = history([solve(10), solve(30)])
+        let vision = history([solve(20), solve(30)])
+        let merged = vision.merged(with: phone)
+        #expect(merged.records.map(\.id) == [solve(30), solve(20), solve(10)].map(\.id))
+        #expect(merged.totalPoints == 300)
+    }
+
+    @Test func theUnionIsNewestFirstWhateverOrderItArrivedIn() {
+        let merged = history([solve(1)]).merged(with: history([solve(5), solve(3)]))
+        #expect(merged.records.map(\.date) == merged.records.map(\.date).sorted(by: >))
+    }
+
+    @Test func mergingIsIdempotent() {
+        let a = history([solve(1), solve(2)])
+        let once = a.merged(with: a)
+        #expect(once == a)
+        #expect(once.merged(with: a) == a)
+    }
+
+    @Test func capacityTrimsTheOldest() {
+        let merged = history([solve(1), solve(2)]).merged(with: history([solve(3)]), capacity: 2)
+        #expect(merged.records.map(\.id) == [solve(3), solve(2)].map(\.id))
+    }
+}
+
+/// `mergedWithShared(_:)` — every writer of `nine.history` folds its copy into
+/// the live KVS one before it writes, the phone and the TV and the Mac as well
+/// as the headset.
+@Suite("SolveHistory shared fold")
+struct SolveHistorySharedFoldTests {
+    private func solve(_ offset: TimeInterval) -> SolveRecord {
+        SolveRecord(date: Date(timeIntervalSinceReferenceDate: 800_000_000 + offset),
+                    difficulty: .steady, isDaily: false, seconds: 300, points: 100)
+    }
+
+    private func history(_ records: [SolveRecord]) -> SolveHistory {
+        var h = SolveHistory()
+        for r in records.sorted(by: { $0.date < $1.date }) { h.record(r) }
+        return h
+    }
+
+    @Test func aSolveOnlyTheSharedCopyHoldsSurvivesTheWrite() throws {
+        let headset = try CouchJSON.encode(history([solve(10), solve(20)]))
+        let phone = history([solve(10), solve(30)])
+        let written = phone.mergedWithShared(headset)
+        #expect(written.records.map(\.id) == [solve(30), solve(20), solve(10)].map(\.id))
+    }
+
+    @Test func noSharedCopyOrAnUnreadableOneLeavesTheLocalCopyAlone() {
+        let phone = history([solve(1)])
+        #expect(phone.mergedWithShared(nil) == phone)
+        #expect(phone.mergedWithShared(Data("not json".utf8)) == phone)
     }
 }

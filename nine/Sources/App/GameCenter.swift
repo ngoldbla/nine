@@ -9,7 +9,20 @@
 // sign-in presentation and the dashboard invocation branch per platform — the
 // Mac triggers `GKAccessPoint` (no UIKit view-controller surface); tvOS uses
 // the same `GKGameCenterViewController` UIKit path as iOS.
-#if os(iOS) || os(macOS) || os(tvOS)
+//
+// Vision Pro is the fourth platform and the one with the strongest opinion
+// about presentation: a sign-in sheet that arrives by itself would sit in
+// front of the board, the one thing in the room. So on visionOS GameKit's
+// sign-in is *held* (`needsSignIn`) and shown only when the player pinches the
+// Game Center button in the board's transient ornament, and the dashboard opens
+// through `GKAccessPoint`, which visionOS draws as a window of its own beside
+// the board rather than over it.
+//
+// Holding the view controller is not the whole story there: from a signed-out
+// headset GameKit also opens a sign-in window of its own when `authenticate()`
+// is called, so `VisionModel` does not call it until the player has asked for
+// Game Center once.
+#if os(iOS) || os(macOS) || os(tvOS) || os(visionOS)
 import GameKit
 import Observation
 #if os(macOS)
@@ -23,6 +36,20 @@ final class GameCenter: NSObject {
     static let shared = GameCenter()
 
     private(set) var isAuthenticated = false
+
+    #if os(visionOS)
+    /// GameKit asked to sign the player in, and the request is waiting for a
+    /// pinch rather than covering the board. See the file comment.
+    var needsSignIn: Bool { heldSignIn != nil }
+    private var heldSignIn: UIViewController?
+
+    /// Show the sign-in GameKit asked for, now that the player asked for it.
+    func signIn() {
+        guard let viewController = heldSignIn else { return }
+        heldSignIn = nil
+        Self.rootViewController?.present(viewController, animated: true)
+    }
+    #endif
 
     /// Leaderboard / achievement IDs (must match App Store Connect).
     ///
@@ -92,8 +119,12 @@ final class GameCenter: NSObject {
         GKLocalPlayer.local.authenticateHandler = { [weak self] viewController, _ in
             Task { @MainActor in
                 guard let self else { return }
-                if let viewController { Self.present(viewController) }
+                if let viewController { self.present(viewController) }
                 self.isAuthenticated = GKLocalPlayer.local.isAuthenticated
+                #if os(visionOS)
+                // Signed in some other way (Settings) while the request waited.
+                if self.isAuthenticated { self.heldSignIn = nil }
+                #endif
                 guard self.isAuthenticated else { return }
                 if thenShowDashboard, viewController == nil { self.showDashboard() }
                 self.registerParlorListener()
@@ -199,7 +230,7 @@ final class GameCenter: NSObject {
     /// `GKAccessPoint` trigger opens the same dashboard without a UIKit host.
     func showDashboard() {
         guard isAuthenticated else { return }
-        #if os(macOS)
+        #if os(macOS) || os(visionOS)
         GKAccessPoint.shared.trigger(state: .dashboard) {}
         #else
         let dashboard = GKGameCenterViewController(state: .dashboard)
@@ -220,13 +251,17 @@ final class GameCenter: NSObject {
     #if os(macOS)
     /// Present the sign-in view controller macOS-style: as a sheet on the key
     /// window (GameKit hands back an `NSViewController` on the Mac).
-    private static func present(_ viewController: NSViewController) {
+    private func present(_ viewController: NSViewController) {
         guard let window = NSApp.keyWindow ?? NSApp.windows.first else { return }
         window.contentViewController?.presentAsSheet(viewController)
     }
     #else
-    private static func present(_ viewController: UIViewController) {
-        rootViewController?.present(viewController, animated: true)
+    private func present(_ viewController: UIViewController) {
+        #if os(visionOS)
+        heldSignIn = viewController
+        #else
+        Self.rootViewController?.present(viewController, animated: true)
+        #endif
     }
 
     private static var rootViewController: UIViewController? {

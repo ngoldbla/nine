@@ -47,7 +47,10 @@ final class DuelSealTests: XCTestCase {
         // three remaining ledgers keep their anchored guards.
         for (ledger, guarded) in [
             ("the channel ledger", "if !isDuel, case .channel(let c, _, _)? = kind"),
-            ("the classic history", "} else if !isDuel {\n            history.record(record)"),
+            // The history write starts by folding in the shared KVS copy
+            // (Vision follow-through 1), so the anchor is that line now.
+            ("the classic history",
+             "} else if !isDuel {\n            var log = history.mergedWithShared(sharedBlob(\"nine.history\"))"),
             ("Game Center", "} else if !isDuel {\n            // A duel reports nothing."),
         ] {
             XCTAssertTrue(

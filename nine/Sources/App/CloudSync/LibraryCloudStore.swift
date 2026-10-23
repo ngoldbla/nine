@@ -4,7 +4,7 @@
 // carrying the SyncedEntry projection. No CKQuery polling — the engine's event
 // stream drives fetch and send. This is the ONLY file in the app that imports
 // CloudKit; the merge rules it applies live, tested, in the Engine.
-#if os(iOS) || os(macOS) || os(tvOS)
+#if os(iOS) || os(macOS) || os(tvOS) || os(visionOS)
 import Foundation
 import CloudKit
 import OSLog

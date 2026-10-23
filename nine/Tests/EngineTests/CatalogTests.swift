@@ -37,7 +37,7 @@ final class CatalogTests: XCTestCase {
         // that need them: drop it from NineWidgets, add a second copy anywhere
         // under Nine, and the count, the test and all three platform builds
         // stay green while the widget ships permanently English.
-        for target in ["Nine", "NineWidgets", "NineWatch"] {
+        for target in ["Nine", "NineWidgets", "NineWatch", "NineVision"] {
             let block = try XCTUnwrap(Self.targetBlock(target, in: yml),
                                       "project.yml has no target named \(target) at "
                                       + "two-space indent — this test is reading the "
@@ -107,13 +107,15 @@ final class CatalogTests: XCTestCase {
             .map { $0.trimmingCharacters(in: .whitespaces) }
             .filter { $0.hasPrefix("CFBundleLocalizations:") }
 
-        // Three: the app's Info.plist, the widget extension's, and the watch
-        // app's. Each is a separate bundle with a separate Info.plist, so "the
-        // app declares it" is a fact about none of the others — and an
-        // extension or a watch app resolves against its OWN `Bundle.main`.
-        XCTAssertEqual(declared.count, 3, """
-            CFBundleLocalizations must be declared by ALL THREE bundles — \
-            Nine.app, NineWidgets.appex and NineWatch.app. Found \(declared.count).
+        // Four: the app's Info.plist, the widget extension's, the watch app's
+        // and the Vision Pro app's. Each is a separate bundle with a separate
+        // Info.plist, so "the app declares it" is a fact about none of the
+        // others — and an extension or a watch app resolves against its OWN
+        // `Bundle.main`.
+        XCTAssertEqual(declared.count, 4, """
+            CFBundleLocalizations must be declared by ALL FOUR bundles — \
+            Nine.app, NineWidgets.appex, NineWatch.app and NineVision.app. \
+            Found \(declared.count).
             """)
 
         for line in declared {
@@ -132,8 +134,8 @@ final class CatalogTests: XCTestCase {
                 """)
         }
 
-        XCTAssertEqual(Self.occurrences(of: "CFBundleDevelopmentRegion: en", in: yml), 3,
-                       "English is the source language; all three bundles must say so.")
+        XCTAssertEqual(Self.occurrences(of: "CFBundleDevelopmentRegion: en", in: yml), 4,
+                       "English is the source language; all four bundles must say so.")
     }
 
     // MARK: - The two entry points
@@ -861,9 +863,13 @@ final class CatalogTests: XCTestCase {
         // same sentence with the name replaced by a word meaning "you" and so
         // carries two. The seven others the PRD added take no argument at all:
         // a heading, an invitation, two verbs, two notes and one pronoun.
-        XCTAssertEqual(keysCarryingTwoOrMore, 52, """
+        //
+        // 52 → 53 for the Vision Pro board chooser: `vision.chooser.detail`,
+        // a board's second line in the New Game menu (how much is left, and
+        // when it was last played). The offer button beside it takes none.
+        XCTAssertEqual(keysCarryingTwoOrMore, 53, """
             \(keysCarryingTwoOrMore) keys carry two or more positional arguments, \
-            not the 52 this test was calibrated against. That is fine and the \
+            not the 53 this test was calibrated against. That is fine and the \
             number should move with the catalog — update it deliberately, in a \
             diff, having checked that `renderings` still reads all three shapes. \
             It is pinned because it dropping to 0 is what a silently-broken \

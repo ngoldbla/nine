@@ -18,7 +18,7 @@
 // "available on watchOS 11", and the fallback branch became unreachable. The
 // compiler caught it on `GlassEffectContainer` (PRD-6 Task 1); it would not
 // have caught a modifier that merely does nothing.
-#if os(tvOS) || os(iOS) || os(macOS) || os(watchOS)
+#if os(tvOS) || os(iOS) || os(macOS) || os(watchOS) || os(visionOS)
 import SwiftUI
 
 extension View {
@@ -26,6 +26,9 @@ extension View {
     /// Use instead of any direct material/glass call.
     @ViewBuilder
     public func couchGlass(in shape: some Shape) -> some View {
+        #if os(visionOS)
+        self.modifier(CouchSpatialGlass(shape: shape, material: .regularMaterial))
+        #else
         if #available(tvOS 26.0, iOS 26.0, macOS 26.0, watchOS 26.0, *) {
             self.glassEffect(.regular, in: shape)
         } else {
@@ -33,6 +36,7 @@ extension View {
                 .background(.ultraThinMaterial, in: shape)
                 .overlay(shape.stroke(Color.white.opacity(0.12), lineWidth: 1))
         }
+        #endif
     }
 
     /// Capsule glass — the default silhouette for pills and chips.
@@ -44,6 +48,14 @@ extension View {
     /// tvOS 26 the glass responds to focus with specular movement.
     @ViewBuilder
     public func couchGlassInteractive(in shape: some Shape) -> some View {
+        #if os(visionOS)
+        // The gaze highlight is visionOS's version of `.interactive()`: the
+        // system draws it out of process, so the app never learns where the
+        // eyes are — only that a pinch landed.
+        self.modifier(CouchSpatialGlass(shape: shape, material: .regularMaterial))
+            .contentShape(.hoverEffect, shape)
+            .hoverEffect(.highlight)
+        #else
         if #available(tvOS 26.0, iOS 26.0, macOS 26.0, watchOS 26.0, *) {
             self.glassEffect(.regular.interactive(), in: shape)
         } else {
@@ -51,6 +63,7 @@ extension View {
                 .background(.ultraThinMaterial, in: shape)
                 .overlay(shape.stroke(Color.white.opacity(0.18), lineWidth: 1))
         }
+        #endif
     }
 }
 
@@ -120,6 +133,9 @@ extension View {
     /// `.clear` deliberately does not.
     @ViewBuilder
     public func couchGlassOverContent(in shape: some Shape) -> some View {
+        #if os(visionOS)
+        self.modifier(CouchSpatialGlass(shape: shape, material: .thinMaterial))
+        #else
         if #available(tvOS 26.0, iOS 26.0, macOS 26.0, watchOS 26.0, *) {
             self.modifier(CouchClearGlass(shape: shape))
         } else {
@@ -127,6 +143,7 @@ extension View {
                 .background(.ultraThinMaterial, in: shape)
                 .overlay(shape.stroke(Color.white.opacity(0.10), lineWidth: 1))
         }
+        #endif
     }
 
     /// Capsule `.clear` glass — the default silhouette for floating chrome.
@@ -145,6 +162,9 @@ extension View {
     /// paper — see `AccentChoice.color(isLight:)`).
     @ViewBuilder
     public func couchGlassTinted(_ tint: Color, in shape: some Shape) -> some View {
+        #if os(visionOS)
+        self.modifier(CouchSpatialGlass(shape: shape, material: .regularMaterial, tint: tint))
+        #else
         if #available(tvOS 26.0, iOS 26.0, macOS 26.0, watchOS 26.0, *) {
             self.modifier(CouchTintedGlass(shape: shape, tint: tint))
         } else {
@@ -153,6 +173,7 @@ extension View {
                 .background(.ultraThinMaterial, in: shape)
                 .overlay(shape.stroke(tint.opacity(0.45), lineWidth: 1))
         }
+        #endif
     }
 
     /// Capsule tinted glass.
@@ -180,11 +201,16 @@ extension View {
         in shape: some Shape,
         tint: Color = Color.white.opacity(0.06)
     ) -> some View {
+        #if os(visionOS)
+        // Already the visionOS answer to glass-on-glass: no second material.
+        self.background(tint, in: shape)
+        #else
         if #available(tvOS 26.0, iOS 26.0, macOS 26.0, watchOS 26.0, *) {
             self.modifier(CouchIdentityGlass(shape: shape, tint: tint))
         } else {
             self.background(tint, in: shape)
         }
+        #endif
     }
 
     /// Capsule inset.
@@ -246,7 +272,15 @@ extension View {
         in shape: some InsettableShape,
         isLight: Bool = false
     ) -> some View {
+        #if os(visionOS)
+        // The platform's own glass is already lit and lifted by the room — it
+        // takes its specular from the real lights and its depth from the
+        // window. CouchElevation's blurred black lift would read as a smudge
+        // on the user's wall, so on Vision Pro the rung is the system's slab.
+        self.glassBackgroundEffect(in: shape)
+        #else
         couchGlass(in: shape).couchElevated(in: shape, isLight: isLight)
+        #endif
     }
 
     // MARK: L1½ — a bar of chrome floating over live content
@@ -486,6 +520,7 @@ public enum CouchSpecular {
 // live as modifiers because a `View` extension has no environment of its own.
 
 @available(tvOS 26.0, iOS 26.0, macOS 26.0, watchOS 26.0, *)
+@available(visionOS, unavailable)
 private struct CouchClearGlass<S: Shape>: ViewModifier {
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
     let shape: S
@@ -503,6 +538,7 @@ private struct CouchClearGlass<S: Shape>: ViewModifier {
 }
 
 @available(tvOS 26.0, iOS 26.0, macOS 26.0, watchOS 26.0, *)
+@available(visionOS, unavailable)
 private struct CouchTintedGlass<S: Shape>: ViewModifier {
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
     let shape: S
@@ -519,6 +555,7 @@ private struct CouchTintedGlass<S: Shape>: ViewModifier {
 }
 
 @available(tvOS 26.0, iOS 26.0, macOS 26.0, watchOS 26.0, *)
+@available(visionOS, unavailable)
 private struct CouchIdentityGlass<S: Shape>: ViewModifier {
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
     let shape: S
@@ -540,6 +577,31 @@ private struct CouchIdentityGlass<S: Shape>: ViewModifier {
 }
 
 /// The rim without the lift — see `couchRim(in:isLight:)`.
+#if os(visionOS)
+/// Every material rung on Vision Pro. `glassBackgroundEffect(in:)` would be the
+/// truer slab, but it wants an `InsettableShape` and these rungs take any
+/// `Shape`; visionOS's materials are themselves glass (they sample the room,
+/// not a backdrop), so a material clipped to the shape is the platform's own
+/// look rather than a fallback. Reduce Transparency gets the opaque backing,
+/// exactly as on the other four platforms.
+private struct CouchSpatialGlass<S: Shape>: ViewModifier {
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+    let shape: S
+    let material: Material
+    var tint: Color? = nil
+
+    func body(content: Content) -> some View {
+        if reduceTransparency {
+            content.modifier(CouchOpaqueBacking(shape: shape, tint: tint?.opacity(0.30)))
+        } else {
+            content
+                .background(tint?.opacity(0.22) ?? .clear, in: shape)
+                .background(material, in: shape)
+        }
+    }
+}
+#endif
+
 private struct CouchRim<S: InsettableShape>: ViewModifier {
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
     let shape: S
@@ -687,6 +749,12 @@ public struct CouchGlassContainer<Content: View>: View {
     }
 
     public var body: some View {
+        #if os(visionOS)
+        // No morphing container on visionOS; siblings are simply siblings.
+        Group {
+            content
+        }
+        #else
         if #available(tvOS 26.0, iOS 26.0, macOS 26.0, watchOS 26.0, *) {
             GlassEffectContainer(spacing: spacing) {
                 content
@@ -696,6 +764,7 @@ public struct CouchGlassContainer<Content: View>: View {
                 content
             }
         }
+        #endif
     }
 }
 #endif

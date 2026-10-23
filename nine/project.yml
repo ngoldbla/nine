@@ -5,6 +5,7 @@ options:
     tvOS: "18.0"
     iOS: "18.0"
     macOS: "15.0"
+    visionOS: "26.0"
 packages:
   CouchKit:
     path: ../couchkit
@@ -52,6 +53,10 @@ targets:
       # Sources/Strings is listed three times.
       - Sources/Shortcuts
       - Assets.xcassets
+      # Not on tvOS: Apple TV's icon is the parallax image stack in the brand
+      # asset, and Icon Composer documents have no tvOS rendition.
+      - path: Nine.icon
+        destinationFilters: [iOS, macOS]
       - path: PrivacyInfo.xcprivacy
         buildPhase: resources
     dependencies:
@@ -77,12 +82,13 @@ targets:
         MARKETING_VERSION: "1.2"
         CURRENT_PROJECT_VERSION: 1
         TARGETED_DEVICE_FAMILY: "1,2,3"
-        # tvOS keeps the layered brand asset; iOS uses the flat square icon;
-        # macOS uses its own margined, rounded icon set (PRD-4 §1).
-        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        # tvOS keeps the layered brand asset (PRD-4 §1); iOS and macOS take the
+        # Icon Composer document `Nine.icon`, named by its basename. One file
+        # replaces the flat square and the margined Mac set: the system masks
+        # and lights it per platform and appearance, which a PNG cannot do.
+        ASSETCATALOG_COMPILER_APPICON_NAME: Nine
         "ASSETCATALOG_COMPILER_APPICON_NAME[sdk=appletvos*]": "App Icon & Top Shelf Image"
         "ASSETCATALOG_COMPILER_APPICON_NAME[sdk=appletvsimulator*]": "App Icon & Top Shelf Image"
-        "ASSETCATALOG_COMPILER_APPICON_NAME[sdk=macosx*]": "AppIcon-macOS"
         # PRD-16 alternate icons, iOS SDKs only: a tvOS icon is a layered brand
         # asset and macOS has no `setAlternateIconName`, so naming these there
         # would hand actool iOS icon sets to validate against the wrong idiom.
@@ -342,6 +348,9 @@ targets:
       - Sources/App/DesignTokens.swift
       - Sources/App/Theme.swift
       - Assets.xcassets
+      # The same document as the phone's; its `circles` rendition and the
+      # watchOS position specializations are what fit the grid to the round mask.
+      - Nine.icon
     dependencies:
       - package: CouchKit
     settings:
@@ -354,7 +363,7 @@ targets:
         MARKETING_VERSION: "1.2"
         CURRENT_PROJECT_VERSION: 1
         SKIP_INSTALL: true
-        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon-watchOS
+        ASSETCATALOG_COMPILER_APPICON_NAME: Nine
         CODE_SIGN_STYLE: Manual
         CODE_SIGN_IDENTITY: "Apple Distribution"
         DEVELOPMENT_TEAM: ${COUCH_TEAM_ID}
@@ -386,3 +395,83 @@ targets:
         # the Gentle fallback (PRD-6 §2.4, and D6 of the plan).
         WKRunsIndependentlyOfCompanionApp: true
         ITSAppUsesNonExemptEncryption: false
+
+  # Nine on Vision Pro. The watch's shape, not the universal target's: a
+  # platform target of its own with a curated source list, because the phone,
+  # TV and Mac UI is ~20k lines that would each need a visionOS answer, and the
+  # board is one file that already has one. `AppModel.swift` is absent for the
+  # CloudKit reason in CLAUDE.md — this target carries no entitlements at all,
+  # and its model (Sources/Vision/VisionModel.swift) persists locally only.
+  #
+  # Same bundle identifier as `Nine`, so Vision Pro joins the one app record
+  # (universal purchase) rather than founding a second. Its own shared scheme
+  # is safe where a test bundle's was not: gym is handed `scheme: "Nine"`
+  # explicitly, so a second entry in `xcodebuild -list` changes nothing it does.
+  NineVision:
+    type: application
+    platform: visionOS
+    scheme: {}
+    sources:
+      - Sources/Vision
+      - Sources/Engine
+      - Sources/Shared
+      # A fourth process, a fourth `Bundle.main` — see the long comment on
+      # `Nine.sources`, and `CatalogTests.testEveryTargetListsTheStringsTree`.
+      - Sources/Strings
+      # The board is reused exactly as the watch reuses it. Unlike the watch,
+      # visionOS has SwiftUI shaders, so the Afterglow comes too.
+      - Sources/App/BoardView.swift
+      - Sources/App/BoardAccessibility.swift
+      - Sources/App/DesignTokens.swift
+      - Sources/App/Theme.swift
+      - Sources/App/Afterglow.metal
+      # Parity (play anywhere): the library's CloudKit boundary, Game Center and
+      # the parlor transport seam — each compiled in on its own, never through
+      # AppModel. Those three files import no model; LibraryCloudStore is the
+      # one that builds a `CKContainer`, which is why the entitlements below
+      # are no longer optional for this target. `VisionSealTests` holds both
+      # halves of that.
+      - Sources/App/CloudSync
+      - Sources/App/GameCenter.swift
+      - Sources/App/ParlorSession.swift
+      # Not Nine.icon: actool accepts the document for `xros` and emits no
+      # icon at all. visionOS wants a layered solid image stack, which
+      # scripts/vision-icon.py derives from Nine.icon's three groups.
+      - VisionAssets.xcassets
+    dependencies:
+      - package: CouchKit
+    settings:
+      base:
+        SWIFT_VERSION: "6.0"
+        PRODUCT_BUNDLE_IDENTIFIER: com.couchsuite.nine
+        MARKETING_VERSION: "1.2"
+        CURRENT_PROJECT_VERSION: 1
+        ASSETCATALOG_COMPILER_APPICON_NAME: Nine
+        CODE_SIGN_STYLE: Manual
+        CODE_SIGN_IDENTITY: "Apple Distribution"
+        DEVELOPMENT_TEAM: ${COUCH_TEAM_ID}
+        # Checked in, not generated: see the file and the `.gitignore`
+        # negation beside the other three.
+        CODE_SIGN_ENTITLEMENTS: Nine-visionOS.entitlements
+        # visionOS has no profile of its own. Apple mints the iOS App Store
+        # profile for every platform that shares the iOS SDK lineage — the
+        # installed `match AppStore com.couchsuite.nine` reads
+        # Platform = [iOS, xrOS, visionOS] — and match 2.241 accepts only
+        # tvos/ios/macos/catalyst, so the iOS profile is the visionOS profile.
+        "PROVISIONING_PROFILE_SPECIFIER[sdk=xros*]": "match AppStore com.couchsuite.nine"
+    info:
+      path: VisionInfo.plist
+      properties:
+        CFBundleDisplayName: Nine
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        CFBundleDevelopmentRegion: en
+        CFBundleLocalizations: [en, ja, de, fr, es, it, pt-BR, ko, zh-Hans, nl]
+        ITSAppUsesNonExemptEncryption: false
+        LSApplicationCategoryType: public.app-category.puzzle-games
+        # Launch into the Shared Space as one window: the board sits beside
+        # whatever else is open, and nothing here ever asks for a Full Space.
+        UIApplicationSceneManifest:
+          UIApplicationSupportsMultipleScenes: false
+          UIApplicationPreferredDefaultSceneSessionRole: UIWindowSceneSessionRoleApplication
+          UISceneConfigurations: {}

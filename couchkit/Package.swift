@@ -22,7 +22,11 @@ let package = Package(
         // Adding a platform only introduces a floor for that platform; it
         // cannot move tvOS/iOS/macOS. Proved rather than assumed — a sibling
         // tvOS app is built in the same commit (PRD-6 Task 1 Step 5).
-        .watchOS(.v11)
+        .watchOS(.v11),
+        // Nine on Vision Pro. visionOS has no `glassEffect` at all — it is
+        // marked unavailable there, not merely absent below 26 — so CouchGlass
+        // routes it to the platform's own glass rather than through `#available`.
+        .visionOS(.v2)
     ],
     products: [
         .library(name: "CouchKit", targets: ["CouchKit", "CouchCore"])

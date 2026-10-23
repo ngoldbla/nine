@@ -20,13 +20,69 @@ xcodegen generate
 open Nine.xcodeproj      # pick a destination, Cmd+R
 ```
 
-`xcodegen generate` produces three targets:
+`xcodegen generate` produces four targets:
 
 | Target | Destinations |
 |---|---|
 | `Nine` | tvOS, iOS (iPhone + iPad), macOS — one universal target |
 | `NineWidgets` | iOS app extension (WidgetKit); filtered out of the tvOS and macOS graphs |
 | `NineWatch` | watchOS, embedded in the iOS app |
+| `NineVision` | visionOS — its own target and shared scheme, same bundle id as `Nine` |
+
+### Vision Pro
+
+`NineVision` is the watch's shape, not the universal target's: a curated source
+list (`Sources/Vision` plus the Engine, Shared, Strings, the four board files,
+and the CloudKit store, Game Center and parlor seam compiled in on their own)
+with its own small model, so `AppModel` never reaches it. It carries
+`Nine-visionOS.entitlements` (checked in, like tvOS's) because
+`LibraryCloudStore` builds a `CKContainer`; `VisionSealTests` holds that pair
+together. It signs with the iOS App Store profile, which Apple mints for
+visionOS too, and ships with `fastlane beta platform:vision` (train +3).
+
+```bash
+xcodebuild -project Nine.xcodeproj -scheme NineVision \
+  -destination 'generic/platform=visionOS Simulator' CODE_SIGNING_ALLOWED=NO build
+```
+
+A simulator cannot be pinched from a script, so DEBUG builds take two launch
+arguments that stage what a screenshot needs: `--vision-near-solve` (every cell
+but one filled and selected — the keypad is up) and `--vision-solve` (the same,
+then the last digit lands two seconds in, through the pinch's own path).
+`--vision-coplay-demo` starts a SharePlay co-solve over a ghost transport that
+places a correct digit every 2.5 s, since no FaceTime call reaches a simulator.
+`--vision-tour` walks every board interaction (select, place, error, erase,
+undo, pencil, deselect, new game, solve) through the model's own input calls,
+because the visionOS simulator vends no HID digitizer to inject a pinch with;
+add `--vision-wait-go` to advance it one step per `tmp/vision-go` file instead
+of on timers. `nine/docs/vision/SHOTLIST.md` is the walkthrough made with them.
+`--vision-theme <raw>` (with optional `--vision-accent <raw>`) stages the
+appearance a phone would publish, for a contrast pass on a simulator that has
+no iCloud account to receive it.
+`--vision-offer-demo` lands a newer Steady board in the library as a phone's
+would arrive, runs the after-merge rule and selects a cell, so the bottom
+ornament shows "Continue your other board". `--vision-chooser-demo` adds three
+boards in progress from earlier days and selects a cell, for the New Game
+menu's "In progress" section (the menu itself opens only on a pinch).
+
+`nine/scripts/vision-storyboard.py` keeps those captures repeatable: it boots
+"Nine Vision" (`simrig.prepare_vision_simulator`), installs a DEBUG build,
+waits for the scene (the app consumes its first `vision-go` only once its
+window is up — luminance alone mistook visionOS's launch placeholder for the
+board) and then for the frame to settle by luminance, steps the tour with
+`vision-go`, bursts frames after the solve and assembles `storyboard.mp4` with
+ffmpeg. Staging arguments go after `--`. `--measure-launch N` times N cold
+launches to the scene going active instead.
+
+`.github/workflows/nine-vision.yml` builds NineVision for the simulator in Debug
+and Release on every PR touching `nine/` or `couchkit/`, fails if
+`xcodebuild -list` stops listing both `Nine` and `NineVision`, and fails if any
+DEBUG staging argument survives into the Release binary.
+
+The app icon is a `.solidimagestack` in `VisionAssets.xcassets`, **derived** from
+`Nine.icon` by `python3 nine/scripts/vision-icon.py` — actool accepts the Icon
+Composer document for `xros` and silently emits no icon. Re-run the script after
+editing `Nine.icon`. `simslim` does not slim visionOS simulators; they run stock.
 
 Nine depends on `../couchkit` as a local SwiftPM package. There are no other
 dependencies and no remote packages anywhere in the repo.

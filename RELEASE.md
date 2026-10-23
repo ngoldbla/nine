@@ -60,6 +60,27 @@ bundle exec fastlane ios release platform:ios build:1231 submit:true   # …and 
 
 `store_check` is the gate every upload lane runs first, and the only lane that
 needs no credentials — run it anywhere, including a Linux container.
+
+**While another platform's version is In Review, pass `app_info:false`.** The
+app-level record (name, subtitle, privacy URLs, categories, age rating) is shared
+by every platform and ASC locks it during any review; deliver's metadata step
+fetches it unconditionally and gives up after ~10 minutes of "Cannot find edit
+app info". With `app_info:false`, deliver still renames/creates the version and
+replaces the screenshots, and the version-level text (description, keywords,
+promotional text, URLs, copyright, release notes) goes up through the API.
+1.2 was staged this way on 2026-10-23 while Mac 1.1 sat in review. `release`
+also attaches the build itself now: deliver only picks one inside
+`submit_for_review`, so a staged version used to have none. The same path sets
+**manual release** and creates **App Review details** when a version has none
+(copying the contact from another version; notes from
+`metadata/review_information/notes.txt`), two more things deliver's skipped
+metadata step used to do. Both were done by hand for tvOS 1.2, which went in
+without review details and set to release on approval.
+
+**Game Center on a new platform's version** is not a lane step: the API takes a
+`POST /v1/gameCenterAppVersions` linked to the `appStoreVersion` (done for tvOS
+1.2 on 2026-10-23). Later versions on that platform inherit it, as iOS 1.2 did
+from 1.1.
 `release` has no default build number on purpose: HEAD's commit count is not
 the number of the build that was tested. Use the number TestFlight shows
 (`(commit count + 100) × 10`, +1 iOS, +2 Mac; builds before 2026-10-17 had no +100). Approval never auto-releases —
