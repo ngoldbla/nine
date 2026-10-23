@@ -271,7 +271,7 @@ public enum EnglishPhrases {
         "game.tv.backAgain": "Press Back again for Home",
         "game.tv.disconnected": "Controller disconnected",
         "game.tv.padHint": "✕ digits · □ pencil · △ undo · ☰ settings",
-        "game.tv.remoteHint": "Tap for digits · ▶︎ pencil · Hold ▶︎ to undo · Hold the clickpad for settings",
+        "game.tv.remoteHint": "▶︎ pencil · Hold ▶︎ to undo",
         "game.undo.autoNotes": "Undid auto notes",
         "game.undo.note": "Undid note %1$lld",
         "game.undo.placement": "Undid %1$lld",

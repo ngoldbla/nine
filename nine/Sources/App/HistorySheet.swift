@@ -708,6 +708,16 @@ struct HeatLegend: View {
 
 // MARK: - The sheet
 
+/// A place the remote can stop while reading History: a section, or one solve
+/// in the recent log (by `SolveRecord.id`). Only tvOS focuses them, but every
+/// platform names them — `readable(_:_:)` takes one everywhere and is the
+/// identity off the TV.
+enum HistoryTVStop: Hashable {
+    case close
+    case section(Int)
+    case record(Double)
+}
+
 struct HistorySheetContent: View {
     let model: AppModel
     /// tvOS only: a focusable dismiss control so the remote/pad can always leave
@@ -732,6 +742,15 @@ struct HistorySheetContent: View {
     /// content beyond it. See `edgeFade`.
     #if !os(tvOS)
     @State private var edges = LearnScrollEdges()
+    #endif
+
+    #if os(tvOS)
+    /// Where the remote is reading. Every section and every logged solve is a
+    /// stop: a sheet of charts is static text, and static text gives the
+    /// focus engine nothing to land on — so the remote could neither scroll
+    /// this sheet nor be sure of being inside it (1.2 beta: "History cannot be
+    /// exited at all").
+    @FocusState private var tvStop: HistoryTVStop?
     #endif
 
     /// The new stat sections need a real history to be worth drawing; below
@@ -809,13 +828,13 @@ struct HistorySheetContent: View {
                 case .blank:
                     zeroState
                 case .seam:
-                    totalsRow
-                    heatSection
+                    readable(totalsRow, .section(0))
+                    readable(heatSection, .section(1))
                 case .full:
-                    totalsRow
-                    heatSection
-                    avgVsBestSection
-                    trendSection
+                    readable(totalsRow, .section(0))
+                    readable(heatSection, .section(1))
+                    readable(avgVsBestSection, .section(2))
+                    readable(trendSection, .section(3))
                 }
 
                 gameCenterRow
@@ -839,6 +858,40 @@ struct HistorySheetContent: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.top, Space.m * s)
         }
+        // Room inside the clip for a stop's highlight, which reaches past the
+        // section it outlines.
+        .contentMargins(.vertical, 18, for: .scrollContent)
+        .contentMargins(.horizontal, 14, for: .scrollContent)
+        // Land on the close disc, as Boards does: it holds the sheet at its
+        // top with the title in view (landing on the first section scrolled
+        // the title off), and a reflexive click there only closes. One swipe
+        // down and the remote is reading.
+        .onAppear {
+            Task { @MainActor in tvStop = .close }
+        }
+        #endif
+    }
+
+    /// A section the remote can stop on (tvOS); the section itself elsewhere.
+    @ViewBuilder
+    private func readable(_ content: some View, _ stop: HistoryTVStop) -> some View {
+        #if os(tvOS)
+        let shape = RoundedRectangle(cornerRadius: HistoryMetrics.childRadius * s + 10,
+                                     style: .continuous)
+        let isHere = tvStop == stop
+        content
+            // Outlined from outside, so focusing a section moves nothing.
+            .background {
+                shape.fill(tones.gridTone.opacity(isHere ? 0.08 : 0)).padding(-10)
+            }
+            .overlay {
+                shape.strokeBorder(accent.opacity(isHere ? 0.75 : 0), lineWidth: 3).padding(-10)
+            }
+            .focusable()
+            .focused($tvStop, equals: stop)
+            .animation(.couchFast, value: isHere)
+        #else
+        content
         #endif
     }
 
@@ -894,6 +947,7 @@ struct HistorySheetContent: View {
                         .couchRim(in: Circle(), isLight: tones.isLight)
                 }
                 .buttonStyle(.plain)
+                .focused($tvStop, equals: .close)
                 .accessibilityLabel(Strings.string("history.close"))
             }
             #endif
@@ -936,8 +990,11 @@ struct HistorySheetContent: View {
                 .fixedSize(horizontal: false, vertical: true)
                 .frame(maxWidth: .infinity, alignment: .leading)
 
-            heatSection
-            totalsRow
+            // Stops on the figures, not on the sentence: one stop for the
+            // whole zero state is taller than the sheet, and landing on it
+            // scrolled the title out of view.
+            readable(heatSection, .section(0))
+            readable(totalsRow, .section(1))
         }
     }
 
@@ -1197,7 +1254,7 @@ struct HistorySheetContent: View {
                     if index > 0 {
                         HistorySeam(tones: tones, leading: recentSeamInset)
                     }
-                    recentRow(record)
+                    readable(recentRow(record), .record(record.id))
                 }
             }
             .historyInset(tones,

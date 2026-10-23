@@ -79,6 +79,7 @@ struct GameScreen: View {
     @Environment(\.colorScheme) private var colorScheme
     /// PRD-22: the petal lens is motion, so Reduce Motion keeps the material.
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.layoutDirection) private var layoutDirection
 
     /// The TV rose's geometry (PRD-22). `clamped: false` on purpose: the tvOS
     /// ring has never been pulled back onto the plane, and PRD-22 is a
@@ -211,6 +212,7 @@ struct GameScreen: View {
     private var core: some View {
         ZStack {
             stage(board)
+            panelChevron
             screenChrome(pencil: remotePencil)
             completionChip
             sidePanel {
@@ -229,6 +231,29 @@ struct GameScreen: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .onAppear { flashHint() }
+    }
+
+    /// The chevron in the margin on the panel's side of the centred board,
+    /// while there is a board to swipe off: not over a panel, the rose or a
+    /// solved board. Remote only — a controller opens settings with ☰.
+    @ViewBuilder
+    private var panelChevron: some View {
+        if panel == nil, rose == nil, model.solvedAt == nil {
+            // A board-wide gap, then the chevron: an HStack, so the trailing
+            // side is the trailing side under either layout direction.
+            HStack(spacing: 24) {
+                Color.clear.frame(width: TVPanelMetrics.boardSide)
+                PanelChevron(
+                    armed: Self.leavesTowardPanel(
+                        cursor: cursor,
+                        direction: layoutDirection == .rightToLeft ? .left : .right,
+                        layout: layoutDirection),
+                    accent: accent)
+            }
+            // Centred on the board, not on the pair.
+            .padding(.leading, 24 + PanelChevron.width)
+            .transition(.opacity)
+        }
     }
 
     // MARK: - Side by side
@@ -327,13 +352,16 @@ struct GameScreen: View {
     @ViewBuilder
     private var notes: some View {
         let oneLine = panel != nil
-        if showHint {
-            CornerNote(text: Strings.string("game.tv.remoteHint"),
-                       systemImage: "questionmark.circle", oneLine: oneLine)
+        // The two control legends are rows, never one squeezed line: they
+        // are the only place the screen says how settings open.
+        // Not while a panel is open: the player has found settings, and under
+        // the shrunk board the legend would sit on the board.
+        if showHint && panel == nil {
+            CornerLegend(text: Strings.string("game.tv.remoteHint"))
         }
-        if showPadHint {
-            CornerNote(text: Strings.string("game.tv.padHint"),
-                       systemImage: "gamecontroller", oneLine: oneLine)
+        if showPadHint && panel == nil {
+            CornerLegend(text: Strings.string("game.tv.padHint"),
+                         systemImage: "gamecontroller")
         }
         if let toast = model.padSession ? pad.undoToast : toast {
             CornerNote(text: toast.text, systemImage: "arrow.uturn.backward", oneLine: oneLine)
@@ -672,7 +700,9 @@ struct GameScreen: View {
         model.hintFlashed = true
         withAnimation(.couchFast) { showHint = true }
         Task {
-            try? await Task.sleep(nanoseconds: 4_200_000_000)
+            // Long enough to read four rows from a sofa; it was 4.2 s for one
+            // run-on line, and the job that mattered came last.
+            try? await Task.sleep(nanoseconds: 9_000_000_000)
             withAnimation(.couchAmbient) { showHint = false }
         }
     }
@@ -734,7 +764,16 @@ struct GameScreen: View {
     private func handleBoard(_ gesture: CouchGesture) {
         switch gesture {
         case .swipe(let direction):
-            moveCursor(direction)
+            // Past the board's edge on the panel's side is settings: the
+            // panel lives there, so the thumb goes where the panel will be.
+            // A route a four-way remote and a thumb that cannot find "hold"
+            // both have (1.2 beta: settings could not be opened in a game).
+            if Self.leavesTowardPanel(cursor: cursor, direction: direction,
+                                      layout: layoutDirection) {
+                openPanel(.settings)
+            } else {
+                moveCursor(direction)
+            }
         case .tap:
             primary(.tap) { openRose() }
         case .click:
@@ -868,6 +907,18 @@ struct GameScreen: View {
             model.place(digit, at: cursor)
         }
         withAnimation(.couchFast) { rose = nil }
+    }
+
+    /// Whether a swipe from `cursor` would leave the board on the side the
+    /// side panel occupies — trailing, so right, or left under RTL.
+    static func leavesTowardPanel(cursor: Int, direction: Direction4,
+                                  layout: LayoutDirection) -> Bool {
+        let column = cursor % 9
+        switch (direction, layout) {
+        case (.right, .leftToRight): return column == 8
+        case (.left, .rightToLeft): return column == 0
+        default: return false
+        }
     }
 
     private func moveCursor(_ direction: Direction4) {

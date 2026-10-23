@@ -5218,3 +5218,55 @@ byte-identical to CI's.
 - **Not re-recorded: `duo-folded/`.** These baselines are local only (iOS 27.1,
   and the posture needs a person at Device Hub). They will show the same
   `[Top]` additions the next time someone runs them by hand.
+
+## tvOS repair pass — doors that close, settings you can find, a glow that does not band (2026-10-22)
+
+Three defects from the 1.2 beta on a real television, each fixed at its cause
+and each with a test that presses the Siri Remote through the focus engine
+(`UITests/TV/ShelfDoorTests.swift`, scheme `NineTVUITests`). The notification
+injector could not have caught the first: it feeds handlers directly, and the
+defect was where focus went.
+
+- **Boards and History opened behind a row that kept focus.** The shelf's glass
+  row stayed open — and enabled — after a door was pressed, so focus stayed on
+  it under the sheet. Back closed the row, not the sheet; History, whose body
+  is all static text, then had nothing the focus engine would move to, so it
+  could not be left at all. Now the row closes as the door opens, the shelf is
+  `.disabled` while a sheet is up (the same rule the first-run card already
+  followed), and History's sections and logged solves are focus stops with an
+  outline drawn outside them, so the remote can read the whole sheet and
+  always knows it is inside it. Both sheets land on their close disc: it
+  holds the sheet at its top with the title in view, and a reflexive click
+  there only closes. The shelf blurs and dims behind a sheet, because the
+  page's 124pt title read straight through the translucent glass.
+  Two more causes only the UI test found: with focus claimed by nothing,
+  Back on Boards was the *system's* Back and left the app (Boards now claims
+  focus on its close disc), and opening History called
+  `GameCenter.authenticate()`, which on a signed-out TV put Game Center's
+  full-screen welcome over the sheet. The History door no longer
+  authenticates; its Game Center row and the Game Center door still do.
+- **Settings could not be opened in a game.** The only route was holding the
+  clickpad, detected by a SwiftUI long press sharing one focusable surface
+  with a tap gesture — and on hardware the hold read as a click. Two routes
+  now: RemoteKit's GameController reader times the clickpad button itself
+  (0.6 s, the long press's own threshold; remote only — a gamepad's Cross is
+  PadKit's), and a swipe past the board's edge on the panel's side opens the
+  panel where the thumb was already pointing. The hint was a `CornerNote`
+  capped at three lines in a 380pt corner, which cut off the one clause about
+  settings. Round 3 made it minimal instead of longer: a `CornerLegend` of two
+  rows — ▶︎ pencil, hold ▶︎ to undo — split on the catalog's own " · " (the
+  two clauses keep their existing translations), on screen for 9 s, and gone
+  while a panel is open. Settings left the sentence entirely: a quiet
+  `PanelChevron` sits in the margin on the board's trailing side and lifts to
+  the accent when the cursor reaches the edge column, where one more swipe
+  opens the panel. Holding the clickpad still works; the guide still shows it.
+  The nine translations of the changed clause are `needs_review`.
+- **The shelf glow banded.** A two-stop `RadialGradient` at 28% over near-black
+  is a few dozen 8-bit codes over ~1800 4K pixels — rings — ending in a crease
+  where the linear ramp hit zero. `ShelfGlow.metal` draws a Gaussian falloff
+  with ±1-code triangular dither, faded out with the glow so the empty ground
+  stays still for the idle-pixel test.
+
+**Not verified here:** the GameController clickpad timer needs a physical Siri
+Remote (`XCUIRemote` presses reach UIKit, not GameController), and how much
+the dither helps on any given television's processing is a hardware question.

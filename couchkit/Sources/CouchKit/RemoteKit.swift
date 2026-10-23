@@ -134,15 +134,9 @@ struct CouchRemoteModifier: ViewModifier {
             }
             .onLongPressGesture(
                 minimumDuration: 0.6,
-                perform: {
-                    holdActive = true
-                    emit(.holdBegan)
-                },
+                perform: { beginHold() },
                 onPressingChanged: { pressing in
-                    if !pressing && holdActive {
-                        holdActive = false
-                        emit(.holdEnded)
-                    }
+                    if !pressing { endHold() }
                 }
             )
             .onAppear {
@@ -171,9 +165,32 @@ struct CouchRemoteModifier: ViewModifier {
             emit(direction == .center ? .tap : .flick(direction))
         }
         reader.onPlayPauseLongPress = { emit(.playPauseLongPress) }
+        reader.onClickHold = { beginHold() }
+        reader.onClickRelease = { endHold() }
         reader.start()
         flickReader = reader
         #endif
+    }
+
+    /// A held clickpad, from whichever detector saw it first: SwiftUI's long
+    /// press, or the reader's own timer on the clickpad button. Both exist
+    /// because the long press shares one focusable surface with a tap gesture,
+    /// and on a real Siri Remote that pair does not reliably let the long press
+    /// win — a hold read as a click, so "hold the clickpad for settings" opened
+    /// the rose instead (1.2 beta). The button timer cannot be outvoted.
+    @MainActor
+    private func beginHold() {
+        guard !holdActive else { return }
+        holdActive = true
+        suppressTap()
+        emit(.holdBegan)
+    }
+
+    @MainActor
+    private func endHold() {
+        guard holdActive else { return }
+        holdActive = false
+        emit(.holdEnded)
     }
 
     /// Tell the reader the touch in progress already meant something else.
@@ -203,6 +220,12 @@ struct CouchRemoteModifier: ViewModifier {
 final class MicroGamepadFlickReader {
     var onFlick: (@MainActor (Direction8OrCenter) -> Void)?
     var onPlayPauseLongPress: (@MainActor () -> Void)?
+    /// The clickpad has been held down for `holdDuration`, and on its release.
+    var onClickHold: (@MainActor () -> Void)?
+    var onClickRelease: (@MainActor () -> Void)?
+    /// The same 0.6 s the SwiftUI long press asks for, so either detector
+    /// firing first feels the same under the thumb.
+    static let holdDuration: TimeInterval = 0.6
     var thresholds = FlickThresholds.standard
 
     private var samples: [(t: TimeInterval, x: Double, y: Double)] = []
@@ -212,6 +235,7 @@ final class MicroGamepadFlickReader {
     /// reader sees.
     private var tapSuppressed = false
     private var playPausePressedAt: TimeInterval?
+    private var clickHold: Task<Void, Never>?
     private var observer: (any NSObjectProtocol)?
 
     func start() {
@@ -231,6 +255,8 @@ final class MicroGamepadFlickReader {
     func stop() {
         if let observer { NotificationCenter.default.removeObserver(observer) }
         observer = nil
+        clickHold?.cancel()
+        clickHold = nil
         samples.removeAll()
         tapSuppressed = false
     }
@@ -253,6 +279,29 @@ final class MicroGamepadFlickReader {
             MainActor.assumeIsolated {
                 self?.handlePlayPause(pressed: pressed)
             }
+        }
+        // The clickpad. Only on a remote: a full gamepad's Cross is PadKit's
+        // to read, and a held Cross there means nothing to the remote grammar.
+        guard controller?.extendedGamepad == nil else { return }
+        pad.buttonA.pressedChangedHandler = { [weak self] _, _, pressed in
+            MainActor.assumeIsolated {
+                self?.handleClick(pressed: pressed)
+            }
+        }
+    }
+
+    private func handleClick(pressed: Bool) {
+        clickHold?.cancel()
+        clickHold = nil
+        guard pressed else {
+            onClickRelease?()
+            return
+        }
+        clickHold = Task { @MainActor [weak self] in
+            try? await Task.sleep(nanoseconds: UInt64(Self.holdDuration * 1_000_000_000))
+            guard let self, !Task.isCancelled else { return }
+            self.tapSuppressed = true
+            self.onClickHold?()
         }
     }
 
