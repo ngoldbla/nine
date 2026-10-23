@@ -145,6 +145,63 @@ def store_screenshots_root(plat)
   staged
 end
 
+# Version-level fields deliver would upload, by metadata file → ASC attribute.
+# Everything else in metadata/ is app-level (name, subtitle, privacy URLs,
+# categories) or review contact, and lives on the record `app_info:false` skips.
+VERSION_LOCALIZED_FIELDS = {
+  "description.txt" => "description", "keywords.txt" => "keywords",
+  "promotional_text.txt" => "promotionalText", "support_url.txt" => "supportUrl",
+  "marketing_url.txt" => "marketingUrl", "release_notes.txt" => "whatsNew"
+}.freeze
+
+# The editable version for a platform, after deliver has created or renamed it.
+def edit_version(plat)
+  app = Spaceship::ConnectAPI::App.find(APPS["nine"][:bundle])
+  platform = Spaceship::ConnectAPI::Platform.map(STORE_PLATFORMS.fetch(plat))
+  version = app.get_edit_app_store_version(platform: platform)
+  UI.user_error!("No editable #{plat} version on App Store Connect") unless version
+  [app, platform, version]
+end
+
+# Attach a processed build to the platform's editable version. deliver only
+# picks a build inside submit_for_review, so a staged version (submit:false)
+# used to sit with no build at all.
+def attach_build(plat, build)
+  app, platform, version = edit_version(plat)
+  candidate = Spaceship::ConnectAPI::Build.all(app_id: app.id, version: marketing_version, build_number: build)
+                                          .find { |b| b.platform.to_s == platform.to_s }
+  UI.user_error!("#{plat} build #{build} (#{marketing_version}) is not on App Store Connect") unless candidate
+  UI.user_error!("#{plat} build #{build} is #{candidate.processing_state}, not VALID yet") unless candidate.processing_state == "VALID"
+  version.select_build(build_id: candidate.id)
+  UI.success("#{plat} #{version.version_string}: build #{build} attached")
+end
+
+# Version-level text straight through the API, for when the app-level record is
+# locked. ASC locks it while any platform's version is in review (1.2: the Mac's
+# 1.1 was), and deliver's metadata step fetches it unconditionally, retrying for
+# ~10 minutes before failing. Name, subtitle, privacy URLs, categories and the
+# age rating stay as ASC has them — check with `store_pull` that they match.
+def push_version_metadata(plat)
+  app, platform, version = edit_version(plat)
+  # ASC refuses release notes on a platform's first version.
+  first = app.get_app_store_versions(filter: { platform: platform }).size == 1
+  meta = File.join(STORE_DIR, "metadata")
+  copyright = File.join(meta, "copyright.txt")
+  version.update(attributes: { copyright: File.read(copyright).strip }) if File.exist?(copyright)
+  version.get_app_store_version_localizations.each do |loc|
+    dir = File.join(meta, loc.locale)
+    next unless File.directory?(dir)
+    attrs = {}
+    VERSION_LOCALIZED_FIELDS.each do |file, key|
+      next if key == "whatsNew" && first
+      path = File.join(dir, file)
+      attrs[key] = File.read(path, encoding: "UTF-8").strip if File.exist?(path)
+    end
+    loc.update(attributes: attrs)
+    UI.success("#{plat} #{version.version_string} #{loc.locale}: #{attrs.keys.join(', ')}")
+  end
+end
+
 def store_locales
   meta = File.join(STORE_DIR, "metadata")
   Dir.children(meta).select { |d| File.directory?(File.join(meta, d)) } -
@@ -460,7 +517,7 @@ platform :ios do
     deliver(store_options(plat).merge(skip_metadata: true, overwrite_screenshots: true))
   end
 
-  desc "Attach an uploaded build, push metadata + screenshots, and (submit:true) send for review (platform:ios|tvos|mac build:<CFBundleVersion>)"
+  desc "Attach an uploaded build, push metadata + screenshots, and (submit:true) send for review (platform:ios|tvos|mac build:<CFBundleVersion>, app_info:false while another platform is in review)"
   lane :release do |options|
     plat = store_platform!(options)
     unless RELEASE_PLATFORMS.include?(plat) || options[:force_platform]
@@ -472,7 +529,12 @@ platform :ios do
     UI.user_error!("Pass build:<number> — the CFBundleVersion of a build already on TestFlight") if build.empty?
     store_check(platform: plat)
     submit = options.fetch(:submit, false) == true || options[:submit].to_s == "true"
+    # app_info:false — another platform's version is in review, so the shared
+    # app-level record is locked: deliver handles the version and screenshots,
+    # the version-level text goes up through the API (push_version_metadata).
+    app_info = options[:app_info].to_s != "false"
     deliver(store_options(plat).merge(
+      skip_metadata: !app_info,
       build_number: build,
       overwrite_screenshots: true,
       submit_for_review: submit,
@@ -486,6 +548,10 @@ platform :ios do
         content_rights_contains_third_party_content: false
       }
     ))
+    unless submit
+      push_version_metadata(plat) unless app_info
+      attach_build(plat, build)
+    end
     UI.success(submit ? "#{plat} #{marketing_version} (#{build}) submitted for review" :
                         "#{plat} #{marketing_version} (#{build}) staged — re-run with submit:true to send for review")
   end
