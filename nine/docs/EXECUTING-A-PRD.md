@@ -211,7 +211,7 @@ CloudKit additionally needs `aps-environment` and the Push capability, because
 ### Build numbers collide across branch and merge
 
 `CFBundleVersion` = `(git rev-list --count HEAD + 100) × 10 + platform offset`
-(tvOS +0, iOS +1, macOS +2). The repo **squash-merges**, so a feature branch
+(tvOS +0, iOS +1, macOS +2, visionOS +3). The repo **squash-merges**, so a feature branch
 computes the count main will have *after* the merge only if it is one commit
 ahead; a longer branch counts every commit and runs ahead of main.
 

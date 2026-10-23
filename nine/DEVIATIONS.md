@@ -5308,3 +5308,80 @@ masks, lights and tints the icon per platform and appearance.
   green build, wrong `CFBundleAlternateIcons`. The generator no longer emits
   `AppIcon`, `AppIcon-macOS` or `AppIcon-watchOS`; rerunning it removes exactly
   those three sets and leaves every other asset byte-identical.
+
+## Vision Pro parity — CloudKit, Game Center, KVS appearance, SharePlay (2026-10-23)
+
+Play anywhere: `NineVision` stops being local-only. It is still not `AppModel`;
+it compiles the pieces in on their own (`Sources/App/CloudSync`,
+`GameCenter.swift`, `ParlorSession.swift`) and `VisionSealTests` holds the two
+facts the `CKContainer` trap depends on — the target that builds a container
+carries a checked-in entitlements file granting CloudKit (with its `.gitignore`
+negation), and `AppModel` never reaches it.
+
+- **The board lives in `nine.library` now.** Same blob, same `LibraryCloudStore`,
+  same `LibrarySync` merge. `nine.vision.board` keeps only which entry is open
+  and the cursor; the first build's slot (`game`, `difficulty`) is read once,
+  moved into the library, and never written again. On launch, and after a
+  merge while the player is idle (no cell selected), the headset opens the most
+  recent in-progress free board — the phone's board, waiting in the room.
+- **Replays are not kept on the headset.** `onRemoteReplay` is unset and a
+  Vision solve mints no `SolveReplay`, the same as a watch or widget solve: no
+  comet surface here to draw one with.
+- **History is merged before it is written.** `nine.history` is one KVS blob
+  under last-writer-wins, and `CouchStored` reads KVS only when its local file
+  is missing — so a second writer holding a stale copy would erase solves the
+  phone recorded since. The headset starts from the live KVS copy and folds its
+  own in (`SolveHistory.merged(with:)`, tested). **The iPhone, Apple TV and Mac
+  still do not merge** — they write their local copy over KVS as before, so a
+  headset solve can be dropped from KVS by the next phone solve. Game Center is
+  unaffected (it keeps the best total). Fixing the three existing writers is
+  its own change to `AppModel` and was out of scope here.
+- **Game Center waits to be asked.** On visionOS, `authenticate()` from a
+  signed-out headset makes GameKit open its own "Welcome to Game Center" window
+  (`GameCenterHostingContainer`, a separate process) in front of the board —
+  holding the view controller the handler passes back does not prevent it;
+  observed on the visionOS 27 simulator, where the window also outlived the
+  app. So the headset never authenticates at launch until the player has
+  pinched the Game Center button in the bottom ornament once
+  (`nine.vision.gameCenter`, a local bool); from then on launches
+  authenticate like every other platform. The dashboard opens through
+  `GKAccessPoint.trigger(state: .dashboard)`, as on the Mac; the always-on
+  access-point badge is not used, because an idle board shows no chrome.
+  Consequence: a player who never pinches it submits nothing to Game Center
+  from the headset (the solve still lands in `nine.history`).
+- **Appearance is read live from KVS.** Theme and accent come from
+  `SharedAppearance`, read straight from `NSUbiquitousKeyValueStore` (not through
+  `CouchStored`, which would prefer a local file that is never written here) and
+  re-read on `didChangeExternallyNotification`.
+- **SharePlay is a co-solve, a third shape.** One board, everybody's hands on it
+  at once, everybody's Persona on one side of it (`SystemCoordinator`,
+  `.sideBySide`, window associated with `.groupActivityAssociation`). It reuses
+  `ParlorInvite` as the activity payload, `ParlorSession` for the roster,
+  `DuelState`/`DuelCredits.owners` for attribution and `DuelTint` for the
+  colour. The one new wire type is `CoSolveMove` (`Sources/Shared/CoSolve.swift`):
+  last-writer-wins per cell under a Lamport clock, tie broken by author, so two
+  headsets that saw concurrent writes in opposite orders hold the same board
+  (`CoSolveTests`). Its activity is `com.couchsuite.nine.cosolve`, not the iOS
+  parlor's, so an iPhone cannot answer it with a race.
+  - **Two tints, not one per person**: you, and everyone else. `DuelTint`
+    proves separation for two (PRD-27 §12); a third colour would be untested.
+  - **Undo is off during a co-solve.** `NineGame.undoStack` is the board's, so
+    undo would take back somebody else's digit. Erase still works.
+  - **Pencil notes stay on the headset that wrote them.**
+  - **A shared solve is nobody's solve** (PRD-27 §7): no history record, no
+    Game Center submission. The board is still marked solved in the library.
+  - **Not exercised live.** A FaceTime call cannot be placed into a simulator.
+    DEBUG `--vision-coplay-demo` runs the same session over a ghost transport
+    (a correct digit every 2.5 s) so the tint, roster and no-history rule can
+    be seen; `VisionSealTests` keeps the ghost out of Release.
+- **Signing: no new profile, no re-mint.** visionOS signs with the iOS App
+  Store profile — the installed `match AppStore com.couchsuite.nine` reads
+  `Platform = [iOS, xrOS, visionOS]` and already grants CloudKit, KVS, Game
+  Center, group-session and `aps-environment`. match 2.241 has no visionOS
+  platform at all (`tvos ios macos catalyst`). No App ID capability changed, so
+  EXECUTING-A-PRD §6's `match --force` does not apply.
+- **Release: `beta platform:vision`, train +3, opt-in.** `beta_app` runs the
+  vision leg only with `COUCH_SHIP_VISION=1`, because App Store Connect refuses
+  a visionOS build until the platform is added to the app record (a human
+  gate), and a refused upload would fail `beta_all` on main. The lane has not
+  been dry-run: this machine has no `signing.env`.

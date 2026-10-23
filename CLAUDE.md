@@ -44,7 +44,7 @@ because green builds shipped defects that only showed up on a real screen.
   files that cannot be generated. That rule has swallowed a needed entitlements
   file before and broken the CI mac archive. If you add one, add the negation.
 - **Build numbers.** `CFBundleVersion` is `(git rev-list --count HEAD + 100) × 10`
-  plus a per-platform offset (tvOS +0, iOS +1, mac +2). The +100 base
+  plus a per-platform offset (tvOS +0, iOS +1, mac +2, visionOS +3). The +100 base
   (`BUILD_BASE_COMMITS`) exists because a branch upload outran main; CI now
   uploads from `main` only. ASC enforces uniqueness per
   *app record*, not per platform, so the disjoint trains are load-bearing.

@@ -259,6 +259,29 @@ public struct SolveHistory: Sendable, Codable, Equatable {
         }
     }
 
+    /// This history and `other`, as one: every solve either side holds, once.
+    ///
+    /// For a device that writes `nine.history` while another device may have
+    /// written it since this one last read it — Vision Pro reads the KVS copy
+    /// before recording a solve, and folds its own local copy in, so writing
+    /// back cannot drop a solve the phone recorded in between. A solve's
+    /// identity is its `date` (`id`), the instant the board finished, which two
+    /// devices cannot share by accident.
+    ///
+    /// `self` wins every tie and keeps its quarantine and its carried keys:
+    /// `other`'s unreadable elements are unreadable here too, and re-emitting
+    /// both sides' would duplicate the ones they share.
+    public func merged(with other: SolveHistory, capacity: Int = Self.capacity) -> SolveHistory {
+        var seen = Set(records.map(\.id))
+        var union = records
+        for record in other.records where seen.insert(record.id).inserted {
+            union.append(record)
+        }
+        var merged = self
+        merged.records = Array(union.sorted { $0.date > $1.date }.prefix(max(1, capacity)))
+        return merged
+    }
+
     // MARK: - Coding (the persistence covenant)
 
     private enum CodingKeys: String, CodingKey { case records }

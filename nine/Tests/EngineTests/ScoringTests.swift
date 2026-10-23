@@ -258,3 +258,44 @@ struct SolveRecordErrorsCodingTests {
         #expect(blob["errors"] == nil)
     }
 }
+
+/// `SolveHistory.merged(with:)` — the union a second writer of `nine.history`
+/// takes before it writes, so it cannot drop a solve another device recorded.
+@Suite("SolveHistory merge")
+struct SolveHistoryMergeTests {
+    private func solve(_ offset: TimeInterval, points: Int = 100) -> SolveRecord {
+        SolveRecord(date: Date(timeIntervalSinceReferenceDate: 800_000_000 + offset),
+                    difficulty: .steady, isDaily: false, seconds: 300, points: points)
+    }
+
+    private func history(_ records: [SolveRecord]) -> SolveHistory {
+        var h = SolveHistory()
+        for r in records.sorted(by: { $0.date < $1.date }) { h.record(r) }
+        return h
+    }
+
+    @Test func aSolveEitherSideHoldsSurvivesOnce() {
+        let phone = history([solve(10), solve(30)])
+        let vision = history([solve(20), solve(30)])
+        let merged = vision.merged(with: phone)
+        #expect(merged.records.map(\.id) == [solve(30), solve(20), solve(10)].map(\.id))
+        #expect(merged.totalPoints == 300)
+    }
+
+    @Test func theUnionIsNewestFirstWhateverOrderItArrivedIn() {
+        let merged = history([solve(1)]).merged(with: history([solve(5), solve(3)]))
+        #expect(merged.records.map(\.date) == merged.records.map(\.date).sorted(by: >))
+    }
+
+    @Test func mergingIsIdempotent() {
+        let a = history([solve(1), solve(2)])
+        let once = a.merged(with: a)
+        #expect(once == a)
+        #expect(once.merged(with: a) == a)
+    }
+
+    @Test func capacityTrimsTheOldest() {
+        let merged = history([solve(1), solve(2)]).merged(with: history([solve(3)]), capacity: 2)
+        #expect(merged.records.map(\.id) == [solve(3), solve(2)].map(\.id))
+    }
+}

@@ -27,7 +27,7 @@ struct VisionBoardScreen: View {
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
-    private var accent: Color { model.accent.color(isLight: false) }
+    private var accent: Color { model.accent.color(isLight: model.isLight) }
     private var chromeShown: Bool { model.cursor != nil && !model.isSolved }
 
     var body: some View {
@@ -41,8 +41,13 @@ struct VisionBoardScreen: View {
                         in: RoundedRectangle(cornerRadius: 36, style: .continuous))
             }
         }
-        .environment(\.nineTheme, .auto)
+        // The phone's theme and accent (`SharedAppearance`), as the watch
+        // wears them.
+        .environment(\.nineTheme, model.theme)
         .tint(accent)
+        // This window is the one SharePlay shares: every Persona gathers
+        // around it, and the side-by-side template stands them on one side.
+        .groupActivityAssociation(.primary("board"))
         .ornament(
             visibility: chromeShown ? .visible : .hidden,
             attachmentAnchor: .scene(.trailing),
@@ -56,7 +61,7 @@ struct VisionBoardScreen: View {
             attachmentAnchor: .scene(.bottom),
             contentAlignment: .top
         ) {
-            NewBoardMenu()
+            BoardActions()
                 .padding(.top, 24)
         }
         .animation(.couchFast, value: chromeShown)
@@ -79,6 +84,8 @@ struct VisionBoardScreen: View {
                 previewDigit: nil,
                 previewPencil: false,
                 highlightDigit: model.highlightDigit,
+                // Co-solve only: whose hand placed each digit (PRD-27's tint).
+                digitTint: model.digitTint,
                 waveOrigin: solvedAt == nil ? nil : model.winningCell,
                 side: VisionBoardMetrics.side,
                 inset: VisionBoardMetrics.inset,
@@ -161,27 +168,72 @@ private struct CellTargets: View {
     }
 }
 
-/// New Game, by band. On a solved board it is the only chrome left in the
-/// room, which is all the emphasis it needs — a prominent variant was tried
-/// and a `Menu` on visionOS drew it identically, so it went rather than stay
-/// as styling that does nothing.
-private struct NewBoardMenu: View {
+/// The bottom ornament: New Game by band, then "Play together" and Game
+/// Center. On a solved board it is the only chrome left in the room, which is
+/// all the emphasis it needs — a prominent variant was tried and a `Menu` on
+/// visionOS drew it identically, so it went rather than stay as styling that
+/// does nothing.
+///
+/// Game Center lives here rather than as the always-on access point because
+/// this ornament is transient: it arrives on a pinch and recedes with it, so
+/// the signed-in badge never sits on an idle board (README, rule one), and
+/// sign-in happens only when the player asks for it (`gameCenterTapped`).
+private struct BoardActions: View {
     @Environment(VisionModel.self) private var model
 
     var body: some View {
-        Menu {
-            ForEach(Difficulty.allCases, id: \.self) { band in
-                Button(Strings.difficulty(band)) { model.compose(band) }
+        HStack(spacing: 12) {
+            Menu {
+                ForEach(Difficulty.allCases, id: \.self) { band in
+                    Button(Strings.difficulty(band)) { model.compose(band) }
+                }
+            } label: {
+                Label(Strings.string("menu.game.newGame"), systemImage: "square.grid.3x3")
+                    .font(.title3.weight(.semibold))
+                    .padding(.horizontal, 12)
+                    .frame(minHeight: 60)
             }
-        } label: {
-            Label(Strings.string("menu.game.newGame"), systemImage: "square.grid.3x3")
-                .font(.title3.weight(.semibold))
-                .padding(.horizontal, 12)
-                .frame(minHeight: 60)
+            .disabled(model.composing)
+
+            if let invitation = model.invitation, !model.coSolve.isActive {
+                ShareLink(item: invitation, preview: SharePreview(
+                    Strings.string("parlor.activity.title"),
+                    image: Image(systemName: "shareplay"))) {
+                    Label(Strings.string("parlor.start.title"), systemImage: "shareplay")
+                        .labelStyle(.iconOnly)
+                        .font(.title2.weight(.medium))
+                        .frame(width: 60, height: 60)
+                }
+                .help(Strings.string("parlor.start.title"))
+                .accessibilityLabel(Text(Strings.string("parlor.start.title")))
+            } else if model.coSolve.isActive {
+                // Who is here: one figure per participant, you included.
+                Label {
+                    Text(verbatim: "\(model.coSolve.participantCount)")
+                } icon: {
+                    Image(systemName: "person.2.fill")
+                }
+                    .font(.title3.weight(.semibold))
+                    .monospacedDigit()
+                    .padding(.horizontal, 12)
+                    .frame(minHeight: 60)
+                    .accessibilityLabel(Text(Strings.string("parlor.activity.title")))
+                    .accessibilityValue(Text(verbatim: "\(model.coSolve.participantCount)"))
+            }
+
+            Button {
+                model.gameCenterTapped()
+            } label: {
+                Image(systemName: "gamecontroller")
+                    .font(.title2.weight(.medium))
+                    .frame(width: 60, height: 60)
+            }
+            .help(Strings.string("history.gameCenter.title"))
+            .accessibilityLabel(Text(Strings.string("history.gameCenter.title")))
         }
-        .disabled(model.composing)
         .buttonStyle(.borderless)
         .buttonBorderShape(.capsule)
+        .padding(.horizontal, 8)
         .glassBackgroundEffect(in: Capsule())
     }
 }

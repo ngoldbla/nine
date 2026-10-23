@@ -425,6 +425,15 @@ targets:
       - Sources/App/DesignTokens.swift
       - Sources/App/Theme.swift
       - Sources/App/Afterglow.metal
+      # Parity (play anywhere): the library's CloudKit boundary, Game Center and
+      # the parlor transport seam — each compiled in on its own, never through
+      # AppModel. Those three files import no model; LibraryCloudStore is the
+      # one that builds a `CKContainer`, which is why the entitlements below
+      # are no longer optional for this target. `VisionSealTests` holds both
+      # halves of that.
+      - Sources/App/CloudSync
+      - Sources/App/GameCenter.swift
+      - Sources/App/ParlorSession.swift
       # Not Nine.icon: actool accepts the document for `xros` and emits no
       # icon at all. visionOS wants a layered solid image stack, which
       # scripts/vision-icon.py derives from Nine.icon's three groups.
@@ -441,6 +450,15 @@ targets:
         CODE_SIGN_STYLE: Manual
         CODE_SIGN_IDENTITY: "Apple Distribution"
         DEVELOPMENT_TEAM: ${COUCH_TEAM_ID}
+        # Checked in, not generated: see the file and the `.gitignore`
+        # negation beside the other three.
+        CODE_SIGN_ENTITLEMENTS: Nine-visionOS.entitlements
+        # visionOS has no profile of its own. Apple mints the iOS App Store
+        # profile for every platform that shares the iOS SDK lineage — the
+        # installed `match AppStore com.couchsuite.nine` reads
+        # Platform = [iOS, xrOS, visionOS] — and match 2.241 accepts only
+        # tvos/ios/macos/catalyst, so the iOS profile is the visionOS profile.
+        "PROVISIONING_PROFILE_SPECIFIER[sdk=xros*]": "match AppStore com.couchsuite.nine"
     info:
       path: VisionInfo.plist
       properties:

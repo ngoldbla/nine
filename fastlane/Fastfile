@@ -22,6 +22,10 @@ end
 # The app this repo ships: folder => Xcode scheme + bundle identifier.
 # Match profile naming:
 #   tvOS: "match AppStore <bundle> tvos"   ·   iOS: "match AppStore <bundle>"
+#   visionOS: the iOS profile. Apple mints the iOS App Store profile for the
+#   whole iOS SDK lineage — `security cms -D` on it reads Platform = [iOS, xrOS,
+#   visionOS] — and match 2.241's `platform` accepts only tvos/ios/macos/catalyst
+#   (match/options.rb), so there is no "… visionos" profile to name.
 #
 # This was a five-entry map until the four sibling Couch Suite apps moved to
 # repositories of their own (ngoldbla/{rabbit-ears,darkroom,blockhead,cartridge}).
@@ -39,7 +43,10 @@ APPS = {
   # entry in the export map — so it rides this list rather than earning a
   # mechanism of its own. It needs no `platform:` leg either: a watch app ships
   # *inside* the iOS ipa, so `beta app:nine platform:ios` already carries it.
+  # `vision_scheme`: Vision Pro is its own target (NineVision), not a fourth
+  # destination of the universal one — see project.yml.
   "nine"        => { scheme: "Nine",       bundle: "com.couchsuite.nine", ios: true, mac: true,
+                     vision_scheme: "NineVision",
                      extensions: ["com.couchsuite.nine.widgets",
                                   "com.couchsuite.nine.watchkitapp"] }
 }.freeze
@@ -324,21 +331,23 @@ def store_screenshot_problems(plat)
 end
 
 platform :ios do
-  desc "Build Nine for one platform and upload to TestFlight (platform:tvos|ios|mac, upload:false = dry run)"
+  desc "Build Nine for one platform and upload to TestFlight (platform:tvos|ios|mac|vision, upload:false = dry run)"
   lane :beta do |options|
     app_key = options.fetch(:app, "nine")
     cfg = APPS[app_key] || UI.user_error!("Unknown app '#{app_key}'. One of: #{APPS.keys.join(', ')}")
     plat = options.fetch(:platform, "tvos").to_s
-    UI.user_error!("platform must be 'tvos', 'ios' or 'mac'") unless %w[tvos ios mac].include?(plat)
+    UI.user_error!("platform must be 'tvos', 'ios', 'mac' or 'vision'") unless %w[tvos ios mac vision].include?(plat)
+    UI.user_error!("#{app_key} has no visionOS build") if plat == "vision" && !cfg[:vision_scheme]
     UI.user_error!("#{app_key} has no iOS build (only: #{APPS.select { |_, c| c[:ios] }.keys.join(', ')})") if plat == "ios" && !cfg[:ios]
     UI.user_error!("#{app_key} has no macOS build (only: #{APPS.select { |_, c| c[:mac] }.keys.join(', ')})") if plat == "mac" && !cfg[:mac]
     do_upload = options.fetch(:upload, true)
     app_id  = cfg[:bundle]
-    scheme  = cfg[:scheme]
+    scheme  = plat == "vision" ? cfg[:vision_scheme] : cfg[:scheme]
     folder  = File.expand_path("../#{app_key}", __dir__)
     profile =
       case plat
-      when "ios" then "match AppStore #{app_id}"
+      # visionOS signs with the iOS profile (see the APPS comment).
+      when "ios", "vision" then "match AppStore #{app_id}"
       when "mac" then "match AppStore #{app_id} macos"
       else "match AppStore #{app_id} tvos"
       end
@@ -346,18 +355,21 @@ platform :ios do
       case plat
       when "ios" then "generic/platform=iOS"
       when "mac" then "generic/platform=macOS"
+      when "vision" then "generic/platform=visionOS"
       else "generic/platform=tvOS"
       end
     # tvOS/iOS export an .ipa; macOS a signed .pkg.
     output_name = case plat
                   when "ios" then "#{scheme}-iOS.ipa"
+                  when "vision" then "#{scheme}.ipa"
                   # gym appends .pkg itself for Mac App Store exports; naming
                   # it here yielded Nine-macOS.pkg.pkg on the first dry run.
                   when "mac" then "#{scheme}-macOS"
                   else "#{scheme}.ipa"
                   end
-    # match's platform vocabulary calls the Mac "macos".
-    match_platform = plat == "mac" ? "macos" : plat
+    # match's platform vocabulary calls the Mac "macos", and has no visionOS:
+    # the headset's profile is the iOS one.
+    match_platform = { "mac" => "macos", "vision" => "ios" }.fetch(plat, plat)
     # Build number derived from git history — monotonic, never committed back.
     # App Store Connect enforces CFBundleVersion uniqueness per app record (bundle
     # ID), NOT per platform, so a universal app's tvOS/iOS/mac builds must never
@@ -372,7 +384,11 @@ platform :ios do
     # below it and its 86th commit set to collide with it. The base puts main
     # back above every number ASC holds (main commit 76 → 1760/1761/1762), and
     # the workflow now refuses uploads from any ref but main so it stays there.
-    train = { "tvos" => 0, "ios" => 1, "mac" => 2 }.fetch(plat)
+    #
+    # visionOS is train +3 (2026-10-23). It joins the same app record as the
+    # other three (one bundle id), so it needs a fourth disjoint number, and
+    # +3 keeps every train inside the commit's own decade.
+    train = { "tvos" => 0, "ios" => 1, "mac" => 2, "vision" => 3 }.fetch(plat)
     commit_count = sh("git", "-C", File.expand_path("..", __dir__), "rev-list", "--count", "HEAD").strip
     build = ((Integer(commit_count) + BUILD_BASE_COMMITS) * 10 + train).to_s
 
@@ -421,7 +437,11 @@ platform :ios do
       # that ipa was just uploaded). Point mac at its pkg with app_platform osx;
       # iOS/tvOS pass their ipa explicitly so no stray artifact can be picked.
       upload_params = { api_key: key, app_identifier: app_id, skip_waiting_for_build_processing: true }
-      if plat == "mac"
+      if plat == "vision"
+        # pilot's own vocabulary for the headset (pilot/options.rb).
+        upload_params[:app_platform] = "xros"
+        upload_params[:ipa] = "#{folder}/dist/#{output_name}"
+      elsif plat == "mac"
         upload_params[:app_platform] = "osx"
         upload_params[:pkg] = "#{folder}/dist/#{output_name}.pkg"
       else
@@ -445,6 +465,11 @@ platform :ios do
     # the mac leg; mint with `fastlane beta app:nine platform:mac upload:false`
     # directly, then flip COUCH_SHIP_MAC=1 in CI (or drop this guard).
     beta(options.merge(platform: "mac")) if cfg[:mac] && ENV["COUCH_SHIP_MAC"] == "1"
+    # Opt-in like the Mac leg, for a human gate of the same kind: App Store
+    # Connect refuses a visionOS build until the visionOS platform has been
+    # added to the app record, and a refused upload here would fail the whole
+    # `beta_all` run on main. Set COUCH_SHIP_VISION=1 once it has been added.
+    beta(options.merge(platform: "vision")) if cfg[:vision_scheme] && ENV["COUCH_SHIP_VISION"] == "1"
   end
 
   # Retained as the name CI and muscle memory both reach for. With one app in

@@ -32,9 +32,13 @@ open Nine.xcodeproj      # pick a destination, Cmd+R
 ### Vision Pro
 
 `NineVision` is the watch's shape, not the universal target's: a curated source
-list (`Sources/Vision` plus the Engine, Shared, Strings and the four board
-files) with its own small model, so `AppModel` and its CloudKit container never
-reach it. It has no entitlements and persists locally only.
+list (`Sources/Vision` plus the Engine, Shared, Strings, the four board files,
+and the CloudKit store, Game Center and parlor seam compiled in on their own)
+with its own small model, so `AppModel` never reaches it. It carries
+`Nine-visionOS.entitlements` (checked in, like tvOS's) because
+`LibraryCloudStore` builds a `CKContainer`; `VisionSealTests` holds that pair
+together. It signs with the iOS App Store profile, which Apple mints for
+visionOS too, and ships with `fastlane beta platform:vision` (train +3).
 
 ```bash
 xcodebuild -project Nine.xcodeproj -scheme NineVision \
@@ -45,6 +49,8 @@ A simulator cannot be pinched from a script, so DEBUG builds take two launch
 arguments that stage what a screenshot needs: `--vision-near-solve` (every cell
 but one filled and selected — the keypad is up) and `--vision-solve` (the same,
 then the last digit lands two seconds in, through the pinch's own path).
+`--vision-coplay-demo` starts a SharePlay co-solve over a ghost transport that
+places a correct digit every 2.5 s, since no FaceTime call reaches a simulator.
 
 The app icon is a `.solidimagestack` in `VisionAssets.xcassets`, **derived** from
 `Nine.icon` by `python3 nine/scripts/vision-icon.py` — actool accepts the Icon
