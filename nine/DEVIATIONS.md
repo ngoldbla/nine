@@ -5549,3 +5549,56 @@ Recorded in `nine/docs/vision/HEADSET-UX.md`, item by item. In short:
   on the visionOS simulator's daemon socket, so there is no evidence the AX API
   reaches its tree; teaching the harness a dump nobody has seen work would be
   a lane that always fails or always passes.
+
+## Vision Pro follow-through 5 — the board-switch offer and the board chooser (2026-10-23)
+
+HEADSET-UX items 9 and 10, built as mocked.
+
+- **The offer replaces the silent switch.** After a merge, a newer classic
+  board another device moved is published as `VisionModel.offeredBoard` and
+  shown in the bottom ornament as "Continue your other board" — only with the
+  ornament a pinch brings, so an idle board is still zero-chrome: no badge,
+  dot or toast. The board switches without asking only when the one here is
+  solved or gone. The decision is `HeadsetBoards.afterMerge` (pure, tested),
+  made again on every merge and every open, so the offer is withdrawn once its
+  board is solved, removed or no longer newer. Off during a co-solve. No device
+  name: `SyncedEntry` has none, and adding one is a CloudKit schema change.
+- **The chooser is the New Game menu, one section deeper.** "In progress"
+  below the bands (`boards.section.inProgress`, reused): classic boards in
+  progress, newest first, at most five, the current one left out
+  (`HeadsetBoards.chooserRows`, tested). Each row is the band, then
+  "34 squares to go · 2 hr. ago" (`presence.remaining`, reused; the time is
+  the system's relative format). Hidden during a co-solve. Two new keys,
+  `vision.offer.continue` and `vision.chooser.detail`, translations
+  `needs_review`; `CatalogTests`' two-argument count moved 52 → 53.
+- **Switching boards stops the left board's clock.** The silent switch left
+  the old board's run open (the next `open` closes a run at its start, so that
+  time was lost) and the new board's clock stopped until the window next came
+  forward. Taking the offer or a row now pauses one and starts the other.
+  A daily opened from the chooser records its puzzle's band, not the previous
+  board's — still as a free solve (`isDaily: false`), as the headset always has.
+- **Seen on the simulator:** `--vision-offer-demo` shows the ornament with New
+  Game, "Continue your other board", SharePlay and Game Center, the board kept
+  in front. Its first run showed the other rule instead: the simulator's
+  remembered board was solved (an earlier `--vision-solve`), so the staged board
+  opened silently — correct, and the demo now puts a board in progress in front
+  first. **The open New Game menu was not photographed:** no input reaches this
+  simulator, and SwiftUI cannot open a `Menu` from code. `--vision-chooser-demo`
+  stages its three boards and the ornament; the section itself is the tested
+  row list plus a `Section` of `Button`s, unseen. Both staging arguments are
+  DEBUG-only, sealed in `VisionSealTests` and the CI Release check (a local
+  Release build carries none of them).
+- **Found, not changed: coming forward stamps the board as new.**
+  `scene(active:)` persists the timer start, and `persist` sets `updatedAt`.
+  So in the common case — play on the phone, then put the headset on — the
+  headset's board is stamped newer the moment the window is up, and the phone's
+  board arriving a moment later is not "newer": no offer, as there was no
+  silent switch before. The offer fires when the phone moves *while* the
+  headset is up, and at launch when a newer board synced in an earlier session.
+  Fixing it means a timer-only write that does not count as activity, which
+  `LibrarySync` orders by — every platform's question, not the headset's alone.
+- **Only a headset can confirm:** the offer and the menu under gaze and pinch,
+  how the two-line rows read in a visionOS menu, the offer arriving from a real
+  iPhone over CloudKit (the live proof is still skipped, follow-through 2), and
+  VoiceOver on both.
+

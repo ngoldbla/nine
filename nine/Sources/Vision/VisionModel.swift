@@ -282,6 +282,13 @@ final class VisionModel {
     /// library, the after-merge rule runs, and a cell is selected so the
     /// ornament carrying the offer is up.
     private func stageOffer() {
+        // A solved board here would be switched away from silently, which is
+        // the rule, not the offer — so put a board in progress in front first.
+        if isSolved || entryID.flatMap(library.entry(id:))?.status != .inProgress {
+            let here = NineGame(puzzle: PuzzleGenerator.generate(seed: 2025, difficulty: .gentle))
+            let id = library.create(kind: .free(.gentle), game: here, now: Date() - 60)
+            if let entry = library.entry(id: id) { open(entry, cursor: nil) }
+        }
         var phone = NineGame(puzzle: PuzzleGenerator.generate(seed: 2026, difficulty: .steady))
         let answer = phone.puzzle.solution.cells
         for cell in (0..<81).filter({ !phone.isGiven($0) }).prefix(18) {

@@ -52,6 +52,9 @@ Mocked in the session's message (not built). The rule half is ready:
 `HeadsetBoards.newerBoard` returns the candidate; the model would publish it as
 `offeredBoard` instead of opening it.
 
+**Built (2026-10-23)** as mocked, label "Continue your other board"; see
+DEVIATIONS, "Vision Pro follow-through 5".
+
 ## 10. Choosing a board — proposal: the same ornament, one level deeper
 
 The smallest surface that fits "one board floating in a room" is not a new
@@ -72,6 +75,9 @@ In progress  Steady · 34 left · iPhone, 2 h ago
 - Rejected: a leading ornament (always-visible chrome, against rule one); a
   sheet (covers the board, which is the only thing in the room); a second
   window (a library window floating beside a board is two things to place).
+
+**Built (2026-10-23)** as mocked, without the device name ("iPhone, 2 h
+ago" is "2 hr. ago"); see DEVIATIONS, "Vision Pro follow-through 5".
 
 ## 11. Window size and scale — evaluated, not changed
 
