@@ -708,15 +708,15 @@ struct HeatLegend: View {
 
 // MARK: - The sheet
 
-#if os(tvOS)
 /// A place the remote can stop while reading History: a section, or one solve
-/// in the recent log (by `SolveRecord.id`).
+/// in the recent log (by `SolveRecord.id`). Only tvOS focuses them, but every
+/// platform names them — `readable(_:_:)` takes one everywhere and is the
+/// identity off the TV.
 enum HistoryTVStop: Hashable {
     case close
     case section(Int)
     case record(Double)
 }
-#endif
 
 struct HistorySheetContent: View {
     let model: AppModel
