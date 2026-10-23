@@ -69,8 +69,11 @@ fastlane/screenshots/**/*.png
 # Except the iPhone Duo frames: no lane can set the Duo's posture, so a
 # reshoot needs a person in Device Hub. Kept, not regenerated. See RELEASE.md.
 !fastlane/screenshots/ios-duo/**/*.png
+# And the Apple TV frames: driven by remote presses, not a seeded capture lane.
+!fastlane/screenshots/tvos/**/*.png
 # `store_pull` output: what App Store Connect held, for diffing against metadata/.
 fastlane/.asc-pull/
+fastlane/.store-shots/
 # site/deploy.sh --build-only output (contact address filled in).
 site/dist/
 site/nine-site.zip

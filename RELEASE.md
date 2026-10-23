@@ -12,6 +12,12 @@ TestFlight through `beta` but is not submitted; `release` refuses platforms
 outside `RELEASE_PLATFORMS` in the Fastfile. The watch app ships *inside* the
 iOS version, so that version needs an Apple Watch screenshot set.
 
+**1.2 (owner decision 2026-10-23): Apple TV joins the App Store**, after the
+tvOS repair pass (#68) made it playable on a television, and iOS ships the
+iPhone Duo spread (PRD-37) with its own screenshot set. `RELEASE_PLATFORMS` is
+`ios tvos mac`. The tvOS record's first version goes up as 1.2, to match the
+binary; ASC takes no release notes on a first version and deliver skips them.
+
 The binary never goes through these lanes. `beta` uploads it; `release` attaches
 it **by build number**, so the only pipeline that signs is the one already
 proven by TestFlight.
@@ -68,7 +74,7 @@ the number of the build that was tested. Use the number TestFlight shows
 | iOS | Apple Watch | 422×514 (Ultra 3, 49mm) or 416×496 (Series 11, 46mm) | manual — see below |
 | *with Duo support* iOS | iPhone Duo, open (inner) + folded (outer) | 2853×2007 + 1398×2034 | manual, kept in git — `fastlane/screenshots/ios-duo/en-US/`, see **iPhone Duo** below |
 | macOS | Mac | 2880×1800 (or 2560×1600, 1440×900, 1280×800) | `scripts/mac-store-shots.sh` (Release build, seeded state; park the pointer at the left edge first) |
-| *later* tvOS | Apple TV | 3840×2160 | manual — `.claude/skills/run-nine` + `xcrun simctl io <udid> screenshot` |
+| tvOS | Apple TV | 1920×1080 (or 3840×2160) | manual, kept in git — `fastlane/screenshots/tvos/en-US/`, driven with `XCUIRemote` from a clean install (see **Apple TV** below) |
 
 **Apple Watch, by hand** (one size is enough; ASC scales it to the others):
 
@@ -95,25 +101,26 @@ in with the Crown dial turning, and the solve celebration. In the Simulator,
 the Crown is the scroll wheel / two-finger scroll over the watch face. Number
 the files `20-…` onward so they sort after the phone and iPad sets.
 
-**iPhone Duo** (taken for 1.2; not uploaded). The eight frames — board, coach
+**Apple TV** (1.2). Five frames, committed like the Duo's because nothing seeds
+a tvOS state: the shelf on Gentle and on Sharp, a fresh board, the digit ring,
+and settings beside the board. Taken 2026-10-23 from a clean install (uninstall
+first, so there is no saved board), the timer switched off in settings, each
+frame after the transient chrome and the once-per-launch legend had faded. The
+capture was a throwaway `XCUIRemote` test in `nine/UITests/TV/` writing
+`XCUIScreen.main.screenshot()` to `NINE_UITEST_DUMP`; the same pattern reshoots.
+
+**iPhone Duo** (taken for 1.2; uploaded with 1.2). The eight frames — board, coach
 and Technique School dark plus board light, once per posture — live in
 `fastlane/screenshots/ios-duo/en-US/` with a README naming each one. They are
 the only committed store PNGs (a `.gitignore` exception), because a reshoot
 needs a person: nothing scriptable sets the Duo's posture (PRD-37 §1.6).
 
-They are kept out of `screenshots/ios/` because fastlane 2.237.0's deliver has
-no display type for 2853×2007 or 1398×2034, so `store_check` and
-`store_screenshots` would reject the whole iOS set. When the Duo-native
-version ships:
-
-1. Check whether a newer fastlane, or App Store Connect itself, offers an
-   iPhone Duo display type.
-2. If deliver supports it, move the frames into `screenshots/ios/en-US/`
-   (numbered after the iPhone and iPad sets), add the type's prefix to
-   `required` and `allowed` in `store_screenshot_problems`, run `store_check`,
-   then `store_screenshots`.
-3. If only ASC supports it, upload them by hand in App Store Connect after
-   `store_screenshots`, which replaces every set it manages.
+They stay in `screenshots/ios-duo/` (committed) rather than moving into the
+regenerated `screenshots/ios/`, which `store_screenshots_capture` empties. The
+Fastfile's `COMMITTED_SHOT_DIRS` merges them into the iOS set at upload, via
+`fastlane/.store-shots/ios`. fastlane 2.237.0 had no display type for 2853×2007
+or 1398×2034; 2.241.1 (the Gemfile pin since 1.2) maps both postures to
+`APP_IPHONE_DUO`, which `store_screenshot_problems` now requires on iOS.
 
 To reshoot (Xcode 27.1; one person at Device Hub for the two posture
 presses):
@@ -170,9 +177,8 @@ Blocking — ASC will refuse submission without these:
       frame while the Parlor card is unadvertised; see `STORE_SHOTS` in the
       Fastfile. Watch frames were driven with `sim-use tap -x -y`, which works
       on watchOS; `simctl status_bar` does not, so the watch clock is real.)
-- [ ] **Leave the Apple TV version unsubmitted.** If ASC created a tvOS version
-      on the record, it can sit in *Prepare for Submission* indefinitely. (It
-      did: tvOS 1.0 sits there; nothing touches it.)
+- [x] **~~Leave the Apple TV version unsubmitted.~~** Superseded 2026-10-23:
+      tvOS ships with 1.2 (see the scope note at the top).
 - [x] **Marketing version** (2026-10-13: ASC's iOS and Mac versions are both
       1.1, Manual release. Submitted for review 2026-10-13: iOS build **861**
       (721 was refused — its NineWatch lacked the Game Center key) and Mac
@@ -227,10 +233,9 @@ Before release, carried from earlier PRDs:
       submitted for Beta App Review — waiting for review.)
 - [ ] **tvOS 750 stays internal.** The owner found it not playable on
       2026-10-17; it is not sent to external beta review until that is fixed.
-- [ ] **First-run copy** still says "Boards, streak and stats follow you" and
-      "One purchase · iPhone, iPad, Mac & Apple TV" (`firstrun.ledger.sync`,
-      `firstrun.onePurchase`). The streak went in #58 and Apple TV is not sold;
-      fix before 1.2 goes to App Store review.
+- [x] **First-run copy** (2026-10-23): `firstrun.ledger.sync` is "Boards and
+      stats follow you between devices" in all ten languages; `onePurchase`
+      ("… Mac & Apple TV") became true when Apple TV joined the store.
 
 Later (PRD-35, "The Store Tells the Story"): localized store pages for the nine
 shipped languages, app preview videos, custom product pages.

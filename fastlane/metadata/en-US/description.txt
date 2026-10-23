@@ -1,7 +1,7 @@
-Nine is sudoku built for wherever you are...on the couch, the train, the desk, or the wrist. One purchase for iPhone, iPad, Mac and Apple Watch, and your boards follow you between them.
+Nine is sudoku built for wherever you are...on the couch, the train, the desk, or the wrist. One purchase for iPhone, iPad, Mac, Apple TV and Apple Watch, and your boards follow you between them.
 
 FLICK TO PLAY
-Tap a cell and a ring of nine digits blooms around it. Flick toward the one you want. On the Mac it's the arrow keys and the number keys; on Apple Watch it's the Digital Crown.
+Tap a cell and a ring of nine digits blooms around it. Flick toward the one you want. On the Mac it's the arrow keys and the number keys; on Apple Watch it's the Digital Crown; on Apple TV it's a swipe and a tap on the Siri Remote, or a game controller.
 
 PUZZLES YOU CAN TRUST
 Every board has exactly one solution and is checked by a logic solver before you see it, so you never need to guess. Three difficulty bands set which techniques a puzzle may ask for... from a relaxed first coffee to a proper fight.
@@ -17,8 +17,10 @@ Finish a board and watch it play back as a comet across the grid, with a debrief
 
 MADE FOR EVERY SCREEN
 • iPhone and iPad: touch-first, with Apple Pencil handwriting and a drafting table on iPad.
+• iPhone Duo: open it and the board becomes a book spread, the crease falling on the board's own box rule, with the controls on one page and the digits on the other.
 • Mac: keyboard-native, with a menu bar, a History window and a compact always-on-top desk mode.
 • Apple Watch: zoom into one box at a time and dial digits with the Crown.
+• Apple TV: a full-screen board across the room, with settings beside it rather than on top of it, played on the Siri Remote or a game controller.
 • Home Screen widget with a board you can play.
 
 QUIET BY DESIGN

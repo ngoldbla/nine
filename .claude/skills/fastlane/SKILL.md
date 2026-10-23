@@ -11,10 +11,10 @@ Two documents are the source of truth; read the one you need before acting:
 - `RELEASE.md` — the store: metadata, screenshots, age rating, submission
   (`store_*` and `release` lanes) and the account-side checklist.
 
-**Current scope:** the first App Store release is iOS + macOS at $4.99
-(`RELEASE_PLATFORMS`), with the watch app embedded in the iOS app and shipping
-with it; Apple TV goes to TestFlight only. Don't put tvOS features in store copy
-or screenshots until the owner widens that.
+**Current scope:** iOS + macOS at $4.99 since 1.1, with the watch app embedded
+in the iOS app; **Apple TV joins the App Store with 1.2** (owner, 2026-10-23),
+and iOS 1.2 ships the iPhone Duo set. `RELEASE_PLATFORMS` is `ios tvos mac`.
+Store copy may describe Apple TV and the Duo; the Parlor stays unadvertised.
 
 Lanes live in `fastlane/Fastfile` under `platform :ios`, so they are invoked as
 `bundle exec fastlane ios <lane>`. Every lane takes `platform:tvos|ios|mac`.

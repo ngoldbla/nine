@@ -58,11 +58,18 @@ BUILD_BASE_COMMITS = 100
 # Store lanes take the same `platform:` vocabulary as `beta`; deliver calls the
 # same three things ios / appletvos / osx.
 STORE_PLATFORMS = { "ios" => "ios", "tvos" => "appletvos", "mac" => "osx" }.freeze
-# What goes to the App Store this release (owner decision 2026-10-13): iOS with
-# the embedded watch app, and macOS. tvOS still ships to TestFlight through
-# `beta`; it just is not submitted.
-RELEASE_PLATFORMS = %w[ios mac].freeze
+# What goes to the App Store (owner decisions): iOS with the embedded watch
+# app, and macOS, since 2026-10-13; Apple TV joins with 1.2 (2026-10-23), after
+# the tvOS repair pass made it playable on a television.
+RELEASE_PLATFORMS = %w[ios tvos mac].freeze
 STORE_DIR = File.expand_path(".", __dir__)
+
+# Screenshot sets that are committed rather than regenerated, kept in their own
+# folder and merged into the platform's set at upload. The iPhone Duo frames
+# need a person in Device Hub to reshoot (no tool sets the posture). (The Apple
+# TV set is committed too, but in place — `screenshots/tvos/` is the whole
+# platform set, so it needs no merge; see `.gitignore`.)
+COMMITTED_SHOT_DIRS = { "ios" => %w[ios-duo] }.freeze
 
 # App Store Connect's limits, checked here so a too-long field fails on the
 # laptop instead of halfway through an upload. Keywords are bytes, not
@@ -110,13 +117,32 @@ def store_options(plat)
     platform: STORE_PLATFORMS.fetch(plat),
     app_version: marketing_version,
     metadata_path: File.join(STORE_DIR, "metadata"),
-    screenshots_path: File.join(STORE_DIR, "screenshots", plat),
+    screenshots_path: store_screenshots_root(plat),
     app_rating_config_path: File.join(STORE_DIR, "rating_config.json"),
     skip_binary_upload: true,
     skip_app_version_update: false,
     force: true,
     precheck_include_in_app_purchases: false
   }
+end
+
+# The folder deliver uploads for a platform: its own set, plus any committed
+# set beside it (`COMMITTED_SHOT_DIRS`), copied together into
+# `.store-shots/<platform>` so one `overwrite_screenshots` replaces them all.
+def store_screenshots_root(plat)
+  base = File.join(STORE_DIR, "screenshots", plat)
+  extras = COMMITTED_SHOT_DIRS.fetch(plat, [])
+  return base if extras.empty?
+  staged = File.join(STORE_DIR, ".store-shots", plat)
+  FileUtils.rm_rf(staged)
+  ([plat] + extras).each do |dir|
+    Dir[File.join(STORE_DIR, "screenshots", dir, "*")].select { |d| File.directory?(d) }.each do |loc_dir|
+      dest = File.join(staged, File.basename(loc_dir))
+      FileUtils.mkdir_p(dest)
+      Dir[File.join(loc_dir, "*.{png,jpg,jpeg}")].each { |f| FileUtils.cp(f, dest) }
+    end
+  end
+  staged
 end
 
 def store_locales
@@ -171,12 +197,14 @@ def store_screenshot_problems(plat)
   problems = []
   locales = store_locales
   require "deliver"
-  shots_root = File.join(STORE_DIR, "screenshots", plat)
+  shots_root = store_screenshots_root(plat)
   # What ASC refuses to publish without, per platform — each entry a display
   # type prefix. iOS needs a Watch set because NineWatch is embedded; any
-  # watch size satisfies it (ASC scales the rest).
+  # watch size satisfies it (ASC scales the rest). The Duo set is ours, not
+  # ASC's: 1.2 ships the spread, and a page that omits it undersells it.
+  # APP_IPHONE_DUO needs deliver 2.241+ (both postures are one display type).
   required = {
-    "ios" => %w[APP_IPHONE_67 APP_IPAD_PRO_3GEN_129 APP_WATCH_],
+    "ios" => %w[APP_IPHONE_67 APP_IPAD_PRO_3GEN_129 APP_WATCH_ APP_IPHONE_DUO],
     "tvos" => %w[APP_APPLE_TV],
     "mac" => %w[APP_DESKTOP]
   }.fetch(plat)
