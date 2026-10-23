@@ -1338,7 +1338,7 @@ COMMENTS = {
     "game.mac.exitDesk": "VoiceOver label of the glyph that restores the full Mac window from the small board-only pane. \"Desk mode\" is that pane's name.",
     "game.tv.padHint": "A note shown when a game controller takes over on Apple TV. ✕ □ △ ☰ are the controller's button symbols — keep them; translate only the words. Middle dots separate the four.",
     "game.tv.disconnected": "A chip shown when a game controller drops mid-game and the Siri Remote takes over. A statement of fact, not an error.",
-    "game.tv.remoteHint": "A note shown once per launch beside the Apple TV board. \"Tap\" is a light touch on the Siri Remote's touch surface. ▶︎ stands for the Play/Pause button — keep the character; the app draws the button's icon in its place. Pressing it toggles pencil (corner-note) mode; holding it undoes; holding the clickpad down opens settings. Middle dots separate the parts.",
+    "game.tv.remoteHint": "A note shown once per launch beside the Apple TV board: just the Play/Pause button's two jobs. ▶︎ stands for the Play/Pause button — keep the character; the app draws the button's icon in its place. Pressing it toggles pencil (corner-note) mode; holding it undoes. Middle dots separate the two, and each becomes its own line.",
     "board.rotor.empty": "Name of a VoiceOver rotor that jumps between squares with nothing in them. A plural noun phrase, as rotor names are.",
     "board.rotor.notes": "Name of a VoiceOver rotor that jumps between empty squares carrying pencil marks.",
     "board.rotor.errors": "Name of a VoiceOver rotor that jumps between placed digits that contradict the solution. Only ever offered when the player has mistake-marking switched on.",

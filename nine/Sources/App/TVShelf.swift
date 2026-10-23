@@ -154,7 +154,15 @@ struct TVShelf: View {
             .accessibilityHidden(true)
             HStack(spacing: 22) {
                 ForEach(actions) { action in
-                    Button(action: action.action) {
+                    Button {
+                        // The row lets go before the door opens. Left open it
+                        // kept focus under the sheet, so Back closed the row,
+                        // not the sheet — and History, with nothing else on it
+                        // the focus engine would leave the row for, could not
+                        // be left at all (1.2 beta).
+                        withAnimation(.couchFast) { actionsOpen = false }
+                        action.action()
+                    } label: {
                         Label(action.title, systemImage: action.symbol)
                             .font(.system(size: 26, weight: .semibold, design: .rounded))
                             .labelStyle(.titleAndIcon)
@@ -167,7 +175,7 @@ struct TVShelf: View {
                 }
             }
             .opacity(actionsOpen ? 1 : (awake ? 0.55 : 0))
-            .disabled(!actionsOpen)
+            .disabled(!actionsOpen || !isActive)
             .focusSection()
             .onMoveCommand { direction in
                 if direction == .up { closeActions() }
@@ -223,8 +231,18 @@ private struct ShelfPageView: View {
         ZStack {
             // The page's own light: a soft glow in the band's hue behind the
             // board, the size of the screen so it has no edge of its own.
-            RadialGradient(colors: [tint.opacity(tones.isLight ? 0.18 : 0.28), .clear],
-                           center: .init(x: 0.33, y: 0.5), startRadius: 60, endRadius: 900)
+            // Drawn by a shader, not a `RadialGradient`: the gradient banded
+            // into rings on a television (see ShelfGlow.metal).
+            // The shader ignores what it is drawn over and outputs only light.
+            Rectangle()
+                .fill(.black)
+                .visualEffect { [tint, peak = tones.isLight ? 0.18 : 0.28] content, proxy in
+                    content.colorEffect(ShaderLibrary.shelfGlow(
+                        .float2(proxy.size.width * 0.33, proxy.size.height * 0.5),
+                        .float(620),
+                        .color(tint),
+                        .float(peak)))
+                }
                 .ignoresSafeArea()
                 .allowsHitTesting(false)
             content

@@ -17,6 +17,12 @@ struct BoardsSheetContent: View {
     @Environment(\.colorScheme) private var colorScheme
     /// PRD-26: which past solve's debrief is open over this sheet, if any.
     @State private var debriefBoard: UUID?
+    #if os(tvOS)
+    /// The sheet takes focus the moment it opens. Without a claim, focus could
+    /// stay nowhere — and Back with focus nowhere is the system's "leave the
+    /// app", which is what closing Boards did on the 1.2 beta.
+    @FocusState private var closeFocused: Bool
+    #endif
 
     private var accent: Color { model.prefs.accent.color(isLight: colorScheme == .light) }
     private var tones: ThemeTones { model.prefs.theme.tones(for: colorScheme) }
@@ -77,6 +83,13 @@ struct BoardsSheetContent: View {
             .frame(maxWidth: .infinity, alignment: .topLeading)
         }
         .overlay { debriefOverlay }
+        #if os(tvOS)
+        // On the close disc, not the first fresh-board pill: a reflexive click
+        // on arrival should cost nothing, and a pill would deal a board.
+        .onAppear {
+            Task { @MainActor in closeFocused = true }
+        }
+        #endif
     }
 
     private var header: some View {
@@ -93,6 +106,7 @@ struct BoardsSheetContent: View {
                         .couchInset(in: Circle(), tint: insetTint)
                 }
                 .buttonStyle(.plain)
+                .focused($closeFocused)
                 .accessibilityLabel(Strings.string("boards.close"))
             }
             #endif

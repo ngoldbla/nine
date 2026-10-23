@@ -16138,67 +16138,67 @@
       }
     },
     "game.tv.remoteHint": {
-      "comment": "A note shown once per launch beside the Apple TV board. \"Tap\" is a light touch on the Siri Remote's touch surface. ▶︎ stands for the Play/Pause button — keep the character; the app draws the button's icon in its place. Pressing it toggles pencil (corner-note) mode; holding it undoes; holding the clickpad down opens settings. Middle dots separate the parts.",
+      "comment": "A note shown once per launch beside the Apple TV board: just the Play/Pause button's two jobs. ▶︎ stands for the Play/Pause button — keep the character; the app draws the button's icon in its place. Pressing it toggles pencil (corner-note) mode; holding it undoes. Middle dots separate the two, and each becomes its own line.",
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Tippen für Ziffern · ▶︎ Notizen · ▶︎ halten: Rückgängig · Touchfläche halten: Einstellungen"
+            "value": "▶︎ Notizen · ▶︎ halten: Rückgängig"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Tap for digits · ▶︎ pencil · Hold ▶︎ to undo · Hold the clickpad for settings"
+            "value": "▶︎ pencil · Hold ▶︎ to undo"
           }
         },
         "es": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Toca para dígitos · ▶︎ lápiz · Mantén ▶︎ para deshacer · Mantén el panel táctil para ajustes"
+            "value": "▶︎ lápiz · Mantén ▶︎ para deshacer"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Touchez pour les chiffres · ▶︎ crayon · Maintenez ▶︎ pour annuler · Maintenez la surface pour les réglages"
+            "value": "▶︎ crayon · Maintenez ▶︎ pour annuler"
           }
         },
         "it": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Tocca per le cifre · ▶︎ matita · Tieni premuto ▶︎ per annullare · Tieni premuta la superficie per le impostazioni"
+            "value": "▶︎ matita · Tieni premuto ▶︎ per annullare"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "タップで数字 · ▶︎でメモ · ▶︎長押しで取り消し · タッチ面長押しで設定"
+            "value": "▶︎でメモ · ▶︎長押しで取り消し"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "탭하면 숫자 · ▶︎ 연필 · ▶︎ 길게 누르면 실행 취소 · 터치 표면 길게 누르면 설정"
+            "value": "▶︎ 연필 · ▶︎ 길게 누르면 실행 취소"
           }
         },
         "nl": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Tik voor cijfers · ▶︎ potlood · Houd ▶︎ vast: ongedaan maken · Houd het aanraakoppervlak vast voor instellingen"
+            "value": "▶︎ potlood · Houd ▶︎ vast: ongedaan maken"
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Toque para dígitos · ▶︎ lápis · Segure ▶︎ para desfazer · Segure a superfície para ajustes"
+            "value": "▶︎ lápis · Segure ▶︎ para desfazer"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "轻点选数字 · ▶︎ 笔记 · 按住 ▶︎ 撤销 · 按住触控面打开设置"
+            "value": "▶︎ 笔记 · 按住 ▶︎ 撤销"
           }
         }
       }

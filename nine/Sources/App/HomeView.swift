@@ -36,6 +36,15 @@ struct HomeView: View {
                 // A presses something invisible and Menu leaves the app, so the
                 // card reads as a window that will not close (1.2 playtest).
                 .disabled(!model.helpSeen)
+                // The same rule for a sheet: while Boards or History is up the
+                // shelf holds nothing focusable, so focus can only be in the
+                // sheet and Back can only mean "close it".
+                .disabled(showHistory || showBoards)
+                // …and steps back. The sheet's glass is translucent, and the
+                // page's 124pt title read straight through it.
+                .blur(radius: showHistory || showBoards ? 24 : 0)
+                .opacity(showHistory || showBoards ? 0.45 : 1)
+                .animation(.couchFast, value: showHistory || showBoards)
             // History is the suite's one secondary surface on the shelf, opened
             // from a card and reachable by remote and pad alike (PRD-5 §2.3).
             GlassSheet(isPresented: $showHistory) {
@@ -119,9 +128,11 @@ struct HomeView: View {
                         title: Strings.string("boards.title")) { showBoards = true },
             ShelfAction(id: "history", symbol: "trophy",
                         title: Strings.string("history.title")) {
-                // Authenticate here, not at launch: opening History is the
-                // player choosing to engage Game Center.
-                GameCenter.shared.authenticate()
+                // No Game Center sign-in on the way in. It used to authenticate
+                // here, and a signed-out TV got Game Center's full-screen
+                // welcome on top of the sheet the player asked for (1.2 beta:
+                // "History is broken"). History's own Game Center row, and the
+                // Game Center door beside this one, are where that is chosen.
                 showHistory = true
             },
             ShelfAction(id: "parlor", symbol: "shareplay", title: ParlorPhrase.start,

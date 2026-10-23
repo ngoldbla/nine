@@ -74,6 +74,86 @@ struct CornerNote: View {
     }
 }
 
+/// A control legend in the same corner: one row per job, read straight down.
+///
+/// On the remote it is two rows and nothing else — the Play/Pause button's
+/// glyph, and what pressing and holding it do. Settings are not in it: the
+/// chevron beside the board (`PanelChevron`) says where they are.
+///
+/// The remote's hint was a `CornerNote` — four jobs run together with middle
+/// dots, capped at three lines in a 380pt corner — and on a real television
+/// the last job, the only one that says where settings are, was the one cut to
+/// an ellipsis (1.2 beta: "it indicates to click something, but gets cut
+/// off"). Every catalog entry already separates its jobs with " · ", so the
+/// dots are where the rows break, in every language, and no row has a limit.
+struct CornerLegend: View {
+    let text: String
+    /// A leading symbol naming the device, or nil when the rows' own glyphs
+    /// already say which device they mean.
+    var systemImage: String? = nil
+
+    private var rows: [String] {
+        text.components(separatedBy: " · ").filter { !$0.isEmpty }
+    }
+
+    var body: some View {
+        HStack(alignment: .firstTextBaseline, spacing: 14) {
+            if let systemImage {
+                Image(systemName: systemImage)
+                    .font(.system(size: 26, weight: .semibold))
+                    .foregroundStyle(.secondary)
+                    .accessibilityHidden(true)
+            }
+            VStack(alignment: .leading, spacing: 8) {
+                ForEach(rows, id: \.self) { row in
+                    GlyphText(row)
+                        .font(CouchTypography.label)
+                        .foregroundStyle(.primary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+        }
+        .padding(.horizontal, 22)
+        .padding(.vertical, 16)
+        .couchGlass(in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+        .transition(.opacity.combined(with: .move(edge: .leading)))
+        .accessibilityElement(children: .combine)
+    }
+}
+
+// MARK: - The way to the panel
+
+/// A small chevron in the margin on the board's trailing side: the panel
+/// lives there, and a swipe past the board's edge brings it in.
+///
+/// It replaced the sentence that explained settings (input pass, round 3:
+/// "remove the settings explanation and replace it with a subtle chevron").
+/// Quiet at rest — a mark in the margin, not a button — and it lifts to the
+/// accent when the cursor reaches the edge column, where one more swipe opens
+/// the panel. Not a focusable thing and not read aloud: the swipe is the
+/// control, and VoiceOver players reach settings by the hold.
+struct PanelChevron: View {
+    /// The cursor is in the edge column: the next swipe that way opens it.
+    let armed: Bool
+    let accent: Color
+
+    static let width: CGFloat = 40
+
+    var body: some View {
+        Image(systemName: "chevron.compact.right")
+            .font(.system(size: 54, weight: .semibold))
+            .foregroundStyle(armed ? AnyShapeStyle(accent) : AnyShapeStyle(.tertiary))
+            .opacity(armed ? 0.95 : 0.45)
+            .offset(x: armed ? 6 : 0)
+            .flipsForRightToLeftLayoutDirection(true)
+            // A fixed slot, so `GameScreen` can centre the board, not the pair.
+            .frame(width: Self.width)
+            .animation(.couchFast, value: armed)
+            .accessibilityHidden(true)
+            .allowsHitTesting(false)
+    }
+}
+
 // MARK: - The controller shield
 
 /// Hosts its content under a `GCEventViewController` that keeps game

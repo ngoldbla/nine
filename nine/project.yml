@@ -213,6 +213,26 @@ targets:
           - UIInterfaceOrientationLandscapeLeft
           - UIInterfaceOrientationLandscapeRight
 
+  # The Apple TV's door tests. `XCUIRemote` is the one thing that presses the
+  # Siri Remote *through the focus engine* in a simulator — the notification
+  # injector feeds handlers directly and so cannot see a sheet that never takes
+  # focus, which is exactly how History shipped with no way out. Its own scheme,
+  # so the universal `Nine` scheme and every CI lane that builds it are untouched.
+  NineTVUITests:
+    type: bundle.ui-testing
+    platform: tvOS
+    sources:
+      - UITests/TV
+    dependencies:
+      - target: Nine
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        TEST_TARGET_NAME: Nine
+    scheme:
+      testTargets:
+        - NineTVUITests
+
   # The Home Screen / Lock Screen widget family (PRD-3). iOS only — never in
   # the tvOS dependency graph. Phase 3b compiles the Engine in (real
   # `place()` runs in-process; the CouchKit package is linked for CouchCore)
