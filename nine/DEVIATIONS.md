@@ -5444,11 +5444,21 @@ that was not the headset's alone.
   Pro or 18 Pro on it), which is also why `simrig` pins 26.5. Its first boot
   ran past simslim's default 10-minute boot timeout on this 8 GB host (load
   average 200–500, 6 GB of swap in use), and a retry with
-  `--boot-timeout 40m` left it **partially slim: 14 of 170 daemons
-  disabled**, the other 136 `launchctl disable` calls timing out under the same
-  load. `simslim doctor --requires icloud` passes, which is all the rig needs;
-  re-run `simslim on E4972452-BE76-4E82-B122-3C684140F787 --except icloud`
-  on a quieter host to finish it. Signing an Apple Account into it and into "Nine Vision"
+  `--boot-timeout 40m` got 14 of 170 daemons before `launchctl` timed out.
+  Run again with the Vision simulator shut down, it reached 149 of 170 — the
+  other 21 are the `icloud` category, kept on purpose. **This 8 GB host cannot
+  run the stock visionOS simulator and an iPhone simulator at once** (the user
+  could not interact with either in Device Hub), so the sync proof runs one
+  simulator at a time: CloudKit does not need both up together.
+- **The live CloudKit proof was skipped, by decision.** Even alone, the
+  iPhone simulator would not take keyboard input in Device Hub on this host,
+  so no Apple Account could be signed in (and an agent may not enter one).
+  What is proven is the merge logic, in tests: `LibrarySyncTests`, the history
+  and channel folds, `HeadsetBoardsTests`, and the entitlement reader against
+  real signed and unsigned binaries. What is not: a board actually crossing
+  CloudKit between an iPhone and a headset. That belongs on real devices
+  signed into one account, with the locally signed builds or TestFlight.
+  `Nine-Sync-iPhone` is kept (shut down, 149/170 slim) for a better host. Signing an Apple Account into it and into "Nine Vision"
   is the human step; the board-on-iPhone, solve-on-headset run waits on it.
   Push is part of the `store` category and stays off, so on this rig CloudKit
   syncs on foreground (`kick()`), not in the background.
