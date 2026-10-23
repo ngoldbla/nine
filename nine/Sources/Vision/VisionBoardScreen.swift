@@ -208,7 +208,7 @@ private struct TogetherState: View {
     }
 }
 
-/// The bottom ornament: New Game by band, the offer of a newer board when
+/// The bottom ornament: New Game by band (and the boards in progress), the offer of a newer board when
 /// there is one, then "Play together" and Game Center. On a solved board it is the only chrome left in the room, which is
 /// all the emphasis it needs — a prominent variant was tried and a `Menu` on
 /// visionOS drew it identically, so it went rather than stay as styling that
@@ -226,6 +226,26 @@ private struct BoardActions: View {
             Menu {
                 ForEach(Difficulty.allCases, id: \.self) { band in
                     Button(Strings.difficulty(band)) { model.compose(band) }
+                }
+                // The board chooser (HEADSET-UX item 10): the menu that
+                // already changes boards, one section deeper — no window,
+                // sheet or ornament of its own. A call's board does not move.
+                let rows = model.coSolve.isActive ? [] : model.chooserRows
+                if !rows.isEmpty {
+                    Section(Strings.string("boards.section.inProgress")) {
+                        ForEach(rows) { row in
+                            Button {
+                                model.switchBoard(to: row.id)
+                            } label: {
+                                Text(Strings.difficulty(row.band))
+                                Text(Strings.string(
+                                    "vision.chooser.detail",
+                                    .text(Strings.string("presence.remaining", .int(row.cellsLeft))),
+                                    .text(row.updatedAt.formatted(
+                                        .relative(presentation: .named, unitsStyle: .abbreviated)))))
+                            }
+                        }
+                    }
                 }
             } label: {
                 Label(Strings.string("menu.game.newGame"), systemImage: "square.grid.3x3")

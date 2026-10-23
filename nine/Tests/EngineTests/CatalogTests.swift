@@ -863,9 +863,13 @@ final class CatalogTests: XCTestCase {
         // same sentence with the name replaced by a word meaning "you" and so
         // carries two. The seven others the PRD added take no argument at all:
         // a heading, an invitation, two verbs, two notes and one pronoun.
-        XCTAssertEqual(keysCarryingTwoOrMore, 52, """
+        //
+        // 52 → 53 for the Vision Pro board chooser: `vision.chooser.detail`,
+        // a board's second line in the New Game menu (how much is left, and
+        // when it was last played). The offer button beside it takes none.
+        XCTAssertEqual(keysCarryingTwoOrMore, 53, """
             \(keysCarryingTwoOrMore) keys carry two or more positional arguments, \
-            not the 52 this test was calibrated against. That is fine and the \
+            not the 53 this test was calibrated against. That is fine and the \
             number should move with the catalog — update it deliberately, in a \
             diff, having checked that `renderings` still reads all three shapes. \
             It is pinned because it dropping to 0 is what a silently-broken \

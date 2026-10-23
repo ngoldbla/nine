@@ -119,6 +119,51 @@ struct HeadsetBoardsTests {
         library.create(kind: .channel(channel: .thermo, tier: .steady, day: nil), game: Self.game, now: at(50))
         #expect(HeadsetBoards.afterMerge(in: library, current: done) == .stay)
     }
+
+    // MARK: The board chooser — "In progress" in the New Game menu (item 10)
+
+    @Test func theChooserListsClassicPartialsNewestFirstWithoutTheCurrentOne() {
+        var library = BoardLibrary()
+        let old = library.create(kind: .free(.gentle), game: Self.game, now: at(0))
+        let daily = library.create(kind: .daily(day: 20_600), game: Self.game, now: at(10))
+        library.create(kind: .channel(channel: .killer, tier: .steady, day: nil), game: Self.game, now: at(20))
+        let done = library.create(kind: .free(.sharp), game: Self.game, now: at(30))
+        library.markSolved(id: done, at: at(35))
+        let mine = library.create(kind: .free(.steady), game: Self.game, now: at(40))
+        let rows = HeadsetBoards.chooserRows(in: library, current: mine)
+        #expect(rows.map(\.id) == [daily, old])
+    }
+
+    @Test func theChooserStopsAtFive() {
+        var library = BoardLibrary()
+        let ids = (0..<8).map { library.create(kind: .free(.gentle), game: Self.game, now: at(Double($0))) }
+        let rows = HeadsetBoards.chooserRows(in: library, current: nil)
+        #expect(rows.map(\.id) == Array(ids.reversed().prefix(5)))
+    }
+
+    @Test func aRowCarriesItsBandCellsLeftAndWhen() throws {
+        var played = Self.game
+        let open = (0..<81).filter { !played.isGiven($0) }
+        _ = played.place(played.puzzle.solution.cells[open[0]], at: open[0])
+        // A wrong digit still fills the square: "left" counts empty squares.
+        _ = played.place(played.puzzle.solution.cells[open[1]] % 9 + 1, at: open[1])
+        var library = BoardLibrary()
+        let free = library.create(kind: .free(.steady), game: played, now: at(5))
+        let daily = library.create(kind: .daily(day: 20_600), game: Self.game, now: at(9))
+        let rows = HeadsetBoards.chooserRows(in: library, current: nil)
+        let freeRow = try #require(rows.first { $0.id == free })
+        #expect(freeRow.band == .steady)
+        #expect(freeRow.cellsLeft == open.count - 2)
+        #expect(freeRow.updatedAt == at(5))
+        // A board with no band of its own (a daily) shows its puzzle's.
+        let dailyRow = try #require(rows.first { $0.id == daily })
+        #expect(dailyRow.band == Self.game.puzzle.difficulty)
+        #expect(dailyRow.cellsLeft == open.count)
+    }
+
+    @Test func anEmptyLibraryHasNoRows() {
+        #expect(HeadsetBoards.chooserRows(in: BoardLibrary(), current: nil).isEmpty)
+    }
 }
 
 /// The first Vision build saved one board, locally, in `nine.vision.board`.

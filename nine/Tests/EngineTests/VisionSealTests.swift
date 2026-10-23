@@ -118,7 +118,8 @@ final class VisionSealTests: XCTestCase {
                     depth -= 1
                 }
                 for name in ["VisionGhostTransport", "vision-coplay-demo", "startGhostCoSolve",
-                             "vision-theme", "appearanceIsStaged", "vision-offer-demo", "stageOffer"]
+                             "vision-theme", "appearanceIsStaged", "vision-offer-demo", "stageOffer",
+                             "vision-chooser-demo", "stageChooser"]
                 where line.contains(name) {
                     XCTAssertNotNil(debugDepth, "\(path): \(name) is outside #if DEBUG")
                 }

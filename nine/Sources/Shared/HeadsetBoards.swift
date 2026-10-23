@@ -110,4 +110,37 @@ public enum HeadsetBoards {
         else { return .open(newer.id) }
         return .offer(newer.id)
     }
+
+    /// One row of the board chooser: "Steady · 34 squares to go · 2 hr. ago".
+    /// The relative time is formatted by the view, at the moment it draws.
+    public struct ChooserRow: Equatable, Sendable, Identifiable {
+        public let id: UUID
+        public let band: Difficulty
+        /// Empty squares — a wrong digit still fills one.
+        public let cellsLeft: Int
+        public let updatedAt: Date
+    }
+
+    /// How many boards the chooser offers. Past five, a menu stops being a
+    /// glance; history lives on the phone.
+    public static let chooserLimit = 5
+
+    /// The "In progress" section of the New Game menu: classic boards in
+    /// progress, newest first, at most five, the board on the headset left out
+    /// (HEADSET-UX item 10).
+    public static func chooserRows(in library: BoardLibrary, current: UUID?) -> [ChooserRow] {
+        library.partials
+            .filter { $0.id != current && isPlayable($0.kind) }
+            .sorted { $0.updatedAt > $1.updatedAt }
+            .prefix(chooserLimit)
+            .map { entry in
+                let game = entry.game
+                let band: Difficulty
+                if case .free(let own) = entry.kind { band = own } else { band = game.puzzle.difficulty }
+                return ChooserRow(
+                    id: entry.id, band: band,
+                    cellsLeft: (0..<81).count { !game.isGiven($0) && game.entry(at: $0) == 0 },
+                    updatedAt: entry.updatedAt)
+            }
+    }
 }

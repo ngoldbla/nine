@@ -178,6 +178,12 @@ final class VisionModel {
                 self.stageOffer()
             }
         }
+        if args.contains("--vision-chooser-demo") {
+            Task { @MainActor in
+                await self.waitForScene(then: 2)
+                self.stageChooser()
+            }
+        }
         if args.contains("--vision-coplay-demo") {
             Task { @MainActor in
                 await self.waitForScene(then: 2)
@@ -286,6 +292,23 @@ final class VisionModel {
         if cursor == nil, let g = game { cursor = (0..<81).first { !g.isGiven($0) } }
     }
 
+    /// `--vision-chooser-demo`: three boards in progress from other days, so
+    /// the New Game menu has an "In progress" section to show, and a cell
+    /// selected so the ornament carrying the menu is up. The menu itself
+    /// opens only on a pinch.
+    private func stageChooser() {
+        let now = Date()
+        for (seed, band, filled, age) in [(11, Difficulty.steady, 20, 2.0 * 3600),
+                                          (12, .sharp, 9, 26 * 3600),
+                                          (13, .gentle, 35, 3 * 86_400)] {
+            var g = NineGame(puzzle: PuzzleGenerator.generate(seed: UInt64(seed), difficulty: band))
+            let answer = g.puzzle.solution.cells
+            for cell in (0..<81).filter({ !g.isGiven($0) }).prefix(filled) { g.place(answer[cell], at: cell) }
+            _ = library.create(kind: .free(band), game: g, now: now - age)
+        }
+        if cursor == nil, let g = game { cursor = (0..<81).first { !g.isGiven($0) } }
+    }
+
     private func startGhostCoSolve() {
         guard let game else { return }
         let ghost = VisionGhostTransport { [weak self] in
@@ -314,7 +337,9 @@ final class VisionModel {
         if let since = g.timer.runningSince { g.timer.closeOpenRun(notLaterThan: since) }
         entryID = entry.id
         game = g
-        if case .free(let band) = entry.kind { difficulty = band }
+        // A daily (reachable from the chooser) has no band of its own; its
+        // puzzle's is the one a solve on it records.
+        if case .free(let band) = entry.kind { difficulty = band } else { difficulty = g.puzzle.difficulty }
         lastEvent = nil
         winningCell = nil
         pencilMode = false
@@ -333,10 +358,20 @@ final class VisionModel {
 
     /// "Continue your other board": open the offered board.
     func takeOffer() {
-        guard let id = offeredBoard, !coSolve.isActive else { return }
+        guard let id = offeredBoard else { return }
         offeredBoard = nil
-        guard let entry = library.entry(id: id), entry.status == .inProgress,
-              HeadsetBoards.isPlayable(entry.kind) else { return }
+        switchBoard(to: id)
+    }
+
+    /// The New Game menu's "In progress" section (HEADSET-UX item 10).
+    var chooserRows: [HeadsetBoards.ChooserRow] {
+        HeadsetBoards.chooserRows(in: library, current: entryID)
+    }
+
+    /// A row of the chooser, or the offer: open another board in progress.
+    func switchBoard(to id: UUID) {
+        guard !coSolve.isActive, id != entryID, let entry = library.entry(id: id),
+              entry.status == .inProgress, HeadsetBoards.isPlayable(entry.kind) else { return }
         pauseClock()
         open(entry, cursor: nil)
         resumeClockIfActive()

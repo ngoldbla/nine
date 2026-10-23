@@ -32157,6 +32157,72 @@
         }
       }
     },
+    "vision.chooser.detail": {
+      "comment": "Second line of a board in the Vision Pro New Game menu's \"In progress\" section, under the difficulty name. %1$@ is how much is left (\"34 squares to go\", its own string), %2$@ when the board was last played, already formatted by the system (\"2 hr. ago\"). Punctuation only — reorder if this language reads the other way round.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "%1$@ · %2$@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ · %2$@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "%1$@ · %2$@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "%1$@ · %2$@"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "%1$@ · %2$@"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "%1$@ · %2$@"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "%1$@ · %2$@"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "%1$@ · %2$@"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "%1$@ · %2$@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "%1$@ · %2$@"
+          }
+        }
+      }
+    },
     "vision.offer.continue": {
       "comment": "Button on Vision Pro, shown with the board's controls when another of the player's devices (an iPhone, a Mac) has moved a newer board. It opens that board instead of the one in front of them; the current board is kept, not deleted. \"Your other board\" is deliberately vague — the app does not know which device it came from. Short; a button label, not a sentence with a period.",
       "extractionState": "manual",

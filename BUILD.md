@@ -61,7 +61,9 @@ appearance a phone would publish, for a contrast pass on a simulator that has
 no iCloud account to receive it.
 `--vision-offer-demo` lands a newer Steady board in the library as a phone's
 would arrive, runs the after-merge rule and selects a cell, so the bottom
-ornament shows "Continue your other board".
+ornament shows "Continue your other board". `--vision-chooser-demo` adds three
+boards in progress from earlier days and selects a cell, for the New Game
+menu's "In progress" section (the menu itself opens only on a pinch).
 
 `nine/scripts/vision-storyboard.py` keeps those captures repeatable: it boots
 "Nine Vision" (`simrig.prepare_vision_simulator`), installs a DEBUG build,
