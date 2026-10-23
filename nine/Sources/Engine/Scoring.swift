@@ -2,6 +2,7 @@
 // the rest of the engine: the app persists a SolveHistory value as-is and
 // mirrors totals into Game Center; nothing here touches UI or wall clocks.
 import Foundation
+import CouchCore
 
 /// Points awarded for one solved board. The values are deliberately chunky
 /// (100-point base steps) so a session's total feels like a score, not a
@@ -280,6 +281,18 @@ public struct SolveHistory: Sendable, Codable, Equatable {
         var merged = self
         merged.records = Array(union.sorted { $0.date > $1.date }.prefix(max(1, capacity)))
         return merged
+    }
+
+    /// What a writer of `nine.history` writes: the live KVS copy (`shared`, the
+    /// raw blob) with this device's copy folded in. Every writer does this —
+    /// phone, TV, Mac and headset — because `CouchStored` reads KVS only when
+    /// its local file is missing, so a device writing straight from its local
+    /// copy would drop a solve another device recorded since. No shared blob,
+    /// or one this build cannot read, leaves this copy as it is.
+    public func mergedWithShared(_ shared: Data?, capacity: Int = Self.capacity) -> SolveHistory {
+        guard let shared, let live = try? CouchJSON.decode(SolveHistory.self, from: shared)
+        else { return self }
+        return live.merged(with: self, capacity: capacity)
     }
 
     // MARK: - Coding (the persistence covenant)

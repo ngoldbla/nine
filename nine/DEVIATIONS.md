@@ -5385,3 +5385,151 @@ negation), and `AppModel` never reaches it.
   a visionOS build until the platform is added to the app record (a human
   gate), and a refused upload would fail `beta_all` on main. The lane has not
   been dry-run: this machine has no `signing.env`.
+
+## Vision Pro follow-through 1 — correctness that crosses platforms (2026-10-23)
+
+The four places where the headset joining the other devices exposed a gap
+that was not the headset's alone.
+
+- **Every writer of `nine.history` and `nine.channels` merges now.** The
+  previous entry left the iPhone, Apple TV and Mac writing their local copy
+  over KVS. Each solve path in `AppModel` (the board's own, and a widget or
+  watch solve recorded through `recordSolveMadeElsewhere`) now starts from the
+  live KVS copy with its own folded in — `SolveHistory.mergedWithShared(_:)`,
+  and `ChannelLedger.merged(with:)`/`mergedWithShared(_:)` for the variant
+  ledger, which had the same last-writer-wins exposure. `AppModel` also folds
+  on `didChangeExternallyNotification` when either key changes, so stats read
+  the union without waiting for the next solve; a fold that changes nothing
+  writes nothing, so two devices cannot ping-pong. A channel's streak is not a
+  set: the copy that saw the later day is kept whole (only free-play channel
+  solves are recorded today, so it does not move). **Measured:** the fold of a
+  full 1000-record history (108 KB) is 4.4 ms in Release, 8.2 ms in Debug, on
+  the solve path only. Launch pays for one observer registration and no read,
+  so the 800 ms budget is untouched by construction rather than by measurement.
+- **The `CKContainer` trap is closed on iOS-family platforms too.**
+  `mayBuildCloudContainer` returned `true` off macOS on the grounds that a
+  simulator has no iCloud account; the sync rig below signs one in, and an
+  unsigned simulator build then traps. `SecTask` is not public on iOS, tvOS or
+  visionOS, so `CloudEntitlement` (`Sources/Shared`) reads the running
+  executable's own Mach-O through the public dyld API: the simulator's
+  `__TEXT,__entitlements` section, then the code signature's XML entitlements
+  blob. Both `AppModel` (off macOS) and `VisionModel` ask it before building a
+  store, and `VisionSealTests` fails if any `LibraryCloudStore()` in `Sources`
+  is built without one of the two guards. The parser is tested on synthetic
+  SuperBlobs; that the real section is present in a signed simulator build and
+  absent in an unsigned one was checked with `otool` on the built products
+  (see the group's commit). macOS keeps `SecTask`.
+- **A Vision solve mints a replay.** Pure Engine minting
+  (`SolveReplay(boardID:game:…)`), pushed through the same `LibraryCloudStore`,
+  so a board finished on the headset has its comet and debrief on the phone.
+  The headset keeps the replays it minted in its own `nine.replays` vault —
+  `LibraryCloudStore` holds a pushed record only in memory — and re-sends them
+  on a re-seed (first sync, account reset). `onRemoteReplay` stays unset: no
+  surface here draws one. A co-solve mints one too, by `AppModel`'s duel rule
+  (a replay is the board's); its history and Game Center stay nobody's.
+- **Channel boards are filtered explicitly.** `channelRules` are local to the
+  device that composed the board and do not sync, so the headset cannot draw a
+  Thermo or Killer board faithfully. `HeadsetBoards` (`Sources/Shared`, tested)
+  now owns the launch choice and the after-merge choice, and both refuse a
+  `.channel` kind — the remembered-board path did not ask before. Passing the
+  rules through instead was not done: it needs the new CloudKit record type
+  and production schema deploy that `AppModel`'s `channelRulesStore` comment
+  already defers for every device.
+
+## Vision Pro follow-through 2 — proving sync and SharePlay (2026-10-23)
+
+- **The sync rig is up; the proof is not.** `Nine-Sync-iPhone` (iPhone 17 Pro,
+  iOS 26.5) was created for the CloudKit round trip. Not iOS 27.1: that runtime
+  runs one device type, the iPhone Duo (`simctl create` refuses an iPhone 17
+  Pro or 18 Pro on it), which is also why `simrig` pins 26.5. Its first boot
+  ran past simslim's default 10-minute boot timeout on this 8 GB host (load
+  average 200–500, 6 GB of swap in use), and a retry with
+  `--boot-timeout 40m` left it **partially slim: 14 of 170 daemons
+  disabled**, the other 136 `launchctl disable` calls timing out under the same
+  load. `simslim doctor --requires icloud` passes, which is all the rig needs;
+  re-run `simslim on E4972452-BE76-4E82-B122-3C684140F787 --except icloud`
+  on a quieter host to finish it. Signing an Apple Account into it and into "Nine Vision"
+  is the human step; the board-on-iPhone, solve-on-headset run waits on it.
+  Push is part of the `store` category and stays off, so on this rig CloudKit
+  syncs on foreground (`kick()`), not in the background.
+- **SharePlay: the test script is written, the run is not.**
+  `nine/docs/vision/SHAREPLAY-TEST.md` — join, late joiner gets the snapshot,
+  concurrent writes converge, undo is yours only, leaving keeps the board, a
+  shared solve is nobody's. It needs two people and two headsets.
+- **Undo in a co-solve takes back your own moves only.** `CoSolveLedger`
+  keeps this participant's moves with the digit each replaced; `undoLast`
+  restores the newest one nobody has written over, as a new move stamped past
+  everything seen, so every participant applies it like any other (tested:
+  `CoSolveTests`). Not redo — an undo is not itself undoable — and the board a
+  headset brings into the call is not undoable either. Restoring a digit that
+  somebody else had placed re-sends it as yours, so its tint becomes yours: the
+  alternative is a move authored as somebody else, which the wire must not
+  allow.
+- **The seat attribution persists** in `nine.vision.cosolve`, a `DuelLedger`
+  keyed by board (`nine.duel`'s shape, a sibling blob, pruned to the library).
+  Tints survive the end of a call and a relaunch, and so does the "nobody's
+  solve" rule: a board finished alone after a call that put somebody else's
+  digit on it still records no history and submits nothing. A move log that no
+  longer reaches the last turn (replaced by a merge) tints nothing rather than
+  the wrong cells.
+- **The co-solve is visible while it is on.** The bottom ornament stays up
+  for the whole call — "Nine together · N" and **Leave** (`parlor.together.leave`,
+  the headset's first string of its own; `Sources/Vision` joined the strings
+  audit's `TREES` with it). This is a deliberate exception to the zero-chrome
+  resting state, scoped to a call: a call is not the resting state, and the way
+  out of one must not wait for a pinch to be found. Leaving keeps the board,
+  digits and tints.
+- **iPhone/iPad joining a co-solve: proposed, not built.**
+  `nine/docs/vision/COSOLVE-ON-IPHONE.md` lays out three options; the
+  recommendation is answer-only on iOS, after one real two-headset run.
+
+## Vision Pro follow-through 3 — headset UX (2026-10-23)
+
+Recorded in `nine/docs/vision/HEADSET-UX.md`, item by item. In short:
+
+- **Built:** the sparks' `RealityView` mounts only for a solve it will burst
+  for and never under Reduce Motion (it was mounted, empty, on every board at
+  launch); DEBUG `--vision-theme`/`--vision-accent` to stage an appearance for
+  a contrast pass, sealed to DEBUG by `VisionSealTests` and by the CI Release
+  check.
+- **Proposed, waiting on a decision:** a quiet "continue your other board"
+  offer in the bottom ornament instead of the silent switch (9); an
+  "In progress" section in the New Game menu as the board chooser (10);
+  resizable window with a 596 pt minimum card, the 60 pt eye-target floor (11).
+- **Waiting on a device:** Game Center sign-in, submission and achievements
+  (8); the wave, the sparks and Reduce Motion (12); VoiceOver, Switch Control
+  and Pointer Control (14).
+- **Not run:** the nine-theme contrast pass (13) — the staging exists, the
+  launches did not fit this host today. `sim-use describe-ui` timed out on the
+  visionOS simulator's daemon socket, so whether the AX API reaches a visionOS
+  tree is still open (14).
+- **Sound (15):** spatial audio is a separate proposal from the suite-wide
+  sound deferral, best made with the co-solve. Not added.
+
+## Vision Pro follow-through 4 — scaffolding (2026-10-23)
+
+- **CI builds NineVision.** `.github/workflows/nine-vision.yml`, its own
+  workflow rather than a job in `nine-engine.yml`, whose promise is "no
+  simulator, no signing, no Xcode project generation". Debug and Release
+  simulator builds, unsigned; a check that `xcodebuild -list` lists both
+  `Nine` and `NineVision` (CLAUDE.md's shared-scheme rule — gym is always
+  passed `scheme:` explicitly, so two shared schemes are safe while both are
+  listed); and a `strings` check that no DEBUG staging argument or the ghost
+  transport survives into the Release binary. Not yet seen running on a
+  runner: the first PR is its first run.
+- **VisionModel's pure decisions moved to `Sources/Shared`.** Slot migration
+  (`HeadsetBoards.migrate`, with `VisionSaveSlot` itself), which board to open
+  at launch and after a merge (`HeadsetBoards.atLaunch`/`newerBoard`), and
+  landing a co-solve move on a `NineGame` with its attribution
+  (`CoSolveBoard.land`, `DuelState.credit`). All under `swift test`. Landing
+  now credits a turn only when the move changed the board; before, a move that
+  changed nothing could open an empty turn.
+- **Storyboard tooling.** `scripts/vision-storyboard.py` on `simrig.py`, which
+  gained a visionOS runtime and the Vision Pro device
+  (`prepare_vision_simulator`) and a scheme/products choice in
+  `build_and_install`. It never erases the Vision simulator by default: a
+  stock visionOS simulator is ~4 GB and simslim cannot slim it.
+  `ax-snapshot.py` was **not** taught visionOS: `sim-use describe-ui` timed out
+  on the visionOS simulator's daemon socket, so there is no evidence the AX API
+  reaches its tree; teaching the harness a dump nobody has seen work would be
+  a lane that always fails or always passes.

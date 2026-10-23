@@ -72,6 +72,35 @@ final class VisionSealTests: XCTestCase {
                       "`*/*.entitlements` swallows \(file) without its negation")
     }
 
+    /// An entitlements file is the half of the trap a signed build covers. An
+    /// unsigned build (`CODE_SIGNING_ALLOWED=NO`, every simulator lane in CI)
+    /// has no entitlements at all, so every place that builds the store must
+    /// first ask the binary itself — `CloudEntitlement` off macOS, `SecTask` on
+    /// it, both behind `mayBuildCloudContainer` in `AppModel`.
+    func testEveryCloudStoreIsBuiltBehindTheBinaryEntitlementGuard() throws {
+        let root = Self.nineRoot.appendingPathComponent("Sources")
+        let files = try XCTUnwrap(FileManager.default.enumerator(at: root, includingPropertiesForKeys: nil))
+            .compactMap { $0 as? URL }.filter { $0.pathExtension == "swift" }
+        var builders = 0
+        for file in files {
+            let lines = try String(contentsOf: file, encoding: .utf8)
+                .split(separator: "\n", omittingEmptySubsequences: false)
+            for (n, line) in lines.enumerated() where line.contains("LibraryCloudStore()")
+                && !line.trimmingCharacters(in: .whitespaces).hasPrefix("//") {
+                builders += 1
+                let before = lines[max(0, n - 6)..<n].joined(separator: "\n")
+                XCTAssertTrue(
+                    before.contains("CloudEntitlement.thisProcessGrantsCloudKit")
+                        || before.contains("mayBuildCloudContainer"),
+                    "\(file.lastPathComponent):\(n + 1) builds a LibraryCloudStore without asking the binary first")
+            }
+        }
+        XCTAssertGreaterThanOrEqual(builders, 2, "expected AppModel's and VisionModel's stores")
+        let appModel = try text("Sources/App/AppModel.swift")
+        XCTAssertTrue(appModel.contains("return CloudEntitlement.thisProcessGrantsCloudKit"),
+                      "AppModel off macOS must ask the binary, not return true")
+    }
+
     /// The ghost is a launch argument; in Release it would be one anybody can
     /// pass. Every mention sits inside `#if DEBUG`.
     func testTheGhostTransportCannotBeReachedInRelease() throws {
@@ -88,7 +117,8 @@ final class VisionSealTests: XCTestCase {
                     if debugDepth == depth { debugDepth = nil }
                     depth -= 1
                 }
-                for name in ["VisionGhostTransport", "vision-coplay-demo", "startGhostCoSolve"]
+                for name in ["VisionGhostTransport", "vision-coplay-demo", "startGhostCoSolve",
+                             "vision-theme", "appearanceIsStaged"]
                 where line.contains(name) {
                     XCTAssertNotNil(debugDepth, "\(path): \(name) is outside #if DEBUG")
                 }

@@ -226,6 +226,41 @@ public struct ChannelLedger: Sendable, Codable, Equatable {
         states[channel.rawValue] = state
     }
 
+    // MARK: - Merging
+
+    /// This ledger and `other`, as one — `SolveHistory.merged(with:)` per
+    /// channel, at this ledger's capacity. `nine.channels` is cloud-synced
+    /// under last-writer-wins exactly as `nine.history` is, so a device that
+    /// wrote its own copy over KVS would drop another device's variant solve.
+    ///
+    /// The streak is not a set and cannot be unioned; the copy that has seen
+    /// the later day is the one that has seen more, so it is kept whole (a tie
+    /// keeps `self`'s). `self` keeps its quarantine and carried keys, for
+    /// `SolveHistory.merged`'s reason.
+    public func merged(with other: ChannelLedger) -> ChannelLedger {
+        var merged = self
+        for (key, theirs) in other.states {
+            guard let ours = states[key] else {
+                merged.states[key] = theirs
+                continue
+            }
+            let streak = (theirs.streak.lastCompletedDay ?? .min) > (ours.streak.lastCompletedDay ?? .min)
+                ? theirs.streak : ours.streak
+            merged.states[key] = ChannelState(
+                streak: streak,
+                history: ours.history.merged(with: theirs.history, capacity: Self.historyCapacity))
+        }
+        return merged
+    }
+
+    /// The live KVS blob with this copy folded in — what a writer writes.
+    /// `SolveHistory.mergedWithShared(_:)`'s rule, for the same reason.
+    public func mergedWithShared(_ shared: Data?) -> ChannelLedger {
+        guard let shared, let live = try? CouchJSON.decode(ChannelLedger.self, from: shared)
+        else { return self }
+        return live.merged(with: self)
+    }
+
     // MARK: - Coding
 
     private enum CodingKeys: String, CodingKey { case states }

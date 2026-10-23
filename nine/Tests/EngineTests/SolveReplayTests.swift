@@ -197,6 +197,18 @@ final class SolveReplayTests: XCTestCase {
         XCTAssertNotNil(vault.replay(for: ids.last!))
     }
 
+    /// `all` is what a re-seed pushes (the headset's first sync, an account
+    /// reset): every record held, oldest first, each once.
+    func testAllListsEveryHeldReplayOldestFirst() {
+        let a = UUID(), b = UUID()
+        var vault = ReplayVault()
+        vault.store(replay(a))
+        vault.store(replay(b))
+        vault.store(replay(a, solvedAt: 10))
+        XCTAssertEqual(vault.all.map(\.boardID), [a, b])
+        XCTAssertEqual(vault.all.first?.solvedAt, Date(timeIntervalSince1970: 10))
+    }
+
     /// PRD-26 §4 — a replay is about a board; when the board goes, so does it.
     func testPruningFollowsTheLibrary() {
         let kept = UUID(), gone = UUID()

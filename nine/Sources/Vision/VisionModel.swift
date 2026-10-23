@@ -27,32 +27,8 @@ import SwiftUI
 import CouchKit
 import GroupActivities
 
-/// Where the player left off on this headset: which library board, and the
-/// cursor on it. The board itself is in `nine.library`.
-///
-/// `game` and `difficulty` are the pre-sync slot's fields, read once to move a
-/// board saved by the first, local-only build into the library, and never
-/// written again.
-struct VisionSaveSlot: Codable, Sendable, Equatable {
-    var entryID: UUID?
-    var cursor: Int?
-    var game: NineGame?
-    var difficulty: Difficulty?
-
-    init() {}
-
-    enum CodingKeys: String, CodingKey { case entryID, cursor, game, difficulty }
-
-    init(from decoder: Decoder) throws {
-        let c = try decoder.container(keyedBy: CodingKeys.self)
-        entryID = (try? c.decodeIfPresent(UUID.self, forKey: .entryID)) ?? nil
-        cursor = (try? c.decodeIfPresent(Int.self, forKey: .cursor)) ?? nil
-        game = (try? c.decodeIfPresent(NineGame.self, forKey: .game)) ?? nil
-        // `try?` because a future band this build cannot name must not throw
-        // the board away with it.
-        difficulty = (try? c.decodeIfPresent(Difficulty.self, forKey: .difficulty)) ?? nil
-    }
-}
+// `VisionSaveSlot` and the board rules live in `Sources/Shared/HeadsetBoards.swift`,
+// where `swift test` holds them.
 
 @MainActor
 @Observable
@@ -63,6 +39,20 @@ final class VisionModel {
         CouchStored(wrappedValue: BoardLibrary(), "nine.library")
     @ObservationIgnored private let historyStore =
         CouchStored(wrappedValue: SolveHistory(), "nine.history", cloudSynced: true)
+    /// The headset's own solves, minted here and kept until CloudKit has them:
+    /// `LibraryCloudStore` holds a pushed replay only in memory, so a solve
+    /// whose record had not gone out before the app was closed is re-sent from
+    /// here on the next re-seed. Never read for display — there is no comet on
+    /// this target — and never written from CloudKit (`onRemoteReplay` unset).
+    /// Who placed which digit on a board solved together, keyed by board —
+    /// PRD-27's `nine.duel` shape, a sibling blob rather than a field on
+    /// `LibraryEntry` (EXECUTING-A-PRD §2). It is what keeps the tints, and the
+    /// "nobody's solve" rule, true for a board after the call has ended or the
+    /// app has been relaunched.
+    @ObservationIgnored private let coSolveSeatsStore =
+        CouchStored(wrappedValue: DuelLedger(), "nine.vision.cosolve")
+    @ObservationIgnored private let replaysStore =
+        CouchStored(wrappedValue: ReplayVault(), "nine.replays")
     @ObservationIgnored private var cloudStore: LibraryCloudStore?
     @ObservationIgnored private var kvsObserver: NSObjectProtocol?
     @ObservationIgnored private var composeGeneration = 0
@@ -111,10 +101,9 @@ final class VisionModel {
         library = libraryStore.wrappedValue
         let slot = slotStore.wrappedValue
         migrateLocalOnlySlot(slot)
-        if let id = entryID ?? slot.entryID, let entry = library.entry(id: id) {
-            open(entry, cursor: slot.cursor)
-        } else if let partial = library.mostRecentFreePartial {
-            open(partial, cursor: nil)
+        let remembered = entryID ?? slot.entryID
+        if let entry = HeadsetBoards.atLaunch(library, remembered: remembered) {
+            open(entry, cursor: entry.id == remembered ? slot.cursor : nil)
         } else {
             compose(.gentle)
         }
@@ -126,18 +115,12 @@ final class VisionModel {
         #endif
     }
 
-    /// The first build saved one board, locally, in the slot. Move it into the
-    /// library once so it syncs like any other, then forget the old fields.
+    /// The first build's local-only board, moved into the library once so it
+    /// syncs like any other (`HeadsetBoards.migrate`).
     private func migrateLocalOnlySlot(_ slot: VisionSaveSlot) {
-        guard slot.entryID == nil, let old = slot.game else { return }
-        let now = Date()
-        let id = library.create(kind: .free(slot.difficulty ?? .gentle), game: old, now: now)
-        if old.isSolved { library.markSolved(id: id, at: now) }
-        entryID = id
-        var fresh = VisionSaveSlot()
-        fresh.entryID = id
-        fresh.cursor = slot.cursor
-        slotStore.wrappedValue = fresh
+        guard let moved = HeadsetBoards.migrate(slot, into: &library, now: Date()) else { return }
+        entryID = moved.entryID
+        slotStore.wrappedValue = moved
     }
 
     #if DEBUG
@@ -165,8 +148,21 @@ final class VisionModel {
         try? FileManager.default.removeItem(at: go)
     }
 
+    /// `--vision-theme <raw> [--vision-accent <raw>]`: the appearance a phone
+    /// would have published, for a contrast pass. A simulator with no iCloud
+    /// account never receives `SharedAppearance` from KVS, so without this
+    /// every theme but the default is unreachable on one.
+    @ObservationIgnored private var appearanceIsStaged = false
+
     private func stageForScreenshots() {
         let args = ProcessInfo.processInfo.arguments
+        func value(after flag: String) -> String? {
+            args.firstIndex(of: flag).flatMap { args.indices.contains($0 + 1) ? args[$0 + 1] : nil }
+        }
+        if let theme = value(after: "--vision-theme") {
+            appearance = SharedAppearance(theme: theme, accent: value(after: "--vision-accent") ?? "")
+            appearanceIsStaged = true
+        }
         if args.contains("--vision-tour") {
             Task { @MainActor in await self.runTour() }
             return
@@ -399,6 +395,7 @@ final class VisionModel {
     }
 
     func undo() {
+        if coSolve.isActive { return undoOwnMove() }
         guard canUndo, var g = game,
               let move = g.undo(elapsed: g.timer.elapsed(at: Date())) else { return }
         game = g
@@ -406,9 +403,26 @@ final class VisionModel {
         persist()
     }
 
-    /// Off in a co-solve: the undo stack is the board's, not the player's, so
-    /// it would take back somebody else's digit. Erase still works on any cell.
-    var canUndo: Bool { !(game?.undoStack.isEmpty ?? true) && !isSolved && !coSolve.isActive }
+    /// In a co-solve the board's undo stack is everybody's, so undo walks
+    /// back this headset's own moves instead (`CoSolveLedger.undoLast`) —
+    /// never somebody else's digit.
+    var canUndo: Bool {
+        guard !isSolved else { return false }
+        if coSolve.isActive { return coSolve.canUndo }
+        return !(game?.undoStack.isEmpty ?? true)
+    }
+
+    /// Your last move in the call, taken back: the cell returns to what it
+    /// held before, as a new move of yours everyone applies.
+    private func undoOwnMove() {
+        guard var g = game, !isSolved, let move = coSolve.takeBack(),
+              let landing = coSolve.land(move, seat: 0, on: &g,
+                                         elapsed: g.timer.elapsed(at: Date())) else { return }
+        game = g
+        cursor = move.cell
+        lastEvent = (move.cell, landing.event, Date())
+        persist()
+    }
 
     /// The keypad greys a digit once all nine are placed.
     func isDigitComplete(_ digit: Int) -> Bool { game?.isDigitComplete(digit) ?? false }
@@ -449,16 +463,23 @@ final class VisionModel {
     }
 
     private func beginCoSolve(_ invite: ParlorInvite, over transport: any CoSolveTransport) {
-        coSolve.begin(invite: invite, fillable: fillable, accent: accent.rawValue,
-                      over: transport)
         let sameBoard = game.map {
             $0.puzzle.seed == invite.seed && $0.puzzle.difficulty == invite.difficulty
         } ?? false
+        coSolve.begin(invite: invite, fillable: fillable, accent: accent.rawValue,
+                      resuming: sameBoard ? savedSeats : nil, over: transport)
         if sameBoard, !isSolved {
             coSolveReady()
         } else {
             compose(invite.difficulty, seed: invite.seed) { [weak self] in self?.coSolveReady() }
         }
+    }
+
+    /// "Leave": out of the call, keeping the board as it stands — digits,
+    /// tints and all. The system's own SharePlay control ends it the same way.
+    func leaveCoSolve() {
+        saveSeats()
+        coSolve.end()
     }
 
     private func coSolveReady() {
@@ -475,16 +496,11 @@ final class VisionModel {
     /// keypad uses, so the move log, the settle and the shake are the board's
     /// own — and is credited to seat 1, which is what tints it.
     private func applyRemote(_ move: CoSolveMove) {
-        guard var g = game, !isSolved, !g.isGiven(move.cell) else { return }
-        let elapsed = g.timer.elapsed(at: Date())
-        let index = g.moveLog.count
-        coSolve.attribute(seat: 1, firstMoveIndex: index, elapsed: elapsed)
-        let changed = move.digit == 0
-            ? g.erase(at: move.cell, elapsed: elapsed)
-            : g.place(move.digit, at: move.cell, elapsed: elapsed)
-        guard changed else { return }
+        guard var g = game, !isSolved else { return }
+        guard let landing = coSolve.land(move, seat: 1, on: &g,
+                                         elapsed: g.timer.elapsed(at: Date())) else { return }
         game = g
-        lastEvent = (move.cell, move.digit == 0 ? .erase : (g.isError(at: move.cell) ? .error : .place), Date())
+        lastEvent = (move.cell, landing.event, Date())
         if g.isSolved {
             finishSolve(at: move.cell)
         } else {
@@ -496,7 +512,14 @@ final class VisionModel {
     /// other hand in `DuelTint`'s partner. Nil outside one, so the board draws
     /// exactly as it always has.
     var digitTint: ((Int) -> Color?)? {
-        guard coSolve.isShared, let seats = coSolve.seats, let game else { return nil }
+        let live = coSolve.isShared ? coSolve.seats : nil
+        guard let seats = live ?? savedSeats, let game,
+              seats.turns.contains(where: { $0.player != 0 }),
+              // A log that no longer reaches the last turn was replaced (a
+              // merge from another device); its indices would tint the wrong
+              // cells, so it tints none.
+              (seats.turns.last?.firstMoveIndex ?? 0) <= game.moveLog.count
+        else { return nil }
         let owners = DuelCredits.owners(state: seats, moves: game.moveLog)
         let isLight = isLight
         return { cell in
@@ -548,9 +571,14 @@ final class VisionModel {
         library.markSolved(id: id, at: now)
         if let solved = library.entry(id: id) { cloudStore?.push(solved) }
         try? libraryStore.flushNow()
+        mintReplay(boardID: id, game: g, at: now)
         reportCoSolve()
-        // A board somebody else also filled in is nobody's solve (PRD-27 §7).
-        guard !coSolve.isShared else { return }
+        // A board somebody else also filled in is nobody's solve (PRD-27 §7) —
+        // during the call, or after it, from the attribution it left behind.
+        let shared = coSolve.isShared
+            || (savedSeats?.turns.contains { $0.player != 0 } ?? false)
+        saveSeats()
+        guard !shared else { return }
         recordSolve(game: g, at: now)
     }
 
@@ -561,7 +589,7 @@ final class VisionModel {
     /// may hold a stale copy of it. So the write starts from the newest copy
     /// KVS has and folds this headset's in (`SolveHistory.merged`): writing
     /// back cannot drop a solve the phone recorded since the headset last
-    /// looked.
+    /// looked. Every other writer does the same since (`AppModel`).
     private func recordSolve(game g: NineGame, at now: Date) {
         let seconds = g.timer.elapsed(at: now)
         let record = SolveRecord(
@@ -569,16 +597,30 @@ final class VisionModel {
             points: SolveScore.points(difficulty: difficulty, isDaily: false,
                                       streak: 0, seconds: seconds),
             errors: g.errorCount)
-        var history = historyStore.wrappedValue
-        let kvs = NSUbiquitousKeyValueStore.default
-        if let data = kvs.data(forKey: CouchKeyspace.namespacedKey("nine.history")),
-           let shared = try? CouchJSON.decode(SolveHistory.self, from: data) {
-            history = shared.merged(with: history)
-        }
+        var history = historyStore.wrappedValue.mergedWithShared(
+            NSUbiquitousKeyValueStore.default.data(
+                forKey: CouchKeyspace.namespacedKey("nine.history")))
         history.record(record)
         historyStore.wrappedValue = history
         try? historyStore.flushNow()
         GameCenter.shared.reportSolve(record: record, history: history)
+    }
+
+    /// The board's replay, for the phone's comet and debrief. A replay is the
+    /// board's, not a player's, so a co-solve mints one too — `AppModel`'s
+    /// duel rule (the history and Game Center stay nobody's). Pure Engine
+    /// minting (`SolveReplay(boardID:game:…)`), nil for a board with no log,
+    /// and pushed through the same store the board went through.
+    private func mintReplay(boardID: UUID, game g: NineGame, at now: Date) {
+        guard let replay = SolveReplay(
+            boardID: boardID, game: g, band: difficulty.rawValue,
+            isDaily: false, solvedAt: now, seconds: g.timer.elapsed(at: now)) else { return }
+        var vault = replaysStore.wrappedValue
+        vault.store(replay)
+        vault.prune(to: Set(library.entries.map { $0.id.uuidString }))
+        replaysStore.wrappedValue = vault
+        try? replaysStore.flushNow()
+        cloudStore?.push(replay)
     }
 
     private func persist() {
@@ -589,7 +631,24 @@ final class VisionModel {
             cloudStore?.push(entry)
         }
         saveSlot()
+        saveSeats()
         reportCoSolve()
+    }
+
+    /// The attribution of the board on the headset, from an earlier call.
+    private var savedSeats: DuelState? {
+        entryID.flatMap { coSolveSeatsStore.wrappedValue[$0] }
+    }
+
+    /// Keep the live call's attribution against this board once somebody
+    /// else's digit is on it. Pruned to the library, like `nine.duel`.
+    private func saveSeats() {
+        guard coSolve.isShared, let seats = coSolve.seats, let id = entryID else { return }
+        var ledger = coSolveSeatsStore.wrappedValue
+        guard ledger[id] != seats else { return }
+        ledger.set(seats, for: id)
+        ledger.prune(to: Set(library.entries.map(\.id)))
+        coSolveSeatsStore.wrappedValue = ledger
     }
 
     private func saveSlot() {
@@ -617,6 +676,9 @@ final class VisionModel {
     /// prefers its local file and reads KVS only on a fresh install, and this
     /// value is never written here, so the live KVS copy is the only truth.
     private func readAppearance() {
+        #if DEBUG
+        if appearanceIsStaged { return }
+        #endif
         let key = CouchKeyspace.namespacedKey(SharedAppearance.storeKey)
         guard let data = NSUbiquitousKeyValueStore.default.data(forKey: key),
               let published = try? CouchJSON.decode(SharedAppearance.self, from: data),
@@ -631,15 +693,20 @@ final class VisionModel {
         cloudStore?.kick()
     }
 
-    /// Only with an iCloud account signed in — the same gate `AppModel` uses.
+    /// Only with an iCloud account signed in **and** a binary entitled to
+    /// CloudKit — the same two gates `AppModel` uses. The second is what keeps
+    /// an unsigned simulator build (`CODE_SIGNING_ALLOWED=NO`, no entitlements
+    /// at all) from trapping in `CKContainer.init` once an account is signed in.
     private func setUpCloudSyncIfAvailable() {
-        guard cloudStore == nil, FileManager.default.ubiquityIdentityToken != nil else { return }
+        guard cloudStore == nil, CloudEntitlement.thisProcessGrantsCloudKit,
+              FileManager.default.ubiquityIdentityToken != nil else { return }
         let store = LibraryCloudStore()
         store.onRemoteEntry = { [weak self] synced in self?.applyRemoteEntry(synced) }
         store.onRemoteDeletion = { [weak self] id in self?.applyRemoteDeletion(id) }
         store.onAccountReset = { [weak self] in self?.repushEntireLibrary() }
-        // Replays are not kept on this target (no comet to draw them with), so
-        // `onRemoteReplay` stays unset and a replay record is simply skipped.
+        // Replays minted here go up; none come down. There is no comet to
+        // draw one with, so `onRemoteReplay` stays unset and an incoming
+        // replay record is simply skipped.
         cloudStore = store
         store.start()
         if !store.hasSyncedBefore { repushEntireLibrary() }
@@ -647,6 +714,7 @@ final class VisionModel {
 
     private func repushEntireLibrary() {
         for entry in library.entries { cloudStore?.push(entry) }
+        for replay in replaysStore.wrappedValue.all { cloudStore?.push(replay) }
     }
 
     private func applyRemoteEntry(_ synced: SyncedEntry) {
@@ -663,6 +731,9 @@ final class VisionModel {
     private func applyRemoteDeletion(_ id: UUID) {
         LibrarySync.applyDeletion(id: id, into: &library)
         try? libraryStore.flushNow()
+        var vault = replaysStore.wrappedValue
+        vault.remove(id)
+        replaysStore.wrappedValue = vault
         if entryID == id { entryID = nil }
     }
 
@@ -677,12 +748,18 @@ final class VisionModel {
             open(merged, cursor: cursor)
             if !wasSolved, isSolved { winningCell = nil }
         }
-        guard cursor == nil, let newest = library.mostRecentFreePartial, newest.id != entryID
+        guard cursor == nil, let newer = HeadsetBoards.newerBoard(in: library, current: entryID)
         else { return }
-        let current = entryID.flatMap(library.entry(id:))
-        if current == nil || current?.status != .inProgress
-            || newest.updatedAt > (current?.updatedAt ?? .distantPast) {
-            open(newest, cursor: nil)
+        open(newer, cursor: nil)
+    }
+}
+
+extension CoSolveLanding {
+    /// The board's answer to draw for it.
+    var event: CellEventKind {
+        switch self {
+        case .placed(let wrong): return wrong ? .error : .place
+        case .erased: return .erase
         }
     }
 }
