@@ -664,7 +664,11 @@ final class VisionModel {
         guard var g = game, !isSolved else { return }
         if active { g.timer.start(at: Date()) } else { g.timer.pause(at: Date()) }
         game = g
-        persist()
+        // Coming forward is not play: the start is saved unstamped, so a
+        // board the phone moved meanwhile is still the newer one
+        // (`HeadsetBoards.saving`). Going away stamps: it closes a run that
+        // was watched.
+        persist(isActivity: !active)
         if !active {
             try? libraryStore.flushNow()
             try? slotStore.flushNow()
@@ -736,10 +740,9 @@ final class VisionModel {
         cloudStore?.push(replay)
     }
 
-    private func persist() {
-        if let game, let id = entryID, var entry = library.entry(id: id) {
-            entry.game = game
-            entry.updatedAt = Date()
+    private func persist(isActivity: Bool = true) {
+        if let game, let id = entryID, let entry = library.entry(id: id) {
+            let entry = HeadsetBoards.saving(game, into: entry, at: Date(), isActivity: isActivity)
             library.upsert(entry)
             cloudStore?.push(entry)
         }

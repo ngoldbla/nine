@@ -5588,15 +5588,17 @@ HEADSET-UX items 9 and 10, built as mocked.
   row list plus a `Section` of `Button`s, unseen. Both staging arguments are
   DEBUG-only, sealed in `VisionSealTests` and the CI Release check (a local
   Release build carries none of them).
-- **Found, not changed: coming forward stamps the board as new.**
-  `scene(active:)` persists the timer start, and `persist` sets `updatedAt`.
-  So in the common case — play on the phone, then put the headset on — the
-  headset's board is stamped newer the moment the window is up, and the phone's
-  board arriving a moment later is not "newer": no offer, as there was no
-  silent switch before. The offer fires when the phone moves *while* the
-  headset is up, and at launch when a newer board synced in an earlier session.
-  Fixing it means a timer-only write that does not count as activity, which
-  `LibrarySync` orders by — every platform's question, not the headset's alone.
+- **Coming forward no longer stamps the board as new.** `scene(active:)`
+  persisted the timer start through `persist`, which set `updatedAt`, so in
+  the common case — play on the phone, then put the headset on — the headset's
+  board was stamped newer the moment the window came up, and the phone's board
+  arriving a moment later was not "newer": no offer (and, before item 9, no
+  silent switch either). Now only activity stamps (`HeadsetBoards.saving`): a
+  move, a pause that closes a watched run, a board chosen. Starting the clock
+  as the window comes forward is saved unstamped. Safe for the other devices:
+  `LibrarySync.apply` caps an open remote run at `updatedAt`, which is before
+  the run began, so it credits nothing (tested). This matches the phone, whose
+  `releaseClock` starts the clock without persisting at all.
 - **Only a headset can confirm:** the offer and the menu under gaze and pinch,
   how the two-line rows read in a visionOS menu, the offer arriving from a real
   iPhone over CloudKit (the live proof is still skipped, follow-through 2), and

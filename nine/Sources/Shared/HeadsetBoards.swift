@@ -111,6 +111,21 @@ public enum HeadsetBoards {
         return .offer(newer.id)
     }
 
+    /// The board saved back into its entry. `updatedAt` is both the library's
+    /// "newest" order and, to every other device, the last provable instant
+    /// of play (`LibrarySync.apply` caps an open run there), so only activity
+    /// stamps it: a move, a pause that closes a watched run, a board chosen.
+    /// The window coming forward and starting the clock is not activity — a
+    /// stamp there made the headset's board newer than the phone's the moment
+    /// it was put on, and the phone's board was never offered.
+    public static func saving(_ game: NineGame, into entry: LibraryEntry, at now: Date,
+                              isActivity: Bool) -> LibraryEntry {
+        var saved = entry
+        saved.game = game
+        if isActivity { saved.updatedAt = now }
+        return saved
+    }
+
     /// One row of the board chooser: "Steady · 34 squares to go · 2 hr. ago".
     /// The relative time is formatted by the view, at the moment it draws.
     public struct ChooserRow: Equatable, Sendable, Identifiable {

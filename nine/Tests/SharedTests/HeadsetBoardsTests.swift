@@ -120,6 +120,50 @@ struct HeadsetBoardsTests {
         #expect(HeadsetBoards.afterMerge(in: library, current: done) == .stay)
     }
 
+    // MARK: Saving — what counts as activity
+
+    @Test func comingForwardDoesNotStampTheBoardAsNew() throws {
+        // Played on the headset at 0, on the phone at 50; the headset comes
+        // forward at 100 and starts its clock. The phone's board must still
+        // be the newer one, or the offer never fires.
+        var library = BoardLibrary()
+        let mine = library.create(kind: .free(.gentle), game: Self.game, now: at(0))
+        let phone = library.create(kind: .free(.steady), game: Self.game, now: at(50))
+        var entry = try #require(library.entry(id: mine))
+        var running = entry.game
+        running.timer.start(at: at(100))
+        entry = HeadsetBoards.saving(running, into: entry, at: at(100), isActivity: false)
+        library.upsert(entry)
+        #expect(entry.updatedAt == at(0))
+        #expect(entry.game.timer.isRunning, "the clock still starts")
+        #expect(HeadsetBoards.afterMerge(in: library, current: mine) == .offer(phone))
+    }
+
+    @Test func aMoveOrAPauseStampsTheBoard() throws {
+        var library = BoardLibrary()
+        let mine = library.create(kind: .free(.gentle), game: Self.game, now: at(0))
+        let entry = try #require(library.entry(id: mine))
+        let saved = HeadsetBoards.saving(entry.game, into: entry, at: at(30), isActivity: true)
+        #expect(saved.updatedAt == at(30))
+    }
+
+    @Test func anUnstampedRunCreditsNothingOnAnotherDevice() throws {
+        // The cloud copy of a board whose clock started after its stamp: the
+        // receiving device caps the open run at `updatedAt`, which is before
+        // the run began, so it credits no time nobody there watched.
+        var headset = BoardLibrary()
+        let id = headset.create(kind: .free(.gentle), game: Self.game, now: at(0))
+        var entry = try #require(headset.entry(id: id))
+        var running = entry.game
+        running.timer.start(at: at(100))
+        entry = HeadsetBoards.saving(running, into: entry, at: at(100), isActivity: false)
+        var phone = BoardLibrary()
+        _ = LibrarySync.apply(remote: SyncedEntry(entry), into: &phone, now: at(500), makeID: { UUID() })
+        let landed = try #require(phone.entry(id: id))
+        #expect(!landed.game.timer.isRunning)
+        #expect(landed.game.timer.elapsed(at: at(500)) == 0)
+    }
+
     // MARK: The board chooser — "In progress" in the New Game menu (item 10)
 
     @Test func theChooserListsClassicPartialsNewestFirstWithoutTheCurrentOne() {
