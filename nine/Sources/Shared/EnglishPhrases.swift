@@ -508,6 +508,7 @@ public enum EnglishPhrases {
         "variantTier.gentle.title": "Gentle",
         "variantTier.sharp.title": "Sharp",
         "variantTier.steady.title": "Steady",
+        "vision.offer.continue": "Continue your other board",
         "watch.app.name": "Nine",
         "watch.dial.empty": "Nothing dialled",
         "watch.dial.erase": "Erase",

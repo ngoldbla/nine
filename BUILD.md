@@ -59,6 +59,9 @@ of on timers. `nine/docs/vision/SHOTLIST.md` is the walkthrough made with them.
 `--vision-theme <raw>` (with optional `--vision-accent <raw>`) stages the
 appearance a phone would publish, for a contrast pass on a simulator that has
 no iCloud account to receive it.
+`--vision-offer-demo` lands a newer Steady board in the library as a phone's
+would arrive, runs the after-merge rule and selects a cell, so the bottom
+ornament shows "Continue your other board".
 
 `nine/scripts/vision-storyboard.py` keeps those captures repeatable: it boots
 "Nine Vision" (`simrig.prepare_vision_simulator`), installs a DEBUG build,

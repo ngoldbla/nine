@@ -32157,6 +32157,72 @@
         }
       }
     },
+    "vision.offer.continue": {
+      "comment": "Button on Vision Pro, shown with the board's controls when another of the player's devices (an iPhone, a Mac) has moved a newer board. It opens that board instead of the one in front of them; the current board is kept, not deleted. \"Your other board\" is deliberately vague — the app does not know which device it came from. Short; a button label, not a sentence with a period.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Anderes Spiel fortsetzen"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Continue your other board"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Seguir con tu otro tablero"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Reprendre votre autre grille"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Continua l’altra griglia"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "もう一つの盤面を続ける"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "다른 보드 이어서 하기"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Ga verder met je andere bord"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Continuar seu outro tabuleiro"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "继续另一局"
+          }
+        }
+      }
+    },
     "watch.app.name": {
       "comment": "The app's own name, shown as the watch's navigation title. DO NOT TRANSLATE: Nine is the product name and stays \"Nine\" in every locale, exactly as it does on the App Store.",
       "extractionState": "manual",

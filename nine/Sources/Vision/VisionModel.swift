@@ -84,6 +84,11 @@ final class VisionModel {
     private(set) var winningCell: Int?
     /// The board's answer to the last move (settle, echo, shake).
     private(set) var lastEvent: (cell: Int, kind: CellEventKind, at: Date)?
+    /// A newer board another device moved, offered rather than opened while
+    /// the one here is still in progress (`HeadsetBoards.afterMerge`). The
+    /// bottom ornament shows it, so it is never seen on an idle board. Not
+    /// persisted: the next merge or open decides it again.
+    private(set) var offeredBoard: UUID?
 
     /// Published by the phone (`SharedAppearance`), read here, never written:
     /// a headset that wrote it would fight the phone under last-writer-wins,
@@ -166,6 +171,12 @@ final class VisionModel {
         if args.contains("--vision-tour") {
             Task { @MainActor in await self.runTour() }
             return
+        }
+        if args.contains("--vision-offer-demo") {
+            Task { @MainActor in
+                await self.waitForScene(then: 2)
+                self.stageOffer()
+            }
         }
         if args.contains("--vision-coplay-demo") {
             Task { @MainActor in
@@ -260,6 +271,21 @@ final class VisionModel {
         enter(answer[last])
     }
 
+    /// `--vision-offer-demo`: the merge an iPhone's newer board would make,
+    /// without an iCloud account — a Steady board a third filled lands in the
+    /// library, the after-merge rule runs, and a cell is selected so the
+    /// ornament carrying the offer is up.
+    private func stageOffer() {
+        var phone = NineGame(puzzle: PuzzleGenerator.generate(seed: 2026, difficulty: .steady))
+        let answer = phone.puzzle.solution.cells
+        for cell in (0..<81).filter({ !phone.isGiven($0) }).prefix(18) {
+            phone.place(answer[cell], at: cell)
+        }
+        _ = library.create(kind: .free(.steady), game: phone, now: Date())
+        refreshAfterMerge()
+        if cursor == nil, let g = game { cursor = (0..<81).first { !g.isGiven($0) } }
+    }
+
     private func startGhostCoSolve() {
         guard let game else { return }
         let ghost = VisionGhostTransport { [weak self] in
@@ -302,6 +328,49 @@ final class VisionModel {
             self.cursor = cursor.flatMap { (0..<81).contains($0) ? $0 : nil }
         }
         saveSlot()
+        reconsiderOffer()
+    }
+
+    /// "Continue your other board": open the offered board.
+    func takeOffer() {
+        guard let id = offeredBoard, !coSolve.isActive else { return }
+        offeredBoard = nil
+        guard let entry = library.entry(id: id), entry.status == .inProgress,
+              HeadsetBoards.isPlayable(entry.kind) else { return }
+        pauseClock()
+        open(entry, cursor: nil)
+        resumeClockIfActive()
+        // Pausing stamped the board left behind as the newest; starting the
+        // clock here stamps this one. Decide again, or the ornament would
+        // offer the way straight back.
+        reconsiderOffer()
+    }
+
+    /// The board being left stops its clock where it is: a run left open would
+    /// be closed at its start by the next `open`, and credit nothing.
+    private func pauseClock() {
+        guard var g = game, !isSolved else { return }
+        g.timer.pause(at: Date())
+        game = g
+        persist()
+    }
+
+    /// `open` leaves the clock stopped; the scene going active starts it. A
+    /// board opened while the window is already in the room starts it here.
+    private func resumeClockIfActive() {
+        guard sceneIsActive, var g = game, !isSolved else { return }
+        g.timer.start(at: Date())
+        game = g
+        persist()
+    }
+
+    /// The offer, decided again from the library as it stands. Never during a
+    /// co-solve: the board in a call is everybody's, and it does not move.
+    private func reconsiderOffer() {
+        guard !coSolve.isActive,
+              case .offer(let id) = HeadsetBoards.afterMerge(in: library, current: entryID)
+        else { return offeredBoard = nil }
+        offeredBoard = id
     }
 
     func compose(_ band: Difficulty) {
@@ -466,6 +535,7 @@ final class VisionModel {
         let sameBoard = game.map {
             $0.puzzle.seed == invite.seed && $0.puzzle.difficulty == invite.difficulty
         } ?? false
+        offeredBoard = nil
         coSolve.begin(invite: invite, fillable: fillable, accent: accent.rawValue,
                       resuming: sameBoard ? savedSeats : nil, over: transport)
         if sameBoard, !isSolved {
@@ -480,6 +550,7 @@ final class VisionModel {
     func leaveCoSolve() {
         saveSeats()
         coSolve.end()
+        reconsiderOffer()
     }
 
     private func coSolveReady() {
@@ -735,11 +806,14 @@ final class VisionModel {
         vault.remove(id)
         replaysStore.wrappedValue = vault
         if entryID == id { entryID = nil }
+        if offeredBoard == id { reconsiderOffer() }
     }
 
-    /// After a merge: if this board moved elsewhere, show where it is now; if
-    /// the player is idle on a board another device has since moved past, go
-    /// to that one — the phone's board, waiting in the room.
+    /// After a merge: if this board moved elsewhere, show where it is now.
+    /// If another device has since moved a newer board, offer it — or, when
+    /// the board here is solved or gone and there is nothing to keep, open it
+    /// (`HeadsetBoards.afterMerge`). The silent switch this replaces changed
+    /// the board under a player who was only looking at it (HEADSET-UX item 9).
     private func refreshAfterMerge() {
         guard !coSolve.isActive else { return }
         if let id = entryID, let merged = library.entry(id: id),
@@ -748,9 +822,14 @@ final class VisionModel {
             open(merged, cursor: cursor)
             if !wasSolved, isSolved { winningCell = nil }
         }
-        guard cursor == nil, let newer = HeadsetBoards.newerBoard(in: library, current: entryID)
-        else { return }
-        open(newer, cursor: nil)
+        switch HeadsetBoards.afterMerge(in: library, current: entryID) {
+        case .stay: offeredBoard = nil
+        case .offer(let id): offeredBoard = id
+        case .open(let id):
+            guard let entry = library.entry(id: id) else { return }
+            open(entry, cursor: nil)
+            resumeClockIfActive()
+        }
     }
 }
 

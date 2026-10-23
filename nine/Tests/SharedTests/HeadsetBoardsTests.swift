@@ -69,6 +69,56 @@ struct HeadsetBoardsTests {
         #expect(HeadsetBoards.newerBoard(in: library, current: UUID())?.id == partial)
         #expect(HeadsetBoards.newerBoard(in: library, current: nil)?.id == partial)
     }
+
+    // MARK: After a merge — offer, switch, or stay (HEADSET-UX item 9)
+
+    @Test func aNewerBoardIsOfferedWhileTheCurrentOneIsInProgress() {
+        var library = BoardLibrary()
+        let mine = library.create(kind: .free(.gentle), game: Self.game, now: at(0))
+        let phone = library.create(kind: .free(.steady), game: Self.game, now: at(50))
+        #expect(HeadsetBoards.afterMerge(in: library, current: mine) == .offer(phone))
+    }
+
+    @Test func aSolvedOrMissingCurrentBoardSwitchesSilently() {
+        var library = BoardLibrary()
+        let partial = library.create(kind: .free(.gentle), game: Self.game, now: at(0))
+        let done = library.create(kind: .free(.gentle), game: Self.game, now: at(10))
+        library.markSolved(id: done, at: at(20))
+        #expect(HeadsetBoards.afterMerge(in: library, current: done) == .open(partial))
+        #expect(HeadsetBoards.afterMerge(in: library, current: UUID()) == .open(partial))
+        #expect(HeadsetBoards.afterMerge(in: library, current: nil) == .open(partial))
+    }
+
+    @Test func nothingNewerMeansStay() {
+        var library = BoardLibrary()
+        let older = library.create(kind: .free(.gentle), game: Self.game, now: at(0))
+        let mine = library.create(kind: .free(.steady), game: Self.game, now: at(50))
+        #expect(HeadsetBoards.afterMerge(in: library, current: mine) == .stay)
+        // The offer re-evaluates on every merge: once the headset's board is
+        // the newer one again, an offer of the older board is withdrawn.
+        #expect(HeadsetBoards.afterMerge(in: library, current: older) == .offer(mine))
+    }
+
+    @Test func anOfferIsWithdrawnWhenTheCandidateIsSolvedOrRemoved() {
+        var library = BoardLibrary()
+        let mine = library.create(kind: .free(.gentle), game: Self.game, now: at(0))
+        let phone = library.create(kind: .free(.steady), game: Self.game, now: at(50))
+        #expect(HeadsetBoards.afterMerge(in: library, current: mine) == .offer(phone))
+        var solved = library
+        solved.markSolved(id: phone, at: at(60))
+        #expect(HeadsetBoards.afterMerge(in: solved, current: mine) == .stay)
+        var removed = library
+        removed.delete(id: phone)
+        #expect(HeadsetBoards.afterMerge(in: removed, current: mine) == .stay)
+    }
+
+    @Test func aChannelBoardIsNeverOfferedOrSwitchedTo() {
+        var library = BoardLibrary()
+        let done = library.create(kind: .free(.gentle), game: Self.game, now: at(0))
+        library.markSolved(id: done, at: at(5))
+        library.create(kind: .channel(channel: .thermo, tier: .steady, day: nil), game: Self.game, now: at(50))
+        #expect(HeadsetBoards.afterMerge(in: library, current: done) == .stay)
+    }
 }
 
 /// The first Vision build saved one board, locally, in `nine.vision.board`.

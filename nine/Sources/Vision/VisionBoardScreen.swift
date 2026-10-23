@@ -208,8 +208,8 @@ private struct TogetherState: View {
     }
 }
 
-/// The bottom ornament: New Game by band, then "Play together" and Game
-/// Center. On a solved board it is the only chrome left in the room, which is
+/// The bottom ornament: New Game by band, the offer of a newer board when
+/// there is one, then "Play together" and Game Center. On a solved board it is the only chrome left in the room, which is
 /// all the emphasis it needs — a prominent variant was tried and a `Menu` on
 /// visionOS drew it identically, so it went rather than stay as styling that
 /// does nothing.
@@ -234,6 +234,20 @@ private struct BoardActions: View {
                     .frame(minHeight: 60)
             }
             .disabled(model.composing)
+
+            // Another device moved a newer board while this one was in
+            // progress (HEADSET-UX item 9). Only here, with the ornament a
+            // pinch brought: no badge or toast on an idle board (rule one).
+            // No device name — `SyncedEntry` does not carry one.
+            if model.offeredBoard != nil, !model.coSolve.isActive {
+                Button(Strings.string("vision.offer.continue"),
+                       systemImage: "arrow.triangle.2.circlepath") {
+                    model.takeOffer()
+                }
+                .font(.title3.weight(.semibold))
+                .padding(.horizontal, 12)
+                .frame(minHeight: 60)
+            }
 
             if let invitation = model.invitation, !model.coSolve.isActive {
                 ShareLink(item: invitation, preview: SharePreview(

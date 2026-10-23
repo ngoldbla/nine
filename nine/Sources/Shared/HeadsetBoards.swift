@@ -88,4 +88,26 @@ public enum HeadsetBoards {
         else { return newest }
         return newest.updatedAt > current.updatedAt ? newest : nil
     }
+
+    /// What a merge does to the board on the headset.
+    public enum AfterMerge: Equatable, Sendable {
+        /// Nothing newer: keep the board, and withdraw any standing offer.
+        case stay
+        /// The board here is solved or gone, so there is nothing to keep: open
+        /// the newer one without asking.
+        case open(UUID)
+        /// The board here is still in progress: keep it, and offer the newer
+        /// one in the bottom ornament. A board never changes under a player
+        /// who was looking at it (HEADSET-UX item 9).
+        case offer(UUID)
+    }
+
+    /// The after-merge decision, re-made on every merge — so an offer is
+    /// withdrawn as soon as its board is solved, removed, or no longer newer.
+    public static func afterMerge(in library: BoardLibrary, current: UUID?) -> AfterMerge {
+        guard let newer = newerBoard(in: library, current: current) else { return .stay }
+        guard let here = current.flatMap(library.entry(id:)), here.status == .inProgress
+        else { return .open(newer.id) }
+        return .offer(newer.id)
+    }
 }

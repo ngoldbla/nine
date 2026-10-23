@@ -123,7 +123,7 @@ jobs:
           BIN=$(find build/Build/Products/Release-xrsimulator -path '*NineVision.app/NineVision' -type f | head -1)
           [ -n "$BIN" ] || { echo "::error::no Release NineVision binary found"; exit 1; }
           echo "checking $BIN"
-          LEAKS=$(strings -a "$BIN" | grep -E -e '--vision-(tour|wait-go|near-solve|solve|coplay-demo|theme|accent)' -e 'VisionGhostTransport' || true)
+          LEAKS=$(strings -a "$BIN" | grep -E -e '--vision-(tour|wait-go|near-solve|solve|coplay-demo|theme|accent|offer-demo)' -e 'VisionGhostTransport' || true)
           if [ -n "$LEAKS" ]; then
             echo "::error::DEBUG staging reached the Release binary:"
             echo "$LEAKS"
