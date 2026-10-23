@@ -72,6 +72,12 @@ because green builds shipped defects that only showed up on a real screen.
   fallback unreachable.
 - **The `.xcodeproj` is generated.** Edit `nine/project.yml`, never the project
   file. Same for `Info.plist`.
+- **`Nine` is the only shared scheme, on purpose.** Xcode autocreates schemes
+  only while no shared scheme exists. A shared scheme on any other target hides
+  `Nine` from `xcodebuild -list`: `xcodebuild -scheme Nine` keeps building, so
+  every lane stays green, while fastlane's gym (which reads the list) archives
+  the wrong target and the TestFlight upload fails. New test targets go in the
+  `Nine` target's `scheme: testTargets:`, not in a `scheme:` of their own.
 
 ## Art direction
 

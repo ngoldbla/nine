@@ -16,6 +16,18 @@ targets:
     # remote, touch or keyboard UI per platform, and per-SDK settings below
     # pick icons, entitlements and signing profiles (PRD-4 §1).
     supportedDestinations: [tvOS, iOS, macOS]
+    # The one shared scheme, and it must be this one. Until the tvOS UI tests
+    # every scheme was autocreated — but Xcode autocreates only while *no*
+    # shared scheme exists, so giving the test bundle a shared scheme of its own
+    # hid `Nine` from `xcodebuild -list`. `xcodebuild -scheme Nine` still built
+    # (every lane green), while gym, which reads the list, fell back to the only
+    # scheme in it and tried to archive the test bundle for TestFlight. Build and
+    # archive here are what the autocreated scheme did; the test action adds the
+    # TV door tests (`xcodebuild test -scheme Nine -destination 'platform=tvOS
+    # Simulator,…'`).
+    scheme:
+      testTargets:
+        - NineTVUITests
     sources:
       - Sources/App
       - Sources/Engine
@@ -216,8 +228,8 @@ targets:
   # The Apple TV's door tests. `XCUIRemote` is the one thing that presses the
   # Siri Remote *through the focus engine* in a simulator — the notification
   # injector feeds handlers directly and so cannot see a sheet that never takes
-  # focus, which is exactly how History shipped with no way out. Its own scheme,
-  # so the universal `Nine` scheme and every CI lane that builds it are untouched.
+  # focus, which is exactly how History shipped with no way out. They run from
+  # the `Nine` scheme's test action (see `scheme:` on the `Nine` target).
   NineTVUITests:
     type: bundle.ui-testing
     platform: tvOS
@@ -229,9 +241,6 @@ targets:
       base:
         GENERATE_INFOPLIST_FILE: YES
         TEST_TARGET_NAME: Nine
-    scheme:
-      testTargets:
-        - NineTVUITests
 
   # The Home Screen / Lock Screen widget family (PRD-3). iOS only — never in
   # the tvOS dependency graph. Phase 3b compiles the Engine in (real
