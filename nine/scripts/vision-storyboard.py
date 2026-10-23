@@ -11,31 +11,39 @@ step per `vision-go` file (`--vision-wait-go`), and this photographs each step
 once the simulator has actually drawn it.
 
     python3 nine/scripts/vision-storyboard.py                    # build, tour, video
-    python3 nine/scripts/vision-storyboard.py --no-build --args --vision-solve
+    python3 nine/scripts/vision-storyboard.py --no-build -- --vision-solve
     python3 nine/scripts/vision-storyboard.py --out /tmp/board --burst 12
+
+Staging arguments go after `--` (default: `--vision-tour`); `--vision-wait-go`
+is always added.
 
 What it does, in order:
 
   1. boots the "Nine Vision" simulator (`simrig.prepare_vision_simulator`) and
      installs a DEBUG `NineVision` (`simrig.build_and_install`);
-  2. photographs the empty room, launches Nine with the staging arguments, and
-     **waits for the first frame by luminance**: the board's glass slab moves
-     the mean luminance of the frame off the empty room's, and two polls that
-     agree say it has settled. A launch on a loaded host took minutes inside
-     RealityKit's scene setup, so a fixed sleep is either too long or wrong;
-  3. **steps with `vision-go`**: drops the file into the app's tmp directory,
+  2. launches Nine with the staging arguments and **waits for the first frame**
+     in two halves. The scene going active is the app's to say: in
+     `--vision-wait-go` mode it consumes its first `vision-go` only once its
+     window is in the room. Luminance alone cannot say it — its first try
+     fired on visionOS's launch placeholder, a blank slab with the app icon,
+     which moves the room's luminance as much as the board does. Then
+     luminance says the frame has **settled**: two polls that agree. A launch
+     on a loaded host took minutes inside RealityKit's scene setup, so a fixed
+     sleep is either too long or wrong;
+  3. **steps with `vision-go`** (the first one was the readiness handshake):
+     drops the file into the app's tmp directory,
      waits for the app to consume it (it deletes it), waits for the frame to
      settle, photographs. A file that is not consumed within `--step-timeout`
      means the tour has no more pauses: the run is over;
   4. **bursts after the solving step** — `--burst` frames back to back, right
-     after step `--burst-after` is consumed (17 for `--vision-tour`, whose 17th
-     `vision-go` releases the last digit; 1 otherwise), because the solve's
+     after step `--burst-after` is consumed (16 for `--vision-tour`: its 17th
+     `vision-go`, the first being the handshake; 1 otherwise), because the solve's
      Afterglow and sparks last about a second and the lift holds;
   5. **assembles** the frames with ffmpeg into `storyboard.mp4`, each step held
      `--hold` seconds and each burst frame `--burst-hold`.
 
-`--measure-launch N` instead times N cold launches to the first frame with the
-same luminance test (no staging, no video) — the launch-performance probe.
+`--measure-launch N` instead times N cold launches to the scene going active
+(the same handshake, no staging, no video) — the launch-performance probe.
 
 Luminance is measured by ffmpeg (scale to one grey pixel), so the only
 dependency is the ffmpeg the video needs anyway.
@@ -73,26 +81,15 @@ def container_tmp(udid):
     return os.path.join(data, "tmp")
 
 
-def wait_for_first_frame(udid, room, scratch, delta, timeout, poll):
-    """Until the frame differs from the empty room by `delta` and two polls
-    agree within a quarter of it."""
-    base = luminance(room)
-    deadline = time.time() + timeout
-    last = None
-    n = 0
-    while time.time() < deadline:
-        time.sleep(poll)
-        n += 1
-        level = luminance(screenshot(udid, os.path.join(scratch, "probe-%03d.png" % n)))
-        moved = abs(level - base) >= delta
-        print("  first frame? luminance %.1f (room %.1f)%s"
-              % (level, base, " — moved" if moved else ""))
-        if moved and last is not None and abs(level - last) <= delta / 4:
-            return
-        last = level if moved else None
-    sys.exit("no first frame in %ds — the board never drew (RealityKit scene "
-             "setup can take minutes on a loaded host; raise --first-frame-timeout)"
-             % int(timeout))
+def wait_for_scene(udid, timeout):
+    """Until the app has consumed its first `vision-go`: its window is in the
+    room. Returns the seconds it took."""
+    start = time.time()
+    if not step(udid, container_tmp(udid), timeout):
+        sys.exit("the scene never went active in %ds (RealityKit scene setup can "
+                 "take minutes on a loaded host; raise --first-frame-timeout)"
+                 % int(timeout))
+    return time.time() - start
 
 
 def settle(udid, scratch, tag, tolerance, poll, limit=8):
@@ -145,26 +142,24 @@ def main():
     parser.add_argument("--no-build", action="store_true",
                         help="install the app already in build/ (or --app)")
     parser.add_argument("--app", help="a built NineVision.app to install instead of building")
-    parser.add_argument("--args", nargs=argparse.REMAINDER,
-                        default=["--vision-tour"],
-                        help="staging launch arguments (default: --vision-tour); "
-                             "--vision-wait-go is always added")
     parser.add_argument("--out", default=os.path.join(REPO, "build", "vision-storyboard"))
     parser.add_argument("--hold", type=float, default=2.5, help="seconds per step")
     parser.add_argument("--burst", type=int, default=8, help="frames after the last step")
     parser.add_argument("--burst-hold", type=float, default=0.4)
     parser.add_argument("--burst-after", type=int,
                         help="the step whose go releases the solve "
-                             "(default 17 for --vision-tour, else 1)")
+                             "(default 16 for --vision-tour, else 1)")
     parser.add_argument("--delta", type=float, default=2.0,
-                        help="luminance change (0–255) that means the board drew")
+                        help="luminance difference (0–255) under which two frames agree, ×4")
     parser.add_argument("--first-frame-timeout", type=float, default=900)
     parser.add_argument("--step-timeout", type=float, default=20)
     parser.add_argument("--poll", type=float, default=3.0)
     parser.add_argument("--size", default="1920x1080")
     parser.add_argument("--measure-launch", type=int, metavar="N",
                         help="time N cold launches to first frame, then stop")
-    opts = parser.parse_args()
+    argv = sys.argv[1:]
+    staging = argv[argv.index("--") + 1:] if "--" in argv else ["--vision-tour"]
+    opts = parser.parse_args(argv[:argv.index("--")] if "--" in argv else argv)
 
     os.makedirs(opts.out, exist_ok=True)
     scratch = os.path.join(opts.out, "probes")
@@ -185,26 +180,24 @@ def main():
             simrig.run(["xcrun", "simctl", "terminate", udid, simrig.VISION_BUNDLE_ID],
                        check=False)
             time.sleep(opts.poll)
-            room = screenshot(udid, os.path.join(scratch, "room-%d.png" % i))
             start = time.time()
-            simrig.run(["xcrun", "simctl", "launch", udid, simrig.VISION_BUNDLE_ID])
-            wait_for_first_frame(udid, room, scratch, opts.delta,
-                                 opts.first_frame_timeout, min(opts.poll, 1.0))
+            simrig.run(["xcrun", "simctl", "launch", udid, simrig.VISION_BUNDLE_ID,
+                        "--vision-wait-go"])
+            wait_for_scene(udid, opts.first_frame_timeout)
             times.append(time.time() - start)
-            print("launch %d: %.1f s to first frame" % (i + 1, times[-1]))
+            print("launch %d: %.1f s to scene active" % (i + 1, times[-1]))
         times.sort()
-        print("first frame: min %.1f s, median %.1f s, max %.1f s over %d launches "
-              "(resolution: one screenshot, ~%.0f s)"
-              % (times[0], times[len(times) // 2], times[-1], len(times), min(opts.poll, 1.0)))
+        print("scene active: min %.1f s, median %.1f s, max %.1f s over %d launches"
+              % (times[0], times[len(times) // 2], times[-1], len(times)))
         return
 
-    room = screenshot(udid, os.path.join(scratch, "room.png"))
-    args = list(opts.args) + ["--vision-wait-go"]
+    args = staging + ["--vision-wait-go"]
     print("launching with %s" % " ".join(args))
     simrig.run(["xcrun", "simctl", "launch", udid, simrig.VISION_BUNDLE_ID] + args)
-    wait_for_first_frame(udid, room, scratch, opts.delta, opts.first_frame_timeout, opts.poll)
+    print("scene active after %.0f s" % wait_for_scene(udid, opts.first_frame_timeout))
 
-    burst_after = opts.burst_after or (17 if "--vision-tour" in args else 1)
+    # The handshake consumed the tour's first go, so its 17th is step 16 here.
+    burst_after = opts.burst_after or (16 if "--vision-tour" in args else 1)
     tmp = container_tmp(udid)
     frames = [(settle(udid, opts.out, "shot-000", opts.delta / 4, opts.poll), opts.hold)]
     n = 0

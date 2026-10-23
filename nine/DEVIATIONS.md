@@ -5524,6 +5524,12 @@ Recorded in `nine/docs/vision/HEADSET-UX.md`, item by item. In short:
   (`CoSolveBoard.land`, `DuelState.credit`). All under `swift test`. Landing
   now credits a turn only when the move changed the board; before, a move that
   changed nothing could open an empty turn.
+- **Seen on the simulator:** the ghost co-solve with the ornament up and no
+  cell selected — "Nine together · 1", Leave, the ghost's digits in gold. The
+  count is 1 because the ghost transport sends no presence envelopes; a live
+  call's roster comes from them. Undo-your-own and Leave were not pinched
+  (no input reaches this simulator); their logic is the tested Shared code.
+  Scene active took 139 s from launch on this host (load ~150).
 - **Storyboard tooling.** `scripts/vision-storyboard.py` on `simrig.py`, which
   gained a visionOS runtime and the Vision Pro device
   (`prepare_vision_simulator`) and a scheme/products choice in

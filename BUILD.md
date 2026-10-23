@@ -62,9 +62,12 @@ no iCloud account to receive it.
 
 `nine/scripts/vision-storyboard.py` keeps those captures repeatable: it boots
 "Nine Vision" (`simrig.prepare_vision_simulator`), installs a DEBUG build,
-waits for the first frame by luminance, steps the tour with `vision-go`, bursts
-frames after the solve and assembles `storyboard.mp4` with ffmpeg.
-`--measure-launch N` times N cold launches to first frame instead.
+waits for the scene (the app consumes its first `vision-go` only once its
+window is up — luminance alone mistook visionOS's launch placeholder for the
+board) and then for the frame to settle by luminance, steps the tour with
+`vision-go`, bursts frames after the solve and assembles `storyboard.mp4` with
+ffmpeg. Staging arguments go after `--`. `--measure-launch N` times N cold
+launches to the scene going active instead.
 
 `.github/workflows/nine-vision.yml` builds NineVision for the simulator in Debug
 and Release on every PR touching `nine/` or `couchkit/`, fails if
