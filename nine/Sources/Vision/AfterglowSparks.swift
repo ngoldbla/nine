@@ -7,7 +7,9 @@
 // particle emitter at the winning cell, burst once — no assets, no custom
 // systems, nothing running between solves.
 //
-// Callers pass a nil `trigger` under Reduce Motion, so nothing is ever built.
+// Mounted by `VisionBoardScreen` only once a board is solved, and never under
+// Reduce Motion — so nothing is built at launch, and a player who asked for
+// less motion never gets a RealityKit scene for it at all.
 #if os(visionOS)
 import SwiftUI
 import RealityKit
