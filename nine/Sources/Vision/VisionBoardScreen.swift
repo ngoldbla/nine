@@ -56,8 +56,12 @@ struct VisionBoardScreen: View {
             VisionKeypad()
                 .padding(.leading, 24)
         }
+        // Also up for the whole of a co-solve: a call is not the resting state,
+        // and "you are solving together" and the way out of it must not wait
+        // for a pinch to be found.
         .ornament(
-            visibility: chromeShown || model.isSolved ? .visible : .hidden,
+            visibility: chromeShown || model.isSolved || model.coSolve.isActive
+                ? .visible : .hidden,
             attachmentAnchor: .scene(.bottom),
             contentAlignment: .top
         ) {
@@ -95,10 +99,14 @@ struct VisionBoardScreen: View {
             if !model.isSolved {
                 CellTargets { model.select($0) }
             }
-            AfterglowSparks(
-                trigger: reduceMotion ? nil : solvedAt,
-                origin: model.winningCell,
-                accent: accent)
+            // Mounted only for a solve it will burst for — never at launch, and
+            // never under Reduce Motion. A `RealityView` is a RealityKit scene
+            // of its own; an idle one on every board was paid for at launch,
+            // where RealityKit's scene setup was already the slow part.
+            if let solvedAt, !reduceMotion {
+                AfterglowSparks(trigger: solvedAt, origin: model.winningCell, accent: accent)
+                    .id(solvedAt)
+            }
         }
         .frame(width: VisionBoardMetrics.card, height: VisionBoardMetrics.card)
         // The trophy moment: the solved board comes forward to meet the
@@ -168,6 +176,38 @@ private struct CellTargets: View {
     }
 }
 
+/// The co-solve's state, while a call is on: what this is ("Nine together",
+/// the activity's own name in the system's SharePlay UI), who is here (one
+/// figure per participant, you included), and the way out. Leaving keeps the
+/// board as it stands.
+private struct TogetherState: View {
+    @Environment(VisionModel.self) private var model
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Label {
+                Text(verbatim: "\(Strings.string("parlor.activity.title")) · \(model.coSolve.participantCount)")
+            } icon: {
+                Image(systemName: "shareplay")
+            }
+            .font(.title3.weight(.semibold))
+            .monospacedDigit()
+            .padding(.horizontal, 12)
+            .frame(minHeight: 60)
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(Text(Strings.string("parlor.activity.title")))
+            .accessibilityValue(Text(verbatim: "\(model.coSolve.participantCount)"))
+
+            Button(Strings.string("parlor.together.leave"), systemImage: "rectangle.portrait.and.arrow.right") {
+                model.leaveCoSolve()
+            }
+            .font(.title3.weight(.semibold))
+            .padding(.horizontal, 12)
+            .frame(minHeight: 60)
+        }
+    }
+}
+
 /// The bottom ornament: New Game by band, then "Play together" and Game
 /// Center. On a solved board it is the only chrome left in the room, which is
 /// all the emphasis it needs — a prominent variant was tried and a `Menu` on
@@ -207,18 +247,7 @@ private struct BoardActions: View {
                 .help(Strings.string("parlor.start.title"))
                 .accessibilityLabel(Text(Strings.string("parlor.start.title")))
             } else if model.coSolve.isActive {
-                // Who is here: one figure per participant, you included.
-                Label {
-                    Text(verbatim: "\(model.coSolve.participantCount)")
-                } icon: {
-                    Image(systemName: "person.2.fill")
-                }
-                    .font(.title3.weight(.semibold))
-                    .monospacedDigit()
-                    .padding(.horizontal, 12)
-                    .frame(minHeight: 60)
-                    .accessibilityLabel(Text(Strings.string("parlor.activity.title")))
-                    .accessibilityValue(Text(verbatim: "\(model.coSolve.participantCount)"))
+                TogetherState()
             }
 
             Button {

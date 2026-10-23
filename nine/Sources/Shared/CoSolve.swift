@@ -80,15 +80,54 @@ public struct CoSolveLedger: Equatable, Sendable {
     /// The winning move per cell, for every cell anyone has touched.
     public private(set) var cells: [Int: CoSolveMove] = [:]
 
+    /// This participant's own moves in the call, oldest first, each with the
+    /// digit it replaced — what an undo of *your* moves walks back. The board's
+    /// `NineGame.undoStack` cannot do this: it is everybody's.
+    private var own: [OwnMove] = []
+
+    private struct OwnMove: Equatable, Sendable {
+        let clock: Int
+        let cell: Int
+        let before: Int
+    }
+
     public init() {}
 
     /// A move made on this headset. Always wins locally — it is stamped past
-    /// everything this participant has seen.
-    public mutating func stamp(cell: Int, digit: Int, author: UUID) -> CoSolveMove {
+    /// everything this participant has seen. `undoable` is false for the
+    /// board a headset brings into the call (stamped so a late joiner gets
+    /// it, not placed in the call) and for an undo itself, which is not redo.
+    public mutating func stamp(cell: Int, digit: Int, author: UUID,
+                               undoable: Bool = true) -> CoSolveMove {
+        let before = cells[cell]?.digit ?? 0
         clock += 1
         let move = CoSolveMove(cell: cell, digit: digit, clock: clock, author: author)
         cells[cell] = move
+        if undoable { own.append(OwnMove(clock: move.clock, cell: cell, before: before)) }
         return move
+    }
+
+    /// Whether `author` has a move still standing to take back.
+    public func canUndo(author: UUID) -> Bool {
+        own.contains { isStanding($0, author: author) }
+    }
+
+    /// Take back `author`'s latest move that nobody has since written over:
+    /// the cell goes back to what it held before, as a new move stamped past
+    /// everything seen, so every participant applies it like any other. A
+    /// move somebody else has overwritten is not yours to undo any more and
+    /// is skipped. Nil when nothing of yours is left.
+    public mutating func undoLast(author: UUID) -> CoSolveMove? {
+        while let last = own.popLast() {
+            guard isStanding(last, author: author) else { continue }
+            return stamp(cell: last.cell, digit: last.before, author: author, undoable: false)
+        }
+        return nil
+    }
+
+    private func isStanding(_ move: OwnMove, author: UUID) -> Bool {
+        guard let current = cells[move.cell] else { return false }
+        return current.clock == move.clock && current.author == author
     }
 
     /// A move from somebody else. Returns true when it changes the board, so
@@ -104,5 +143,42 @@ public struct CoSolveLedger: Equatable, Sendable {
     /// The board so far, oldest first, for a late joiner.
     public var snapshot: CoSolveSnapshot {
         CoSolveSnapshot(moves: cells.values.sorted { $1.supersedes($0) })
+    }
+}
+
+/// What a co-solve move did to the board — the answer the board draws.
+public enum CoSolveLanding: Equatable, Sendable {
+    case placed(wrong: Bool)
+    case erased
+}
+
+/// Landing a move on a `NineGame`, with its attribution. Pure, so it is held
+/// under `swift test` rather than only inside the visionOS-only model.
+public enum CoSolveBoard {
+
+    /// Land `move` through the board's own `place`/`erase` — so the move log,
+    /// the settle and the shake are the board's — and credit it to `seat`.
+    /// Nil when the move changes nothing (a given, or the digit already
+    /// there); such a move opens no turn, so it can tint nothing.
+    public static func land(_ move: CoSolveMove, seat: Int, on game: inout NineGame,
+                            seats: inout DuelState?, elapsed: TimeInterval) -> CoSolveLanding? {
+        guard move.isWellFormed, !game.isGiven(move.cell) else { return nil }
+        let index = game.moveLog.count
+        let changed = move.digit == 0
+            ? game.erase(at: move.cell, elapsed: elapsed)
+            : game.place(move.digit, at: move.cell, elapsed: elapsed)
+        guard changed else { return nil }
+        seats?.credit(seat: seat, firstMoveIndex: index, at: elapsed)
+        if move.digit == 0 { return .erased }
+        return .placed(wrong: game.isError(at: move.cell))
+    }
+}
+
+extension DuelState {
+    /// Credit the move logged at `index` to `seat`: a new turn only when the
+    /// hand changes, so one person's run of digits is one turn.
+    public mutating func credit(seat: Int, firstMoveIndex index: Int, at elapsed: TimeInterval) {
+        guard turns.isEmpty || currentPlayer != seat else { return }
+        beginTurn(player: seat, firstMoveIndex: index, startedAt: elapsed)
     }
 }

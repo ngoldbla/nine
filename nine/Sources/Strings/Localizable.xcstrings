@@ -24849,6 +24849,72 @@
         }
       }
     },
+    "parlor.together.leave": {
+      "comment": "Button on Vision Pro that leaves a SharePlay co-solve (several people on ONE shared board). Short imperative verb. The player keeps the board and can go on alone; this only stops solving together. Do NOT translate as quit, close the app, or delete.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Verlassen"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Leave"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Salir"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Quitter"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Esci"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "退出"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "나가기"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Verlaten"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Sair"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "退出"
+          }
+        }
+      }
+    },
     "prefs.accent.title": {
       "comment": "Heading over the row of colour swatches that tints the app. \"Accent\" is the single highlight colour, not a decoration on a letter.",
       "extractionState": "manual",

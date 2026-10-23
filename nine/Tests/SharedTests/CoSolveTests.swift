@@ -88,4 +88,118 @@ final class CoSolveTests: XCTestCase {
             CoSolveSnapshot.self, from: Data(#"{"moves": "not a list"}"#.utf8))
         XCTAssertTrue(decoded.moves.isEmpty)
     }
+
+    // MARK: - Undo, your own moves only
+
+    /// Undo in a co-solve takes back *your* last move and nobody else's: it
+    /// restores what the cell held before it, as a new move everyone applies.
+    func testUndoTakesBackYourLastMoveAsANewMove() throws {
+        var ledger = CoSolveLedger()
+        _ = ledger.stamp(cell: 3, digit: 4, author: ana)
+        _ = ledger.stamp(cell: 7, digit: 9, author: ana)
+        XCTAssertTrue(ledger.apply(CoSolveMove(cell: 12, digit: 1, clock: 9, author: ben)))
+        let undo = try XCTUnwrap(ledger.undoLast(author: ana))
+        XCTAssertEqual(undo.cell, 7)
+        XCTAssertEqual(undo.digit, 0, "the cell was empty before your 9")
+        XCTAssertGreaterThan(undo.clock, 9, "an undo is a new move, past everything seen")
+        XCTAssertEqual(board(ledger), [3: 4, 7: 0, 12: 1], "ben's 1 is untouched")
+    }
+
+    func testUndoRestoresWhateverYourMoveReplaced() throws {
+        var ledger = CoSolveLedger()
+        XCTAssertTrue(ledger.apply(CoSolveMove(cell: 5, digit: 2, clock: 1, author: ben)))
+        _ = ledger.stamp(cell: 5, digit: 6, author: ana)
+        XCTAssertEqual(try XCTUnwrap(ledger.undoLast(author: ana)).digit, 2)
+    }
+
+    /// A move somebody has since written over is not yours to take back any
+    /// more; undo skips it and reaches for the one before.
+    func testUndoSkipsAMoveSomebodyElseHasOverwritten() throws {
+        var ledger = CoSolveLedger()
+        _ = ledger.stamp(cell: 1, digit: 1, author: ana)
+        let mine = ledger.stamp(cell: 2, digit: 2, author: ana)
+        XCTAssertTrue(ledger.apply(CoSolveMove(cell: 2, digit: 8, clock: mine.clock + 1, author: ben)))
+        let undo = try XCTUnwrap(ledger.undoLast(author: ana))
+        XCTAssertEqual(undo.cell, 1)
+        XCTAssertEqual(board(ledger)[2], 8)
+        XCTAssertNil(ledger.undoLast(author: ana), "nothing left of ana's to take back")
+    }
+
+    /// The board this headset brought into the call is not undoable: it was
+    /// stamped so a late joiner gets it, not placed in the call.
+    func testTheBoardYouArrivedWithIsNotUndoable() {
+        var ledger = CoSolveLedger()
+        _ = ledger.stamp(cell: 0, digit: 5, author: ana, undoable: false)
+        XCTAssertFalse(ledger.canUndo(author: ana))
+        XCTAssertNil(ledger.undoLast(author: ana))
+    }
+
+    /// Undoing an undo is not redo; it is a move like any other, and the
+    /// stack does not grow from it.
+    func testAnUndoIsNotItselfUndone() throws {
+        var ledger = CoSolveLedger()
+        _ = ledger.stamp(cell: 4, digit: 4, author: ana)
+        _ = try XCTUnwrap(ledger.undoLast(author: ana))
+        XCTAssertFalse(ledger.canUndo(author: ana))
+    }
+
+    // MARK: - Landing a move on the board (lifted out of VisionModel)
+
+    private func fresh() -> NineGame {
+        NineGame(puzzle: PuzzleGenerator.generate(seed: 7, difficulty: .gentle))
+    }
+
+    private func openCell(_ g: NineGame) -> Int { (0..<81).first { !g.isGiven($0) }! }
+
+    func testARemoteDigitLandsAndIsCreditedToItsSeat() throws {
+        var game = fresh()
+        var seats: DuelState? = DuelState(accent: "glacier", isLight: false, turnLength: .standard)
+        let cell = openCell(game)
+        let digit = game.puzzle.solution.cells[cell]
+        let landing = CoSolveBoard.land(CoSolveMove(cell: cell, digit: digit, clock: 1, author: ben),
+                                        seat: 1, on: &game, seats: &seats, elapsed: 5)
+        XCTAssertEqual(landing, .placed(wrong: false))
+        XCTAssertEqual(game.entry(at: cell), digit)
+        let owners = DuelCredits.owners(state: try XCTUnwrap(seats), moves: game.moveLog)
+        XCTAssertEqual(owners[cell], 1)
+    }
+
+    func testAWrongDigitAndAnEraseLandAsTheBoardAnswersThem() {
+        var game = fresh()
+        var seats: DuelState?
+        let cell = openCell(game)
+        let wrong = game.puzzle.solution.cells[cell] % 9 + 1
+        XCTAssertEqual(CoSolveBoard.land(CoSolveMove(cell: cell, digit: wrong, clock: 1, author: ben),
+                                         seat: 1, on: &game, seats: &seats, elapsed: 0),
+                       .placed(wrong: true))
+        XCTAssertEqual(CoSolveBoard.land(CoSolveMove(cell: cell, digit: 0, clock: 2, author: ben),
+                                         seat: 1, on: &game, seats: &seats, elapsed: 0),
+                       .erased)
+    }
+
+    /// A move that changes nothing — onto a given, or the digit already
+    /// there — lands nowhere and opens no turn, so it tints nothing.
+    func testAMoveThatChangesNothingOpensNoTurn() {
+        var game = fresh()
+        var seats: DuelState? = DuelState(accent: "glacier", isLight: false, turnLength: .standard)
+        let given = (0..<81).first { game.isGiven($0) }!
+        XCTAssertNil(CoSolveBoard.land(CoSolveMove(cell: given, digit: 1, clock: 1, author: ben),
+                                       seat: 1, on: &game, seats: &seats, elapsed: 0))
+        XCTAssertEqual(seats?.turns.count, 0)
+    }
+
+    func testOneHandsRunOfMovesIsOneTurn() {
+        var game = fresh()
+        var seats: DuelState? = DuelState(accent: "glacier", isLight: false, turnLength: .standard)
+        let open = (0..<81).filter { !game.isGiven($0) }
+        for (n, cell) in open.prefix(3).enumerated() {
+            _ = CoSolveBoard.land(CoSolveMove(cell: cell, digit: game.puzzle.solution.cells[cell],
+                                              clock: n + 1, author: ben),
+                                  seat: 1, on: &game, seats: &seats, elapsed: 0)
+        }
+        _ = CoSolveBoard.land(CoSolveMove(cell: open[3], digit: game.puzzle.solution.cells[open[3]],
+                                          clock: 9, author: ana),
+                              seat: 0, on: &game, seats: &seats, elapsed: 0)
+        XCTAssertEqual(seats?.turns.map(\.player), [1, 0])
+    }
 }

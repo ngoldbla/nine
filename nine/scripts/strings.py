@@ -51,8 +51,10 @@ REPO_NINE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # The trees a player can see. `Sources/Engine` is absent on purpose: the engine
 # never localizes (it must stay Linux-clean and its `Technique`/`Difficulty` raw
 # values are frozen inside 56 golden-corpus hashes), and `Sources/Shared`
-# is here because it compiles into the widget extension.
-TREES = ["Sources/App", "Sources/Widgets", "Sources/Shared", "Sources/Watch"]
+# is here because it compiles into the widget extension. `Sources/Vision` came
+# in with the headset's first string of its own (`parlor.together.leave`):
+# before that its words were all borrowed keys, and nothing audited the tree.
+TREES = ["Sources/App", "Sources/Widgets", "Sources/Shared", "Sources/Watch", "Sources/Vision"]
 
 # Debug-only surfaces the player never sees. Each one is named, never
 # pattern-matched: an exemption that can grow by accident is not an exemption,
@@ -1232,6 +1234,7 @@ COMMENTS = {
     "parlor.activity.title": "Title of the SharePlay activity, shown by the system in FaceTime when someone starts a shared game. Contains the app's name, which is never translated. Two or three words.",
     "parlor.activity.subtitle": "One-line subtitle under parlor.activity.title in the system's SharePlay UI. Explains the whole feature: everyone gets the same puzzle but plays it separately on their own device. Not a slogan.",
     "parlor.start.title": "Title of the shelf card that starts a shared game. Imperative verb phrase, warm and plain. \"Together\" means alongside other people, NOT on the same board.",
+    "parlor.together.leave": "Button on Vision Pro that leaves a SharePlay co-solve (several people on ONE shared board). Short imperative verb. The player keeps the board and can go on alone; this only stops solving together. Do NOT translate as quit, close the app, or delete.",
     "parlor.start.caption": "One-line caption under parlor.start.title. States the condition (a FaceTime call is needed) and what happens (everyone gets this same puzzle). Plain statement, not a sales line.",
     "parlor.dot.you": "VoiceOver label for the small dot representing the player's OWN progress in a row of dots, one per person on the call. Second person, one or two words.",
     "parlor.dot.other": "VoiceOver label for the dot representing SOMEONE ELSE on the call. The app is not told who they are, so this must stay anonymous — no name, no placeholder for a name, no \"your friend\" (they may not be). Neutral and singular.",

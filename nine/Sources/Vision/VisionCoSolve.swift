@@ -92,6 +92,11 @@ final class VisionCoSolve {
     /// Who placed what, as turns over the move log. Seat 0 is this headset.
     private(set) var seats: DuelState?
 
+    /// Whether this headset has a move of its own still standing to take back
+    /// (`CoSolveLedger.undoLast`). Undo in a call is yours only: the board's
+    /// own undo stack is everybody's.
+    private(set) var canUndo = false
+
     /// The model applies a remote move to its board and calls `attribute`.
     @ObservationIgnored var onRemoteMove: ((CoSolveMove) -> Void)?
 
@@ -104,12 +109,16 @@ final class VisionCoSolve {
 
     /// Join (or start) a co-solve. `boardReady` is false while the joiner is
     /// still composing the invite's board; `ready(ownEntries:)` releases it.
-    func begin(invite: ParlorInvite, fillable: Int, accent: String,
+    /// `resuming` is the attribution this board already carries from an
+    /// earlier call (`nine.vision.cosolve`), so the tints of people who have
+    /// left stay theirs.
+    func begin(invite: ParlorInvite, fillable: Int, accent: String, resuming: DuelState?,
                over transport: any CoSolveTransport) {
         end()
         ledger = CoSolveLedger()
-        isShared = false
-        seats = DuelState(accent: accent, isLight: false, turnLength: .standard)
+        canUndo = false
+        isShared = resuming?.turns.contains { $0.player != 0 } ?? false
+        seats = resuming ?? DuelState(accent: accent, isLight: false, turnLength: .standard)
         self.transport = transport
         transport.onMove = { [weak self] move in self?.receive(move) }
         transport.onSnapshot = { [weak self] snapshot in
@@ -131,7 +140,8 @@ final class VisionCoSolve {
         guard let transport, !boardReady else { return }
         boardReady = true
         for (cell, digit) in ownEntries.sorted(by: { $0.key < $1.key }) {
-            transport.send(ledger.stamp(cell: cell, digit: digit, author: transport.localParticipant))
+            transport.send(ledger.stamp(cell: cell, digit: digit,
+                                        author: transport.localParticipant, undoable: false))
         }
         let held = early
         early.removeAll()
@@ -141,6 +151,7 @@ final class VisionCoSolve {
     func end() {
         parlor.leave()
         transport = nil
+        canUndo = false
         early.removeAll()
         boardReady = false
         knownRoster.removeAll()
@@ -150,16 +161,42 @@ final class VisionCoSolve {
     func send(cell: Int, digit: Int) {
         guard let transport, boardReady else { return }
         transport.send(ledger.stamp(cell: cell, digit: digit, author: transport.localParticipant))
+        refreshUndo()
+    }
+
+    /// Take back this headset's latest move nobody has overwritten, and send
+    /// the taking-back to everyone. The model lands the returned move on its
+    /// board like any other of its own.
+    func takeBack() -> CoSolveMove? {
+        guard let transport, boardReady,
+              let move = ledger.undoLast(author: transport.localParticipant) else { return nil }
+        transport.send(move)
+        refreshUndo()
+        return move
+    }
+
+    private func refreshUndo() {
+        let can = transport.map { ledger.canUndo(author: $0.localParticipant) } ?? false
+        if can != canUndo { canUndo = can }
     }
 
     /// Credit the move about to be logged at `index` to a seat.
     func attribute(seat: Int, firstMoveIndex index: Int, elapsed: TimeInterval) {
         guard var state = seats else { return }
-        if state.turns.isEmpty || state.currentPlayer != seat {
-            state.beginTurn(player: seat, firstMoveIndex: index, startedAt: elapsed)
-            seats = state
-        }
+        state.credit(seat: seat, firstMoveIndex: index, at: elapsed)
+        if state != seats { seats = state }
         if seat != 0 { isShared = true }
+    }
+
+    /// Land a move on the board, credited to `seat` (`CoSolveBoard.land`).
+    func land(_ move: CoSolveMove, seat: Int, on game: inout NineGame,
+              elapsed: TimeInterval) -> CoSolveLanding? {
+        var state = seats
+        guard let landing = CoSolveBoard.land(move, seat: seat, on: &game,
+                                              seats: &state, elapsed: elapsed) else { return nil }
+        if state != seats { seats = state }
+        if seat != 0 { isShared = true }
+        return landing
     }
 
     /// Fill and done, for the roster. Throttled by `ParlorSession.report`.
@@ -173,6 +210,7 @@ final class VisionCoSolve {
         guard move.author != transport?.localParticipant else { return }
         guard boardReady else { early.append(move); return }
         guard ledger.apply(move) else { return }
+        refreshUndo()
         onRemoteMove?(move)
     }
 

@@ -403,6 +403,7 @@ public enum EnglishPhrases {
         "parlor.sideBySide": "Side by side",
         "parlor.start.caption": "On a FaceTime call, everyone gets this board",
         "parlor.start.title": "Play together",
+        "parlor.together.leave": "Leave",
         "prefs.accent.title": "Accent",
         "prefs.ambient.title": "Ambient display",
         "prefs.appIcon.title": "App icon",
