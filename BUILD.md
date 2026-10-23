@@ -20,13 +20,36 @@ xcodegen generate
 open Nine.xcodeproj      # pick a destination, Cmd+R
 ```
 
-`xcodegen generate` produces three targets:
+`xcodegen generate` produces four targets:
 
 | Target | Destinations |
 |---|---|
 | `Nine` | tvOS, iOS (iPhone + iPad), macOS — one universal target |
 | `NineWidgets` | iOS app extension (WidgetKit); filtered out of the tvOS and macOS graphs |
 | `NineWatch` | watchOS, embedded in the iOS app |
+| `NineVision` | visionOS — its own target and shared scheme, same bundle id as `Nine` |
+
+### Vision Pro
+
+`NineVision` is the watch's shape, not the universal target's: a curated source
+list (`Sources/Vision` plus the Engine, Shared, Strings and the four board
+files) with its own small model, so `AppModel` and its CloudKit container never
+reach it. It has no entitlements and persists locally only.
+
+```bash
+xcodebuild -project Nine.xcodeproj -scheme NineVision \
+  -destination 'generic/platform=visionOS Simulator' CODE_SIGNING_ALLOWED=NO build
+```
+
+A simulator cannot be pinched from a script, so DEBUG builds take two launch
+arguments that stage what a screenshot needs: `--vision-near-solve` (every cell
+but one filled and selected — the keypad is up) and `--vision-solve` (the same,
+then the last digit lands two seconds in, through the pinch's own path).
+
+The app icon is a `.solidimagestack` in `VisionAssets.xcassets`, **derived** from
+`Nine.icon` by `python3 nine/scripts/vision-icon.py` — actool accepts the Icon
+Composer document for `xros` and silently emits no icon. Re-run the script after
+editing `Nine.icon`. `simslim` does not slim visionOS simulators; they run stock.
 
 Nine depends on `../couchkit` as a local SwiftPM package. There are no other
 dependencies and no remote packages anywhere in the repo.

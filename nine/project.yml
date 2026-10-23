@@ -5,6 +5,7 @@ options:
     tvOS: "18.0"
     iOS: "18.0"
     macOS: "15.0"
+    visionOS: "26.0"
 packages:
   CouchKit:
     path: ../couchkit
@@ -394,3 +395,65 @@ targets:
         # the Gentle fallback (PRD-6 §2.4, and D6 of the plan).
         WKRunsIndependentlyOfCompanionApp: true
         ITSAppUsesNonExemptEncryption: false
+
+  # Nine on Vision Pro. The watch's shape, not the universal target's: a
+  # platform target of its own with a curated source list, because the phone,
+  # TV and Mac UI is ~20k lines that would each need a visionOS answer, and the
+  # board is one file that already has one. `AppModel.swift` is absent for the
+  # CloudKit reason in CLAUDE.md — this target carries no entitlements at all,
+  # and its model (Sources/Vision/VisionModel.swift) persists locally only.
+  #
+  # Same bundle identifier as `Nine`, so Vision Pro joins the one app record
+  # (universal purchase) rather than founding a second. Its own shared scheme
+  # is safe where a test bundle's was not: gym is handed `scheme: "Nine"`
+  # explicitly, so a second entry in `xcodebuild -list` changes nothing it does.
+  NineVision:
+    type: application
+    platform: visionOS
+    scheme: {}
+    sources:
+      - Sources/Vision
+      - Sources/Engine
+      - Sources/Shared
+      # A fourth process, a fourth `Bundle.main` — see the long comment on
+      # `Nine.sources`, and `CatalogTests.testEveryTargetListsTheStringsTree`.
+      - Sources/Strings
+      # The board is reused exactly as the watch reuses it. Unlike the watch,
+      # visionOS has SwiftUI shaders, so the Afterglow comes too.
+      - Sources/App/BoardView.swift
+      - Sources/App/BoardAccessibility.swift
+      - Sources/App/DesignTokens.swift
+      - Sources/App/Theme.swift
+      - Sources/App/Afterglow.metal
+      # Not Nine.icon: actool accepts the document for `xros` and emits no
+      # icon at all. visionOS wants a layered solid image stack, which
+      # scripts/vision-icon.py derives from Nine.icon's three groups.
+      - VisionAssets.xcassets
+    dependencies:
+      - package: CouchKit
+    settings:
+      base:
+        SWIFT_VERSION: "6.0"
+        PRODUCT_BUNDLE_IDENTIFIER: com.couchsuite.nine
+        MARKETING_VERSION: "1.2"
+        CURRENT_PROJECT_VERSION: 1
+        ASSETCATALOG_COMPILER_APPICON_NAME: Nine
+        CODE_SIGN_STYLE: Manual
+        CODE_SIGN_IDENTITY: "Apple Distribution"
+        DEVELOPMENT_TEAM: ${COUCH_TEAM_ID}
+    info:
+      path: VisionInfo.plist
+      properties:
+        CFBundleDisplayName: Nine
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        CFBundleDevelopmentRegion: en
+        CFBundleLocalizations: [en, ja, de, fr, es, it, pt-BR, ko, zh-Hans, nl]
+        ITSAppUsesNonExemptEncryption: false
+        LSApplicationCategoryType: public.app-category.puzzle-games
+        # Launch into the Shared Space as one window: the board sits beside
+        # whatever else is open, and nothing here ever asks for a Full Space.
+        UIApplicationSceneManifest:
+          UIApplicationSupportsMultipleScenes: false
+          UIApplicationPreferredDefaultSceneSessionRole: UIWindowSceneSessionRoleApplication
+          UISceneConfigurations: {}

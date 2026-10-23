@@ -23,6 +23,7 @@ build/
 */Info.plist
 */WidgetsInfo.plist
 */WatchInfo.plist
+*/VisionInfo.plist
 */*.entitlements
 # …except Nine's iOS entitlements: xcodegen emits one entitlements file per
 # target, and the iOS app needs a second (app group) applied per-SDK, so this
