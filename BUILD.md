@@ -56,6 +56,20 @@ undo, pencil, deselect, new game, solve) through the model's own input calls,
 because the visionOS simulator vends no HID digitizer to inject a pinch with;
 add `--vision-wait-go` to advance it one step per `tmp/vision-go` file instead
 of on timers. `nine/docs/vision/SHOTLIST.md` is the walkthrough made with them.
+`--vision-theme <raw>` (with optional `--vision-accent <raw>`) stages the
+appearance a phone would publish, for a contrast pass on a simulator that has
+no iCloud account to receive it.
+
+`nine/scripts/vision-storyboard.py` keeps those captures repeatable: it boots
+"Nine Vision" (`simrig.prepare_vision_simulator`), installs a DEBUG build,
+waits for the first frame by luminance, steps the tour with `vision-go`, bursts
+frames after the solve and assembles `storyboard.mp4` with ffmpeg.
+`--measure-launch N` times N cold launches to first frame instead.
+
+`.github/workflows/nine-vision.yml` builds NineVision for the simulator in Debug
+and Release on every PR touching `nine/` or `couchkit/`, fails if
+`xcodebuild -list` stops listing both `Nine` and `NineVision`, and fails if any
+DEBUG staging argument survives into the Release binary.
 
 The app icon is a `.solidimagestack` in `VisionAssets.xcassets`, **derived** from
 `Nine.icon` by `python3 nine/scripts/vision-icon.py` — actool accepts the Icon

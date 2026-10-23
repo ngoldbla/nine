@@ -91,6 +91,49 @@ def ios_runtime(version=None):
     return match[-1]
 
 
+# Vision Pro. One device type that boots the stock 4K panel, and visionOS's
+# own runtime. simslim does not slim visionOS simulators (BUILD.md), so these
+# run stock — about 4 GB, which is why `prepare_vision_simulator` never erases
+# by default: a cold first boot of this runtime took over ten minutes on an
+# 8 GB host, and the storyboard tool reinstalls the app rather than the OS.
+VISION_DEVICE = "Apple Vision Pro"
+VISION_BUNDLE_ID = "com.couchsuite.nine"
+
+
+def vision_runtime():
+    """The newest installed visionOS runtime (platform `xrOS` in simctl)."""
+    data = json.loads(run(["xcrun", "simctl", "list", "runtimes", "--json"]))
+    xr = [r for r in data["runtimes"]
+          if r.get("isAvailable") and r.get("platform") in ("xrOS", "visionOS")]
+    if not xr:
+        sys.exit("no visionOS simulator runtime installed "
+                 "(xcodebuild -downloadPlatform visionOS)")
+    xr.sort(key=lambda r: [int(p) for p in r["version"].split(".")])
+    return xr[-1]
+
+
+def prepare_vision_simulator(name="Nine Vision", erase=False):
+    """The named Vision Pro simulator on the newest visionOS runtime, booted.
+    Created if missing; erased only when asked (see `VISION_DEVICE`). No status
+    bar pin and no bridge warm-up: visionOS has no status bar, and the
+    accessibility bridge is not what a storyboard waits on — the first frame
+    is (`vision-storyboard.py`)."""
+    runtime = vision_runtime()
+    data = json.loads(run(["xcrun", "simctl", "list", "devices", "--json"]))
+    udid = next((d["udid"] for d in data["devices"].get(runtime["identifier"], [])
+                 if d["name"] == name), None)
+    if udid is None:
+        udid = run(["xcrun", "simctl", "create", name,
+                    device_type_id(VISION_DEVICE), runtime["identifier"]]).strip()
+        print("created simulator %s (%s)" % (name, udid))
+    elif erase:
+        run(["xcrun", "simctl", "shutdown", udid], check=False)
+        run(["xcrun", "simctl", "erase", udid])
+    run(["xcrun", "simctl", "boot", udid], check=False)
+    run(["xcrun", "simctl", "bootstatus", udid, "-b"], capture=False)
+    return udid
+
+
 def reslim(udid):
     """Erase and create bring a simulator back stock (~/.claude/CLAUDE.md).
     Nine waits on Game Center at launch, so `gamed` stays. `--keep` is
@@ -253,18 +296,19 @@ def warm_up_bridge(udid, timeout=300.0, launch=None):
     )
 
 
-def build_and_install(udid, app_path, repo, derived="build"):
+def build_and_install(udid, app_path, repo, derived="build", scheme="Nine",
+                      products="Debug-iphonesimulator", bundle="Nine.app"):
+    """`scheme`/`products`/`bundle` default to the universal app; the
+    storyboard tool passes `NineVision`, `Debug-xrsimulator`, `NineVision.app`."""
     import os
     if app_path is None:
-        print("building for the snapshot simulator…")
+        print("building %s for the simulator…" % scheme)
         run([
             "xcodebuild", "-project", os.path.join(repo, "Nine.xcodeproj"),
-            "-scheme", "Nine", "-destination", "id=%s" % udid,
+            "-scheme", scheme, "-destination", "id=%s" % udid,
             "-derivedDataPath", os.path.join(repo, derived), "build",
         ])
-        app_path = os.path.join(
-            repo, derived, "Build", "Products", "Debug-iphonesimulator", "Nine.app"
-        )
+        app_path = os.path.join(repo, derived, "Build", "Products", products, bundle)
     if not os.path.isdir(app_path):
         sys.exit("no app bundle at %s" % app_path)
     run(["xcrun", "simctl", "install", udid, app_path])

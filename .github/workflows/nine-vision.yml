@@ -1,0 +1,132 @@
+# The NineVision lane: does the Vision Pro target still build, and does its
+# Release build leave the DEBUG staging behind?
+#
+# Until this existed no workflow built NineVision at all — `nine-engine.yml`
+# runs `swift test` (which compiles none of `Sources/Vision`), and the
+# TestFlight lane ships it only with COUCH_SHIP_VISION=1. So a change to a file
+# NineVision shares with the universal target (`BoardView`, `Theme`,
+# `Sources/Shared`, the CloudKit store) could break the headset and nothing
+# would say so until a human built it.
+#
+# Two builds, both for the simulator and unsigned (no match secrets needed):
+#   * Debug — the build a developer runs;
+#   * Release — the configuration that ships. `--vision-tour`, the ghost
+#     co-solve and the other staging launch arguments are `#if DEBUG`
+#     (`VisionSealTests` reads the source for that); this checks the *binary*,
+#     which is what a reviewer cannot see.
+name: Vision Pro build (Nine)
+
+on:
+  pull_request:
+    paths: ['nine/**', 'couchkit/**', '.github/workflows/nine-vision.yml']
+  workflow_dispatch:
+
+concurrency:
+  group: nine-vision-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  vision:
+    runs-on: xcode-27
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode 27.1
+        run: |
+          set -euo pipefail
+          XC=""
+          for d in /Applications/Xcode_27.1*.app; do [ -e "$d" ] && XC="$d"; done
+          if [ -z "$XC" ]; then
+            echo "::error::Xcode 27.1 is not installed on this runner. Installed:"
+            ls -d /Applications/Xcode*.app || true
+            exit 1
+          fi
+          sudo xcode-select -s "$XC"
+          xcodebuild -version
+
+      # The board's Afterglow is Metal (Sources/App/Afterglow.metal), and the
+      # image ships without the separate Metal Toolchain — the TestFlight
+      # lane's first dry run died on exactly this.
+      - name: Install the Metal Toolchain
+        run: |
+          set -euo pipefail
+          if xcrun metal --version >/dev/null 2>&1; then
+            echo "Metal Toolchain present"
+          else
+            xcodebuild -downloadComponent MetalToolchain
+          fi
+
+      - name: Install the visionOS platform if absent
+        run: |
+          set -euo pipefail
+          if xcodebuild -showsdks | grep -q xrsimulator; then
+            echo "visionOS simulator SDK present"
+          else
+            xcodebuild -downloadPlatform visionOS
+          fi
+          xcodebuild -showsdks | grep -i xr
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate the project
+        working-directory: nine
+        env:
+          # Only lands in DEVELOPMENT_TEAM, which an unsigned build never reads.
+          COUCH_TEAM_ID: ${{ secrets.COUCH_TEAM_ID || 'XC6FN96MA8' }}
+        run: xcodegen generate
+
+      # CLAUDE.md: `Nine` is the scheme gym archives, and a shared scheme on
+      # another target can hide it from `xcodebuild -list` while every
+      # `-scheme Nine` build stays green. NineVision's is the one other shared
+      # scheme; this fails the moment the pair stops listing both.
+      - name: Both shipping schemes are listed
+        working-directory: nine
+        run: |
+          set -euo pipefail
+          xcodebuild -list -json -project Nine.xcodeproj > schemes.json
+          python3 - <<'PY'
+          import json, sys
+          schemes = set(json.load(open("schemes.json"))["project"]["schemes"])
+          missing = {"Nine", "NineVision"} - schemes
+          if missing:
+              sys.exit(f"::error::xcodebuild -list is missing {sorted(missing)}; it lists {sorted(schemes)}")
+          print("schemes:", sorted(schemes))
+          PY
+
+      - name: Build NineVision (Debug, simulator)
+        working-directory: nine
+        run: |
+          set -euo pipefail
+          xcodebuild -project Nine.xcodeproj -scheme NineVision \
+            -destination 'generic/platform=visionOS Simulator' \
+            -configuration Debug -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO build | tail -n 40
+
+      - name: Build NineVision (Release, simulator)
+        working-directory: nine
+        run: |
+          set -euo pipefail
+          xcodebuild -project Nine.xcodeproj -scheme NineVision \
+            -destination 'generic/platform=visionOS Simulator' \
+            -configuration Release -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO build | tail -n 40
+
+      - name: Release carries no DEBUG staging
+        working-directory: nine
+        run: |
+          set -euo pipefail
+          BIN=$(find build/Build/Products/Release-xrsimulator -path '*NineVision.app/NineVision' -type f | head -1)
+          [ -n "$BIN" ] || { echo "::error::no Release NineVision binary found"; exit 1; }
+          echo "checking $BIN"
+          LEAKS=$(strings -a "$BIN" | grep -E -e '--vision-(tour|wait-go|near-solve|solve|coplay-demo|theme|accent)' -e 'VisionGhostTransport' || true)
+          if [ -n "$LEAKS" ]; then
+            echo "::error::DEBUG staging reached the Release binary:"
+            echo "$LEAKS"
+            exit 1
+          fi
+          echo "no staging strings in Release"
