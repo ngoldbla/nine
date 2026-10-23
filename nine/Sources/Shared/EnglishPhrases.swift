@@ -249,7 +249,7 @@ public enum EnglishPhrases {
         "firstrun.ledger.covenant": "No ads, no subscription, nothing else to buy",
         "firstrun.ledger.proof": "Every board proved solvable by logic, never by guessing",
         "firstrun.ledger.stats": "Your times, points and trends — kept honestly",
-        "firstrun.ledger.sync": "Boards, streak and stats follow you between devices",
+        "firstrun.ledger.sync": "Boards and stats follow you between devices",
         "firstrun.ledger.themes": "%1$lld themes and %2$lld accents, all of them yours",
         "firstrun.onePurchase": "One purchase · iPhone, iPad, Mac & Apple TV",
         "firstrun.welcome.tagline": "Couch sudoku — everywhere you sit.",

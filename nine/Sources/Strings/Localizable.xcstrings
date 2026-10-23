@@ -14134,61 +14134,61 @@
         "de": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Spielfelder, Serie und Statistik folgen dir von Gerät zu Gerät"
+            "value": "Spielfelder und Statistik folgen dir von Gerät zu Gerät"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Boards, streak and stats follow you between devices"
+            "value": "Boards and stats follow you between devices"
           }
         },
         "es": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Tableros, racha y estadísticas te siguen de un dispositivo a otro"
+            "value": "Tableros y estadísticas te siguen de un dispositivo a otro"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Grilles, série et statistiques vous suivent d’un appareil à l’autre"
+            "value": "Grilles et statistiques vous suivent d’un appareil à l’autre"
           }
         },
         "it": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Griglie, serie e statistiche ti seguono tra i dispositivi"
+            "value": "Griglie e statistiche ti seguono tra i dispositivi"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "盤面も連続記録も統計も、デバイス間で引き継ぎ"
+            "value": "盤面も統計も、デバイス間で引き継ぎ"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "기기 사이를 따라오는 보드와 연속 기록, 통계"
+            "value": "기기 사이를 따라오는 보드와 통계"
           }
         },
         "nl": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Borden, reeks en statistieken gaan met je mee tussen apparaten"
+            "value": "Borden en statistieken gaan met je mee tussen apparaten"
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Tabuleiros, sequência e estatísticas acompanham você entre dispositivos"
+            "value": "Tabuleiros e estatísticas acompanham você entre dispositivos"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "棋盘、连续天数和统计随你在各设备间同步"
+            "value": "棋盘和统计随你在各设备间同步"
           }
         }
       }
