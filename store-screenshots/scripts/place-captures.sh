@@ -3,7 +3,7 @@
 # alpha (App Store screenshots must be opaque) and, for iPhone and iPad, add a
 # second language's screen for the languages slide (Japanese, or English on the
 # Japanese set): 08 from its home screen, and on iPad 11 from its School.
-#   zsh scripts/place-captures.sh <capture-out-dir> [iphone|ipad|watch|duo]
+#   zsh scripts/place-captures.sh <capture-out-dir> [iphone|ipad|watch|duo|mac|tv]
 set -euo pipefail
 src=$1
 device=${2:-iphone}
@@ -19,7 +19,7 @@ for dir in $src/*(/); do
   for f in $dir/*.png; do flat $f $dst/$lang/${f:t}; done
 done
 print "placed $device: $(ls $dst | tr '\n' ' ')"
-[[ $device == watch || $device == duo ]] && exit 0
+[[ $device == (watch|duo|mac|tv) ]] && exit 0
 for dir in $dst/*(/); do
   lang=${dir:t}; partner=ja; [[ $lang == ja ]] && partner=en
   cp $dst/$partner/07.png $dst/$lang/08.png

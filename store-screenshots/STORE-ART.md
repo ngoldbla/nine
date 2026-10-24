@@ -22,13 +22,15 @@ emphasised word (`paintText` in `slide-canvas.tsx`, `.kenten` in
 | `scripts/capture-ios.py` | Captures the iPhone or iPad frames per language (`--device ipad`) |
 | `scripts/capture-watch.py` | Captures the four Watch frames per language from a seeded save slot |
 | `scripts/capture-duo.py` | Captures the four open-Duo frames per language (Device Hub set to Open by hand) |
+| `scripts/capture-tv.py` | Captures the four Apple TV frames per language (seeded; `-NineRemoteInjector` for the ring and settings) |
+| `../scripts/mac-store-shots.sh --out` | Captures the three Mac windows per language |
 | `scripts/capture-mac.sh` | The Mac board mid-solve, for slide 05 |
 | `scripts/place-captures.sh` | Flattens captures into `public/screenshots/apple/` |
 | `scripts/publish.py` | Turns export zips into the committed JPEG set |
 | `public/screenshots/apple/devices`, `gamecenter` | Mac, TV, Watch captures and the achievement badges |
 
 Raw captures (`public/screenshots/apple/iphone`, `ipad`, `watch`, `duo-*`) and
-`exports/` are regenerated, not committed.
+`exports/` are regenerated, not committed. So are `mac/` and `tv/`.
 
 ## Rebuild
 
@@ -40,7 +42,9 @@ NINE_KILLER_STATE=/tmp/shots/iphone/killer \
 python3 scripts/capture-watch.py /tmp/shots/watch        # NineWatch on Nine-Store-Watch
 DEVELOPER_DIR=/Applications/Xcode-27.1.app/Contents/Developer \
   python3 scripts/capture-duo.py /tmp/shots/duo          # iOS 27.1 SDK build; Duo set to Open
-zsh scripts/place-captures.sh /tmp/shots/iphone          # then: ipad, watch, duo
+python3 scripts/capture-tv.py /tmp/shots/tv              # tvOS Debug build, Apple TV 4K (at 1080p)
+zsh ../scripts/mac-store-shots.sh --no-build --out /tmp/shots/mac en de …   # Release build
+zsh scripts/place-captures.sh /tmp/shots/iphone          # then: ipad, watch, duo, mac, tv
 bun dev -- -p 3077
 python3 scripts/build-decks.py --device iphone           # reload, Export bundle; repeat per deck
 python3 scripts/publish.py --iphone <zip> --ipad <zip> --watch <zip> --duo <zip>
@@ -71,6 +75,14 @@ frames.
 - **The watch marks mistakes whatever the phone's setting**, so
   `capture-watch.py` corrects the fixture's deliberate wrong digit, and
   `simctl status_bar` does nothing on watchOS: the watch clock is real.
+- **The tvOS canvas is 3840×2160.** The editor lays the Apple TV deck out at its
+  first size and scales the 1920×1080 export from it, so coordinates in
+  `build-decks.py` are 4K ones.
+- **The Mac capture needs a 2× screen**, not the main one: with a 1× external
+  display as main, the window would be 1440×900 pixels. The script picks the
+  first Retina screen.
+- **Holding ▶︎II undoes on tvOS now**; settings open on a held click, which the
+  injector sends as `hold` then `holdEnd`.
 - **SharePlay** cannot be called between simulators: slide 06 is Nine's
   Debug-only `-parlor-demo` session (two simulated players), the same screen a
   real call shows.

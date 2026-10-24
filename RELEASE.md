@@ -18,6 +18,14 @@ iPhone Duo spread (PRD-37) with its own screenshot set. `RELEASE_PLATFORMS` is
 `ios tvos mac`. The tvOS record's first version goes up as 1.2, to match the
 binary; ASC takes no release notes on a first version and deliver skips them.
 
+**1.3 (owner decision 2026-10-24): the store in ten languages.** iOS, tvOS and
+Mac ship the layered icon, the KVS-merge sync fixes and the designed screenshot
+sets for every platform in all ten locales, with listing text in each.
+Vision Pro is not in it (not ready). On 2026-10-24 ASC held iOS 1.2 Ready for
+Sale, tvOS 1.2 Waiting for Review and Mac **1.1** Ready for Sale, so the Mac
+goes from 1.1 to 1.3 and its release notes say what 1.2 brought; tvOS can only
+open 1.3 once its 1.2 review is done. The Vision target's version stays 1.2.
+
 The binary never goes through these lanes. `beta` uploads it; `release` attaches
 it **by build number**, so the only pipeline that signs is the one already
 proven by TestFlight.
@@ -94,8 +102,8 @@ the number of the build that was tested. Use the number TestFlight shows
 | iOS | 13" iPad | 2064×2752 | designed set, as above |
 | iOS | Apple Watch | 422×514 (Ultra 3, 49mm) | designed set, as above |
 | *with Duo support* iOS | iPhone Duo, open (inner) | 2853×2007 | designed set, as above; raw open frames need a person at Device Hub (**iPhone Duo** below) |
-| macOS | Mac | 2880×1800 (or 2560×1600, 1440×900, 1280×800) | `scripts/mac-store-shots.sh` (Release build, seeded state; park the pointer at the left edge first) |
-| tvOS | Apple TV | 1920×1080 (or 3840×2160) | manual, kept in git — `fastlane/screenshots/tvos/en-US/`, driven with `XCUIRemote` from a clean install (see **Apple TV** below) |
+| macOS | Mac | 2880×1800 | designed set, `fastlane/screenshots/marketing-mac/`; raw frames from `scripts/mac-store-shots.sh --out` (Release build, seeded state, a 2× screen; the pointer off the window) |
+| tvOS | Apple TV | 1920×1080 | designed set, `fastlane/screenshots/marketing-tvos/`; raw frames from `store-screenshots/scripts/capture-tv.py` (seeded, driven by the Debug `-NineRemoteInjector`) |
 
 **iOS uploads the designed set.** Captioned iPhone 6.9", 13" iPad, Apple Watch
 and iPhone Duo slides in all ten languages are committed as JPEG in

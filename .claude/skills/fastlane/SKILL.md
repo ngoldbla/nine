@@ -13,7 +13,9 @@ Two documents are the source of truth; read the one you need before acting:
 
 **Current scope:** iOS + macOS at $4.99 since 1.1, with the watch app embedded
 in the iOS app; **Apple TV joins the App Store with 1.2** (owner, 2026-10-23),
-and iOS 1.2 ships the iPhone Duo set. `RELEASE_PLATFORMS` is `ios tvos mac`.
+and iOS 1.2 ships the iPhone Duo set. **1.3** (owner, 2026-10-24) ships the
+store in ten languages on all three; Vision Pro is not in it. `RELEASE_PLATFORMS`
+is `ios tvos mac`.
 Store copy may describe Apple TV, the Duo and, since the owner's call of
 2026-10-24, the Parlor (SharePlay, "Play together"). The listing is in ten
 locales (`fastlane/metadata/<locale>/`).
@@ -85,8 +87,9 @@ purpose.
 (captioned iPhone, iPad, Watch and Duo slides, ten locales, committed as JPEG):
 `STORE_SHOT_DIRS` in the Fastfile points deliver at it. It is made in the
 editor in `store-screenshots/`; that folder's `STORE-ART.md` and the marketing
-README say how to rebuild it. tvOS and Mac upload their own en-US folders, and
-`store_check` lets a locale without a folder fall back to en-US as ASC does.
+README say how to rebuild it. tvOS and Mac upload theirs from `marketing-tvos/`
+and `marketing-mac/`; `store_check` lets a locale without a folder fall back to
+en-US as ASC does.
 
 `store_screenshots_capture` (macOS) runs `nine/scripts/shotlist.py` with its
 `iphone-store` / `ipad-store` devices and copies the frames named in

@@ -1,5 +1,5 @@
 {
-  "_comment": "Store screenshot copy, one block per slide, per locale. *word* marks the one emphasised word (drawn in the accent colour). \\n is an intentional line break. Feature names follow Nine's own string catalog (Thermo = Termo in es/it/pt-BR, Technique School = Technikschule, テクニック教室, …). Duo headlines stay on one line. The iPad deck reuses the iPhone block; Watch slides have no label line (too small at 422x514).",
+  "_comment": "Store screenshot copy, one block per slide, per locale. *word* marks the one emphasised word (drawn in the accent colour). \\n is an intentional line break. Feature names follow Nine's own string catalog (Thermo = Termo in es/it/pt-BR, Technique School = Technikschule, テクニック教室, …). Duo headlines stay on one line. The iPad deck reuses the iPhone block; Watch slides have no label line (too small at 422x514). The Mac and Apple TV decks reuse iPhone and Watch blocks; `tv` holds the one line they lack.",
   "iphone": {
     "hero": {
       "en": ["SUDOKU FOR EVERY APPLE DEVICE", "Sudoku, made\n*beautiful*."],
@@ -221,6 +221,21 @@
       "nl": ["", "Speel *altijd*\nverder."],
       "pt-BR": ["", "Continue\nquando *quiser*."],
       "zh-Hans": ["", "*随时*\n接着玩。"]
+    }
+  }
+,
+  "tv": {
+    "ring": {
+      "en": ["SIRI REMOTE OR GAME CONTROLLER", "Play from\nthe *couch*."],
+      "de": ["SIRI REMOTE ODER GAMECONTROLLER", "Spielen vom\n*Sofa* aus."],
+      "es": ["SIRI REMOTE O MANDO", "Juega desde\nel *sofá*."],
+      "fr": ["SIRI REMOTE OU MANETTE", "Jouez depuis\nle *canapé*."],
+      "it": ["SIRI REMOTE O CONTROLLER", "Gioca dal\n*divano*."],
+      "ja": ["SIRI REMOTEまたはゲームコントローラ", "*ソファ*から\n遊ぼう。"],
+      "ko": ["SIRI REMOTE 또는 게임 컨트롤러", "*소파*에서\n즐기세요."],
+      "nl": ["SIRI REMOTE OF GAMECONTROLLER", "Speel vanaf\nde *bank*."],
+      "pt-BR": ["SIRI REMOTE OU CONTROLE", "Jogue do\n*sofá*."],
+      "zh-Hans": ["SIRI REMOTE 或游戏手柄", "窝在*沙发*里\n轻松玩。"]
     }
   }
 }

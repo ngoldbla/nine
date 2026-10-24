@@ -76,9 +76,12 @@ STORE_DIR = File.expand_path(".", __dir__)
 # set in `marketing/` (iPhone, iPad, Watch and iPhone Duo, all ten locales,
 # committed as JPEG; its README says how it is rebuilt) in place of the plain
 # frames `store_screenshots_capture` leaves in `ios/` and the Duo frames in
-# `ios-duo/`, which are now only that set's raw material. (The Apple TV set is
-# committed in place: `screenshots/tvos/` is the whole platform set.)
-STORE_SHOT_DIRS = { "ios" => %w[marketing] }.freeze
+# `ios-duo/`, which are now only that set's raw material. tvOS and Mac upload
+# their own designed sets beside it, one folder each because deliver takes one
+# per platform; `screenshots/tvos/` and `screenshots/mac/` are raw frames now.
+STORE_SHOT_DIRS = {
+  "ios" => %w[marketing], "tvos" => %w[marketing-tvos], "mac" => %w[marketing-mac]
+}.freeze
 
 # App Store Connect's limits, checked here so a too-long field fails on the
 # laptop instead of halfway through an upload. Keywords are bytes, not

@@ -14,6 +14,12 @@ rewrites it.
 | `21-duo-hero.jpg` … `24-duo-school.jpg` | iPhone Duo, open (`APP_IPHONE_DUO`) | 2853×2007 |
 | `31-watch-hero.jpg` … `34-watch-home.jpg` | Apple Watch Ultra (`APP_WATCH_ULTRA`) | 422×514 |
 
+The Mac and Apple TV sets live beside this folder, because deliver takes one
+folder per platform: `../marketing-mac/<locale>/01-mac-*.jpg` … (2880×1800,
+board, shelf, light board, the list) and `../marketing-tvos/<locale>/01-tv-*.jpg`
+… (1920×1080, board, digit ring, shelf, settings, the list). Their headlines
+reuse the iPhone and Watch copy, plus one Apple TV line ("Play from the couch").
+
 JPEG at quality 92 rather than PNG (App Store Connect takes both): the PNGs
 are ~1.4 MB a slide, and this repository's history cannot be rewritten to drop
 them later. App Store Connect scales each set to the smaller sizes of its display.
@@ -61,11 +67,11 @@ copy). Copy for all ten languages is in `store-screenshots/copy/store-copy.json`
 
 See `store-screenshots/STORE-ART.md`. In short: capture with
 `capture-ios.py` (iPhone, then `--device ipad`), `capture-watch.py` and
-`capture-duo.py`, file each with `place-captures.sh`, export each deck from the
-editor, then
+`capture-duo.py`, `capture-tv.py` and `scripts/mac-store-shots.sh --out`, file
+each with `place-captures.sh`, export each deck from the editor, then
 
 ```bash
-python3 scripts/publish.py --iphone <zip> --ipad <zip> --watch <zip> --duo <zip>
+python3 scripts/publish.py --iphone <zip> --ipad <zip> --watch <zip> --duo <zip> --mac <zip> --tv <zip>
 ```
 
 Any one device can be republished alone.

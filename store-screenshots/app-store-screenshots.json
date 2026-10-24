@@ -17,8 +17,8 @@
     "zh-Hans"
   ],
   "locale": "en",
-  "device": "duo-inner-landscape",
-  "orientation": "landscape",
+  "device": "mac",
+  "orientation": "portrait",
   "appIcon": "",
   "slidesByDevice": {
     "iphone": [
@@ -1804,49 +1804,579 @@
     ],
     "tvos": [
       {
-        "id": "s_mvlt5xqs_d",
+        "id": "hero",
         "layout": "hero",
         "label": {
-          "en": "MEET YOUR APP"
+          "en": "SUDOKU FOR EVERY APPLE DEVICE",
+          "de": "SUDOKU FÜR JEDES APPLE-GERÄT",
+          "es": "SUDOKU PARA TODOS TUS DISPOSITIVOS APPLE",
+          "fr": "LE SUDOKU POUR TOUS VOS APPAREILS APPLE",
+          "it": "IL SUDOKU PER OGNI DISPOSITIVO APPLE",
+          "ja": "すべてのAPPLEデバイスで",
+          "ko": "모든 APPLE 기기를 위한 스도쿠",
+          "nl": "SUDOKU VOOR ELK APPLE-APPARAAT",
+          "pt-BR": "SUDOKU PARA TODO DISPOSITIVO APPLE",
+          "zh-Hans": "适用于所有 APPLE 设备"
         },
         "headline": {
-          "en": "Made for\nthe living room."
+          "en": "Sudoku, made\n*beautiful*.",
+          "de": "Sudoku,\n*wunderschön*.",
+          "es": "El sudoku más\n*bonito*.",
+          "fr": "Le sudoku,\nen *beauté*.",
+          "it": "Sudoku,\n*bellissimo*.",
+          "ja": "*美しい*\n数独。",
+          "ko": "*아름다운*\n스도쿠.",
+          "nl": "Sudoku, op\nz'n *mooist*.",
+          "pt-BR": "Sudoku,\n*lindo* de ver.",
+          "zh-Hans": "数独，\n从未如此*美*。"
         },
-        "screenshot": ""
+        "screenshot": "/screenshots/apple/tv/{locale}/01.png",
+        "transforms": {
+          "device": {
+            "x": 620,
+            "y": 760,
+            "width": 2600,
+            "height": 1681,
+            "rotation": 0,
+            "zIndex": 2
+          }
+        }
       },
       {
-        "id": "s_mvlt5xqs_e",
-        "layout": "split-landscape",
+        "id": "ring",
+        "layout": "hero",
         "label": {
-          "en": "FEATURE 01"
+          "en": "SIRI REMOTE OR GAME CONTROLLER",
+          "de": "SIRI REMOTE ODER GAMECONTROLLER",
+          "es": "SIRI REMOTE O MANDO",
+          "fr": "SIRI REMOTE OU MANETTE",
+          "it": "SIRI REMOTE O CONTROLLER",
+          "ja": "SIRI REMOTEまたはゲームコントローラ",
+          "ko": "SIRI REMOTE 또는 게임 컨트롤러",
+          "nl": "SIRI REMOTE OF GAMECONTROLLER",
+          "pt-BR": "SIRI REMOTE OU CONTROLE",
+          "zh-Hans": "SIRI REMOTE 或游戏手柄"
         },
         "headline": {
-          "en": "One idea\nper screen."
+          "en": "Play from\nthe *couch*.",
+          "de": "Spielen vom\n*Sofa* aus.",
+          "es": "Juega desde\nel *sofá*.",
+          "fr": "Jouez depuis\nle *canapé*.",
+          "it": "Gioca dal\n*divano*.",
+          "ja": "*ソファ*から\n遊ぼう。",
+          "ko": "*소파*에서\n즐기세요.",
+          "nl": "Speel vanaf\nde *bank*.",
+          "pt-BR": "Jogue do\n*sofá*.",
+          "zh-Hans": "窝在*沙发*里\n轻松玩。"
         },
-        "screenshot": ""
+        "screenshot": "/screenshots/apple/tv/{locale}/02.png",
+        "transforms": {
+          "device": {
+            "x": 620,
+            "y": 760,
+            "width": 2600,
+            "height": 1681,
+            "rotation": 0,
+            "zIndex": 2
+          }
+        }
       },
       {
-        "id": "s_mvlt5xqs_f",
-        "layout": "device-top",
+        "id": "home",
+        "layout": "hero",
         "label": {
-          "en": "FEATURE 02"
+          "en": "",
+          "de": "",
+          "es": "",
+          "fr": "",
+          "it": "",
+          "ja": "",
+          "ko": "",
+          "nl": "",
+          "pt-BR": "",
+          "zh-Hans": ""
         },
         "headline": {
-          "en": "Flip the contrast."
+          "en": "Pick up\n*anytime*.",
+          "de": "Jederzeit\n*weiterspielen*.",
+          "es": "Sigue cuando\n*quieras*.",
+          "fr": "Reprenez à\ntout *moment*.",
+          "it": "Riprendi\nquando *vuoi*.",
+          "ja": "*いつでも*\n続きから。",
+          "ko": "*언제든*\n이어서.",
+          "nl": "Speel *altijd*\nverder.",
+          "pt-BR": "Continue\nquando *quiser*.",
+          "zh-Hans": "*随时*\n接着玩。"
         },
-        "screenshot": "",
-        "inverted": true
+        "screenshot": "/screenshots/apple/tv/{locale}/03.png",
+        "transforms": {
+          "device": {
+            "x": 620,
+            "y": 760,
+            "width": 2600,
+            "height": 1681,
+            "rotation": 0,
+            "zIndex": 2
+          }
+        }
       },
       {
-        "id": "s_mvlt5xqs_g",
+        "id": "colors",
+        "layout": "hero",
+        "label": {
+          "en": "TEN ACCENT COLORS",
+          "de": "ZEHN AKZENTFARBEN",
+          "es": "DIEZ COLORES DE ACENTO",
+          "fr": "DIX COULEURS D’ACCENTUATION",
+          "it": "DIECI COLORI DI RISALTO",
+          "ja": "10色のアクセントカラー",
+          "ko": "10가지 강조 색상",
+          "nl": "TIEN ACCENTKLEUREN",
+          "pt-BR": "DEZ CORES DE DESTAQUE",
+          "zh-Hans": "十种强调色"
+        },
+        "headline": {
+          "en": "Make it\n*yours*.",
+          "de": "Ganz\n*deins*.",
+          "es": "Hazlo\n*tuyo*.",
+          "fr": "Faites-le\n*vôtre*.",
+          "it": "Rendilo\n*tuo*.",
+          "ja": "*自分*\nらしく。",
+          "ko": "*나만의*\n스타일로.",
+          "nl": "Helemaal\n*van jou*.",
+          "pt-BR": "Do *seu*\njeito.",
+          "zh-Hans": "*你的*\n专属风格。"
+        },
+        "screenshot": "/screenshots/apple/tv/{locale}/04.png",
+        "transforms": {
+          "device": {
+            "x": 620,
+            "y": 760,
+            "width": 2600,
+            "height": 1681,
+            "rotation": 0,
+            "zIndex": 2
+          }
+        }
+      },
+      {
+        "id": "closer",
         "layout": "no-device",
         "label": {
-          "en": "MORE"
+          "en": "NINE",
+          "de": "NINE",
+          "es": "NINE",
+          "fr": "NINE",
+          "it": "NINE",
+          "ja": "NINE",
+          "ko": "NINE",
+          "nl": "NINE",
+          "pt-BR": "NINE",
+          "zh-Hans": "NINE"
         },
         "headline": {
-          "en": "And so\nmuch more."
+          "en": "Everything\nyou'll *love*.",
+          "de": "Alles, was du\n*liebst*.",
+          "es": "Todo lo que\nvas a *amar*.",
+          "fr": "Tout ce\nque vous *aimez*.",
+          "it": "Tutto ciò\nche *amerai*.",
+          "ja": "*好き*が\n詰まってる。",
+          "ko": "마음에 들\n*모든 것*.",
+          "nl": "Alles waar je\n*van houdt*.",
+          "pt-BR": "Tudo o que\nvocê vai *amar*.",
+          "zh-Hans": "*喜欢*的一切，\n都在这里。"
         },
-        "screenshot": ""
+        "screenshot": "",
+        "transforms": {
+          "caption": {
+            "x": 320,
+            "y": 200,
+            "width": 3200,
+            "height": 720,
+            "rotation": 0,
+            "zIndex": 4
+          }
+        },
+        "textElements": [
+          {
+            "id": "k0",
+            "text": {
+              "en": "VARIANTS",
+              "de": "VARIANTEN",
+              "es": "VARIANTES",
+              "fr": "VARIANTES",
+              "it": "VARIANTI",
+              "ja": "バリエーション",
+              "ko": "변형",
+              "nl": "VARIANTEN",
+              "pt-BR": "VARIANTES",
+              "zh-Hans": "玩法"
+            },
+            "transform": {
+              "x": 200,
+              "y": 900,
+              "width": 1720,
+              "height": 70,
+              "rotation": 0,
+              "zIndex": 4
+            },
+            "fontSize": 48,
+            "fontWeight": 600,
+            "color": "#54ADFA",
+            "align": "center"
+          },
+          {
+            "id": "v0",
+            "text": {
+              "en": "Classic, Thermo and Killer",
+              "de": "Klassisch, Thermo und Killer",
+              "es": "Clásico, Termo y Killer",
+              "fr": "Classique, Thermo et Killer",
+              "it": "Classico, Termo e Killer",
+              "ja": "クラシック、サーモ、キラー",
+              "ko": "클래식, 서모, 킬러",
+              "nl": "Klassiek, Thermo en Killer",
+              "pt-BR": "Clássico, Termo e Killer",
+              "zh-Hans": "经典、温度计、杀手"
+            },
+            "transform": {
+              "x": 200,
+              "y": 976,
+              "width": 1720,
+              "height": 126,
+              "rotation": 0,
+              "zIndex": 4
+            },
+            "fontSize": 90,
+            "fontWeight": 500,
+            "color": "#F5F5F7",
+            "align": "center"
+          },
+          {
+            "id": "k1",
+            "text": {
+              "en": "COACHING",
+              "de": "COACHING",
+              "es": "COACH",
+              "fr": "COACHING",
+              "it": "COACH",
+              "ja": "コーチ",
+              "ko": "코치",
+              "nl": "COACHING",
+              "pt-BR": "TREINADOR",
+              "zh-Hans": "教练"
+            },
+            "transform": {
+              "x": 200,
+              "y": 1190,
+              "width": 1720,
+              "height": 70,
+              "rotation": 0,
+              "zIndex": 4
+            },
+            "fontSize": 48,
+            "fontWeight": 600,
+            "color": "#54ADFA",
+            "align": "center"
+          },
+          {
+            "id": "v1",
+            "text": {
+              "en": "Every hint explained",
+              "de": "Jeder Hinweis erklärt",
+              "es": "Cada pista, explicada",
+              "fr": "Chaque indice expliqué",
+              "it": "Ogni suggerimento spiegato",
+              "ja": "ヒントはすべて解説付き",
+              "ko": "모든 힌트를 설명",
+              "nl": "Elke hint uitgelegd",
+              "pt-BR": "Cada dica explicada",
+              "zh-Hans": "每条提示都有讲解"
+            },
+            "transform": {
+              "x": 200,
+              "y": 1266,
+              "width": 1720,
+              "height": 126,
+              "rotation": 0,
+              "zIndex": 4
+            },
+            "fontSize": 90,
+            "fontWeight": 500,
+            "color": "#F5F5F7",
+            "align": "center"
+          },
+          {
+            "id": "k2",
+            "text": {
+              "en": "COLORS",
+              "de": "FARBEN",
+              "es": "COLORES",
+              "fr": "COULEURS",
+              "it": "COLORI",
+              "ja": "カラー",
+              "ko": "색상",
+              "nl": "KLEUREN",
+              "pt-BR": "CORES",
+              "zh-Hans": "颜色"
+            },
+            "transform": {
+              "x": 200,
+              "y": 1480,
+              "width": 1720,
+              "height": 70,
+              "rotation": 0,
+              "zIndex": 4
+            },
+            "fontSize": 48,
+            "fontWeight": 600,
+            "color": "#54ADFA",
+            "align": "center"
+          },
+          {
+            "id": "v2",
+            "text": {
+              "en": "Ten accents to choose from",
+              "de": "Zehn Akzentfarben zur Wahl",
+              "es": "Diez colores de acento",
+              "fr": "Dix couleurs au choix",
+              "it": "Dieci colori tra cui scegliere",
+              "ja": "10色から選べるアクセント",
+              "ko": "10가지 강조 색상",
+              "nl": "Tien accentkleuren",
+              "pt-BR": "Dez cores de destaque",
+              "zh-Hans": "十种强调色可选"
+            },
+            "transform": {
+              "x": 200,
+              "y": 1556,
+              "width": 1720,
+              "height": 126,
+              "rotation": 0,
+              "zIndex": 4
+            },
+            "fontSize": 90,
+            "fontWeight": 500,
+            "color": "#F5F5F7",
+            "align": "center"
+          },
+          {
+            "id": "k3",
+            "text": {
+              "en": "DEVICES",
+              "de": "GERÄTE",
+              "es": "DISPOSITIVOS",
+              "fr": "APPAREILS",
+              "it": "DISPOSITIVI",
+              "ja": "デバイス",
+              "ko": "기기",
+              "nl": "APPARATEN",
+              "pt-BR": "DISPOSITIVOS",
+              "zh-Hans": "设备"
+            },
+            "transform": {
+              "x": 200,
+              "y": 1770,
+              "width": 1720,
+              "height": 70,
+              "rotation": 0,
+              "zIndex": 4
+            },
+            "fontSize": 48,
+            "fontWeight": 600,
+            "color": "#54ADFA",
+            "align": "center"
+          },
+          {
+            "id": "v3",
+            "text": {
+              "en": "iPhone, iPad, Mac, TV, Watch",
+              "de": "iPhone, iPad, Mac, TV, Watch",
+              "es": "iPhone, iPad, Mac, TV, Watch",
+              "fr": "iPhone, iPad, Mac, TV, Watch",
+              "it": "iPhone, iPad, Mac, TV, Watch",
+              "ja": "iPhone、iPad、Mac、TV、Watch",
+              "ko": "iPhone, iPad, Mac, TV, Watch",
+              "nl": "iPhone, iPad, Mac, TV, Watch",
+              "pt-BR": "iPhone, iPad, Mac, TV, Watch",
+              "zh-Hans": "iPhone、iPad、Mac、TV、Watch"
+            },
+            "transform": {
+              "x": 200,
+              "y": 1846,
+              "width": 1720,
+              "height": 126,
+              "rotation": 0,
+              "zIndex": 4
+            },
+            "fontSize": 90,
+            "fontWeight": 500,
+            "color": "#F5F5F7",
+            "align": "center"
+          },
+          {
+            "id": "k4",
+            "text": {
+              "en": "TOGETHER",
+              "de": "GEMEINSAM",
+              "es": "JUNTOS",
+              "fr": "ENSEMBLE",
+              "it": "INSIEME",
+              "ja": "みんなで",
+              "ko": "함께",
+              "nl": "SAMEN",
+              "pt-BR": "JUNTOS",
+              "zh-Hans": "一起玩"
+            },
+            "transform": {
+              "x": 1920,
+              "y": 900,
+              "width": 1720,
+              "height": 70,
+              "rotation": 0,
+              "zIndex": 4
+            },
+            "fontSize": 48,
+            "fontWeight": 600,
+            "color": "#54ADFA",
+            "align": "center"
+          },
+          {
+            "id": "v4",
+            "text": {
+              "en": "SharePlay on FaceTime",
+              "de": "SharePlay über FaceTime",
+              "es": "SharePlay en FaceTime",
+              "fr": "SharePlay sur FaceTime",
+              "it": "SharePlay su FaceTime",
+              "ja": "FaceTimeでSharePlay",
+              "ko": "FaceTime에서 SharePlay",
+              "nl": "SharePlay via FaceTime",
+              "pt-BR": "SharePlay no FaceTime",
+              "zh-Hans": "FaceTime 上的 SharePlay"
+            },
+            "transform": {
+              "x": 1920,
+              "y": 976,
+              "width": 1720,
+              "height": 126,
+              "rotation": 0,
+              "zIndex": 4
+            },
+            "fontSize": 90,
+            "fontWeight": 500,
+            "color": "#F5F5F7",
+            "align": "center"
+          },
+          {
+            "id": "k5",
+            "text": {
+              "en": "LANGUAGES",
+              "de": "SPRACHEN",
+              "es": "IDIOMAS",
+              "fr": "LANGUES",
+              "it": "LINGUE",
+              "ja": "言語",
+              "ko": "언어",
+              "nl": "TALEN",
+              "pt-BR": "IDIOMAS",
+              "zh-Hans": "语言"
+            },
+            "transform": {
+              "x": 1920,
+              "y": 1190,
+              "width": 1720,
+              "height": 70,
+              "rotation": 0,
+              "zIndex": 4
+            },
+            "fontSize": 48,
+            "fontWeight": 600,
+            "color": "#54ADFA",
+            "align": "center"
+          },
+          {
+            "id": "v5",
+            "text": {
+              "en": "Ten, from Japanese to German",
+              "de": "Zehn, von Japanisch bis Deutsch",
+              "es": "Diez, del japonés al alemán",
+              "fr": "Dix, du japonais à l’allemand",
+              "it": "Dieci, dal giapponese al tedesco",
+              "ja": "日本語からドイツ語まで10言語",
+              "ko": "일본어부터 독일어까지 10개",
+              "nl": "Tien, van Japans tot Duits",
+              "pt-BR": "Dez, do japonês ao alemão",
+              "zh-Hans": "从日语到德语，共十种"
+            },
+            "transform": {
+              "x": 1920,
+              "y": 1266,
+              "width": 1720,
+              "height": 126,
+              "rotation": 0,
+              "zIndex": 4
+            },
+            "fontSize": 90,
+            "fontWeight": 500,
+            "color": "#F5F5F7",
+            "align": "center"
+          },
+          {
+            "id": "k6",
+            "text": {
+              "en": "GAME CENTER",
+              "de": "GAME CENTER",
+              "es": "GAME CENTER",
+              "fr": "GAME CENTER",
+              "it": "GAME CENTER",
+              "ja": "GAME CENTER",
+              "ko": "GAME CENTER",
+              "nl": "GAME CENTER",
+              "pt-BR": "GAME CENTER",
+              "zh-Hans": "GAME CENTER"
+            },
+            "transform": {
+              "x": 1920,
+              "y": 1480,
+              "width": 1720,
+              "height": 70,
+              "rotation": 0,
+              "zIndex": 4
+            },
+            "fontSize": 48,
+            "fontWeight": 600,
+            "color": "#54ADFA",
+            "align": "center"
+          },
+          {
+            "id": "v6",
+            "text": {
+              "en": "Achievements and leaderboards",
+              "de": "Erfolge und Bestenlisten",
+              "es": "Logros y clasificaciones",
+              "fr": "Succès et classements",
+              "it": "Obiettivi e classifiche",
+              "ja": "達成項目とランキング",
+              "ko": "도전 과제와 순위표",
+              "nl": "Prestaties en ranglijsten",
+              "pt-BR": "Conquistas e rankings",
+              "zh-Hans": "成就与排行榜"
+            },
+            "transform": {
+              "x": 1920,
+              "y": 1556,
+              "width": 1720,
+              "height": 126,
+              "rotation": 0,
+              "zIndex": 4
+            },
+            "fontSize": 90,
+            "fontWeight": 500,
+            "color": "#F5F5F7",
+            "align": "center"
+          }
+        ]
       }
     ],
     "watchos": [
@@ -2045,61 +2575,540 @@
     ],
     "mac": [
       {
-        "id": "s_mvlt5xqs_n",
+        "id": "hero",
         "layout": "hero",
         "label": {
-          "en": "MEET YOUR APP"
+          "en": "SUDOKU FOR EVERY APPLE DEVICE",
+          "de": "SUDOKU FÜR JEDES APPLE-GERÄT",
+          "es": "SUDOKU PARA TODOS TUS DISPOSITIVOS APPLE",
+          "fr": "LE SUDOKU POUR TOUS VOS APPAREILS APPLE",
+          "it": "IL SUDOKU PER OGNI DISPOSITIVO APPLE",
+          "ja": "すべてのAPPLEデバイスで",
+          "ko": "모든 APPLE 기기를 위한 스도쿠",
+          "nl": "SUDOKU VOOR ELK APPLE-APPARAAT",
+          "pt-BR": "SUDOKU PARA TODO DISPOSITIVO APPLE",
+          "zh-Hans": "适用于所有 APPLE 设备"
         },
         "headline": {
-          "en": "Made for\nyour Mac."
+          "en": "Sudoku, made\n*beautiful*.",
+          "de": "Sudoku,\n*wunderschön*.",
+          "es": "El sudoku más\n*bonito*.",
+          "fr": "Le sudoku,\nen *beauté*.",
+          "it": "Sudoku,\n*bellissimo*.",
+          "ja": "*美しい*\n数独。",
+          "ko": "*아름다운*\n스도쿠.",
+          "nl": "Sudoku, op\nz'n *mooist*.",
+          "pt-BR": "Sudoku,\n*lindo* de ver.",
+          "zh-Hans": "数独，\n从未如此*美*。"
         },
-        "screenshot": ""
+        "screenshot": "/screenshots/apple/mac/{locale}/01.png",
+        "transforms": {
+          "device": {
+            "x": 465,
+            "y": 590,
+            "width": 1950,
+            "height": 1267,
+            "rotation": 0,
+            "zIndex": 2
+          }
+        }
       },
       {
-        "id": "s_mvlt5xqs_o",
-        "layout": "split-landscape",
+        "id": "home",
+        "layout": "hero",
         "label": {
-          "en": "FEATURE 01"
+          "en": "",
+          "de": "",
+          "es": "",
+          "fr": "",
+          "it": "",
+          "ja": "",
+          "ko": "",
+          "nl": "",
+          "pt-BR": "",
+          "zh-Hans": ""
         },
         "headline": {
-          "en": "Everything in\none window."
+          "en": "Pick up\n*anytime*.",
+          "de": "Jederzeit\n*weiterspielen*.",
+          "es": "Sigue cuando\n*quieras*.",
+          "fr": "Reprenez à\ntout *moment*.",
+          "it": "Riprendi\nquando *vuoi*.",
+          "ja": "*いつでも*\n続きから。",
+          "ko": "*언제든*\n이어서.",
+          "nl": "Speel *altijd*\nverder.",
+          "pt-BR": "Continue\nquando *quiser*.",
+          "zh-Hans": "*随时*\n接着玩。"
         },
-        "screenshot": ""
+        "screenshot": "/screenshots/apple/mac/{locale}/02.png",
+        "transforms": {
+          "device": {
+            "x": 465,
+            "y": 590,
+            "width": 1950,
+            "height": 1267,
+            "rotation": 0,
+            "zIndex": 2
+          }
+        }
       },
       {
-        "id": "s_mvlt5xqs_p",
-        "layout": "device-top",
+        "id": "colors",
+        "layout": "hero",
         "label": {
-          "en": "FEATURE 02"
+          "en": "",
+          "de": "",
+          "es": "",
+          "fr": "",
+          "it": "",
+          "ja": "",
+          "ko": "",
+          "nl": "",
+          "pt-BR": "",
+          "zh-Hans": ""
         },
         "headline": {
-          "en": "One shortcut away."
+          "en": "Make it\n*yours*.",
+          "de": "Ganz\n*deins*.",
+          "es": "Hazlo\n*tuyo*.",
+          "fr": "Faites-le\n*vôtre*.",
+          "it": "Rendilo\n*tuo*.",
+          "ja": "*自分*\nらしく。",
+          "ko": "*나만의*\n스타일로.",
+          "nl": "Helemaal\n*van jou*.",
+          "pt-BR": "Do *seu*\njeito.",
+          "zh-Hans": "*你的*\n专属风格。"
         },
-        "screenshot": "",
-        "inverted": true
+        "screenshot": "/screenshots/apple/mac/{locale}/03.png",
+        "transforms": {
+          "device": {
+            "x": 465,
+            "y": 590,
+            "width": 1950,
+            "height": 1267,
+            "rotation": 0,
+            "zIndex": 2
+          }
+        }
       },
       {
-        "id": "s_mvlt5xqs_q",
-        "layout": "two-devices",
-        "label": {
-          "en": "FEATURE 03"
-        },
-        "headline": {
-          "en": "Work across windows."
-        },
-        "screenshot": "",
-        "screenshotSecondary": ""
-      },
-      {
-        "id": "s_mvlt5xqs_r",
+        "id": "closer",
         "layout": "no-device",
         "label": {
-          "en": "MORE"
+          "en": "NINE",
+          "de": "NINE",
+          "es": "NINE",
+          "fr": "NINE",
+          "it": "NINE",
+          "ja": "NINE",
+          "ko": "NINE",
+          "nl": "NINE",
+          "pt-BR": "NINE",
+          "zh-Hans": "NINE"
         },
         "headline": {
-          "en": "And so\nmuch more."
+          "en": "Everything\nyou'll *love*.",
+          "de": "Alles, was du\n*liebst*.",
+          "es": "Todo lo que\nvas a *amar*.",
+          "fr": "Tout ce\nque vous *aimez*.",
+          "it": "Tutto ciò\nche *amerai*.",
+          "ja": "*好き*が\n詰まってる。",
+          "ko": "마음에 들\n*모든 것*.",
+          "nl": "Alles waar je\n*van houdt*.",
+          "pt-BR": "Tudo o que\nvocê vai *amar*.",
+          "zh-Hans": "*喜欢*的一切，\n都在这里。"
         },
-        "screenshot": ""
+        "screenshot": "",
+        "transforms": {
+          "caption": {
+            "x": 240,
+            "y": 140,
+            "width": 2400,
+            "height": 520,
+            "rotation": 0,
+            "zIndex": 4
+          }
+        },
+        "textElements": [
+          {
+            "id": "k0",
+            "text": {
+              "en": "VARIANTS",
+              "de": "VARIANTEN",
+              "es": "VARIANTES",
+              "fr": "VARIANTES",
+              "it": "VARIANTI",
+              "ja": "バリエーション",
+              "ko": "변형",
+              "nl": "VARIANTEN",
+              "pt-BR": "VARIANTES",
+              "zh-Hans": "玩法"
+            },
+            "transform": {
+              "x": 140,
+              "y": 760,
+              "width": 1300,
+              "height": 57,
+              "rotation": 0,
+              "zIndex": 4
+            },
+            "fontSize": 39,
+            "fontWeight": 600,
+            "color": "#54ADFA",
+            "align": "center"
+          },
+          {
+            "id": "v0",
+            "text": {
+              "en": "Classic, Thermo and Killer",
+              "de": "Klassisch, Thermo und Killer",
+              "es": "Clásico, Termo y Killer",
+              "fr": "Classique, Thermo et Killer",
+              "it": "Classico, Termo e Killer",
+              "ja": "クラシック、サーモ、キラー",
+              "ko": "클래식, 서모, 킬러",
+              "nl": "Klassiek, Thermo en Killer",
+              "pt-BR": "Clássico, Termo e Killer",
+              "zh-Hans": "经典、温度计、杀手"
+            },
+            "transform": {
+              "x": 140,
+              "y": 822,
+              "width": 1300,
+              "height": 103,
+              "rotation": 0,
+              "zIndex": 4
+            },
+            "fontSize": 74,
+            "fontWeight": 500,
+            "color": "#F5F5F7",
+            "align": "center"
+          },
+          {
+            "id": "k1",
+            "text": {
+              "en": "COACHING",
+              "de": "COACHING",
+              "es": "COACH",
+              "fr": "COACHING",
+              "it": "COACH",
+              "ja": "コーチ",
+              "ko": "코치",
+              "nl": "COACHING",
+              "pt-BR": "TREINADOR",
+              "zh-Hans": "教练"
+            },
+            "transform": {
+              "x": 140,
+              "y": 1010,
+              "width": 1300,
+              "height": 57,
+              "rotation": 0,
+              "zIndex": 4
+            },
+            "fontSize": 39,
+            "fontWeight": 600,
+            "color": "#54ADFA",
+            "align": "center"
+          },
+          {
+            "id": "v1",
+            "text": {
+              "en": "Every hint explained",
+              "de": "Jeder Hinweis erklärt",
+              "es": "Cada pista, explicada",
+              "fr": "Chaque indice expliqué",
+              "it": "Ogni suggerimento spiegato",
+              "ja": "ヒントはすべて解説付き",
+              "ko": "모든 힌트를 설명",
+              "nl": "Elke hint uitgelegd",
+              "pt-BR": "Cada dica explicada",
+              "zh-Hans": "每条提示都有讲解"
+            },
+            "transform": {
+              "x": 140,
+              "y": 1072,
+              "width": 1300,
+              "height": 103,
+              "rotation": 0,
+              "zIndex": 4
+            },
+            "fontSize": 74,
+            "fontWeight": 500,
+            "color": "#F5F5F7",
+            "align": "center"
+          },
+          {
+            "id": "k2",
+            "text": {
+              "en": "COLORS",
+              "de": "FARBEN",
+              "es": "COLORES",
+              "fr": "COULEURS",
+              "it": "COLORI",
+              "ja": "カラー",
+              "ko": "색상",
+              "nl": "KLEUREN",
+              "pt-BR": "CORES",
+              "zh-Hans": "颜色"
+            },
+            "transform": {
+              "x": 140,
+              "y": 1260,
+              "width": 1300,
+              "height": 57,
+              "rotation": 0,
+              "zIndex": 4
+            },
+            "fontSize": 39,
+            "fontWeight": 600,
+            "color": "#54ADFA",
+            "align": "center"
+          },
+          {
+            "id": "v2",
+            "text": {
+              "en": "Ten accents to choose from",
+              "de": "Zehn Akzentfarben zur Wahl",
+              "es": "Diez colores de acento",
+              "fr": "Dix couleurs au choix",
+              "it": "Dieci colori tra cui scegliere",
+              "ja": "10色から選べるアクセント",
+              "ko": "10가지 강조 색상",
+              "nl": "Tien accentkleuren",
+              "pt-BR": "Dez cores de destaque",
+              "zh-Hans": "十种强调色可选"
+            },
+            "transform": {
+              "x": 140,
+              "y": 1322,
+              "width": 1300,
+              "height": 103,
+              "rotation": 0,
+              "zIndex": 4
+            },
+            "fontSize": 74,
+            "fontWeight": 500,
+            "color": "#F5F5F7",
+            "align": "center"
+          },
+          {
+            "id": "k3",
+            "text": {
+              "en": "DEVICES",
+              "de": "GERÄTE",
+              "es": "DISPOSITIVOS",
+              "fr": "APPAREILS",
+              "it": "DISPOSITIVI",
+              "ja": "デバイス",
+              "ko": "기기",
+              "nl": "APPARATEN",
+              "pt-BR": "DISPOSITIVOS",
+              "zh-Hans": "设备"
+            },
+            "transform": {
+              "x": 140,
+              "y": 1510,
+              "width": 1300,
+              "height": 57,
+              "rotation": 0,
+              "zIndex": 4
+            },
+            "fontSize": 39,
+            "fontWeight": 600,
+            "color": "#54ADFA",
+            "align": "center"
+          },
+          {
+            "id": "v3",
+            "text": {
+              "en": "iPhone, iPad, Mac, TV, Watch",
+              "de": "iPhone, iPad, Mac, TV, Watch",
+              "es": "iPhone, iPad, Mac, TV, Watch",
+              "fr": "iPhone, iPad, Mac, TV, Watch",
+              "it": "iPhone, iPad, Mac, TV, Watch",
+              "ja": "iPhone、iPad、Mac、TV、Watch",
+              "ko": "iPhone, iPad, Mac, TV, Watch",
+              "nl": "iPhone, iPad, Mac, TV, Watch",
+              "pt-BR": "iPhone, iPad, Mac, TV, Watch",
+              "zh-Hans": "iPhone、iPad、Mac、TV、Watch"
+            },
+            "transform": {
+              "x": 140,
+              "y": 1572,
+              "width": 1300,
+              "height": 103,
+              "rotation": 0,
+              "zIndex": 4
+            },
+            "fontSize": 74,
+            "fontWeight": 500,
+            "color": "#F5F5F7",
+            "align": "center"
+          },
+          {
+            "id": "k4",
+            "text": {
+              "en": "TOGETHER",
+              "de": "GEMEINSAM",
+              "es": "JUNTOS",
+              "fr": "ENSEMBLE",
+              "it": "INSIEME",
+              "ja": "みんなで",
+              "ko": "함께",
+              "nl": "SAMEN",
+              "pt-BR": "JUNTOS",
+              "zh-Hans": "一起玩"
+            },
+            "transform": {
+              "x": 1440,
+              "y": 760,
+              "width": 1300,
+              "height": 57,
+              "rotation": 0,
+              "zIndex": 4
+            },
+            "fontSize": 39,
+            "fontWeight": 600,
+            "color": "#54ADFA",
+            "align": "center"
+          },
+          {
+            "id": "v4",
+            "text": {
+              "en": "SharePlay on FaceTime",
+              "de": "SharePlay über FaceTime",
+              "es": "SharePlay en FaceTime",
+              "fr": "SharePlay sur FaceTime",
+              "it": "SharePlay su FaceTime",
+              "ja": "FaceTimeでSharePlay",
+              "ko": "FaceTime에서 SharePlay",
+              "nl": "SharePlay via FaceTime",
+              "pt-BR": "SharePlay no FaceTime",
+              "zh-Hans": "FaceTime 上的 SharePlay"
+            },
+            "transform": {
+              "x": 1440,
+              "y": 822,
+              "width": 1300,
+              "height": 103,
+              "rotation": 0,
+              "zIndex": 4
+            },
+            "fontSize": 74,
+            "fontWeight": 500,
+            "color": "#F5F5F7",
+            "align": "center"
+          },
+          {
+            "id": "k5",
+            "text": {
+              "en": "LANGUAGES",
+              "de": "SPRACHEN",
+              "es": "IDIOMAS",
+              "fr": "LANGUES",
+              "it": "LINGUE",
+              "ja": "言語",
+              "ko": "언어",
+              "nl": "TALEN",
+              "pt-BR": "IDIOMAS",
+              "zh-Hans": "语言"
+            },
+            "transform": {
+              "x": 1440,
+              "y": 1010,
+              "width": 1300,
+              "height": 57,
+              "rotation": 0,
+              "zIndex": 4
+            },
+            "fontSize": 39,
+            "fontWeight": 600,
+            "color": "#54ADFA",
+            "align": "center"
+          },
+          {
+            "id": "v5",
+            "text": {
+              "en": "Ten, from Japanese to German",
+              "de": "Zehn, von Japanisch bis Deutsch",
+              "es": "Diez, del japonés al alemán",
+              "fr": "Dix, du japonais à l’allemand",
+              "it": "Dieci, dal giapponese al tedesco",
+              "ja": "日本語からドイツ語まで10言語",
+              "ko": "일본어부터 독일어까지 10개",
+              "nl": "Tien, van Japans tot Duits",
+              "pt-BR": "Dez, do japonês ao alemão",
+              "zh-Hans": "从日语到德语，共十种"
+            },
+            "transform": {
+              "x": 1440,
+              "y": 1072,
+              "width": 1300,
+              "height": 103,
+              "rotation": 0,
+              "zIndex": 4
+            },
+            "fontSize": 74,
+            "fontWeight": 500,
+            "color": "#F5F5F7",
+            "align": "center"
+          },
+          {
+            "id": "k6",
+            "text": {
+              "en": "GAME CENTER",
+              "de": "GAME CENTER",
+              "es": "GAME CENTER",
+              "fr": "GAME CENTER",
+              "it": "GAME CENTER",
+              "ja": "GAME CENTER",
+              "ko": "GAME CENTER",
+              "nl": "GAME CENTER",
+              "pt-BR": "GAME CENTER",
+              "zh-Hans": "GAME CENTER"
+            },
+            "transform": {
+              "x": 1440,
+              "y": 1260,
+              "width": 1300,
+              "height": 57,
+              "rotation": 0,
+              "zIndex": 4
+            },
+            "fontSize": 39,
+            "fontWeight": 600,
+            "color": "#54ADFA",
+            "align": "center"
+          },
+          {
+            "id": "v6",
+            "text": {
+              "en": "Achievements and leaderboards",
+              "de": "Erfolge und Bestenlisten",
+              "es": "Logros y clasificaciones",
+              "fr": "Succès et classements",
+              "it": "Obiettivi e classifiche",
+              "ja": "達成項目とランキング",
+              "ko": "도전 과제와 순위표",
+              "nl": "Prestaties en ranglijsten",
+              "pt-BR": "Conquistas e rankings",
+              "zh-Hans": "成就与排行榜"
+            },
+            "transform": {
+              "x": 1440,
+              "y": 1322,
+              "width": 1300,
+              "height": 103,
+              "rotation": 0,
+              "zIndex": 4
+            },
+            "fontSize": 74,
+            "fontWeight": 500,
+            "color": "#F5F5F7",
+            "align": "center"
+          }
+        ]
       }
     ],
     "android-7": [
@@ -2472,7 +3481,9 @@
     "android-10": [],
     "feature-graphic": [],
     "duo-inner-landscape": [],
-    "watchos": []
+    "watchos": [],
+    "mac": [],
+    "tvos": []
   },
   "scene": {
     "backdrop": "spotlight",

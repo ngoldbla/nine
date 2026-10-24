@@ -24,6 +24,8 @@ public/fonts/imported/*
 public/screenshots/apple/iphone/
 public/screenshots/apple/ipad/
 public/screenshots/apple/watch/
+public/screenshots/apple/mac/
+public/screenshots/apple/tv/
 public/screenshots/apple/duo-inner/
 public/screenshots/apple/duo-outer/
 exports/
