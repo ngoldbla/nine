@@ -25,6 +25,14 @@ Vision Pro is not in it (not ready). On 2026-10-24 ASC held iOS 1.2 Ready for
 Sale, tvOS 1.2 Waiting for Review and Mac **1.1** Ready for Sale, so the Mac
 goes from 1.1 to 1.3 and its release notes say what 1.2 brought; tvOS can only
 open 1.3 once its 1.2 review is done. The Vision target's version stays 1.2.
+In the event tvOS 1.2 was withdrawn from review and went up as 1.3, so all three
+platforms were submitted together (2026-10-24).
+
+**App names are reserved per language, across accounts.** "Nine: Sudoku" was
+taken by another developer in de-DE, es-ES, fr-FR and pt-BR, and "Nine Sudoku"
+in en-US. So en-US keeps "Nine: Sudoku" and the other nine are "Nine Sudoku";
+ja, ko and zh-Hans carry 数独 / 스도쿠 in their keywords instead of the name.
+Check a new name with App Store Connect before it goes in `name.txt`.
 
 The binary never goes through these lanes. `beta` uploads it; `release` attaches
 it **by build number**, so the only pipeline that signs is the one already
