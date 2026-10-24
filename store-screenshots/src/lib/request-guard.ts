@@ -2,11 +2,37 @@
  * requests remain supported; these checks do not provide network authentication. */
 export type GuardFailure = { error: string; status: number };
 
+const LOOPBACK_HOSTNAMES = new Set(["localhost", "127.0.0.1", "[::1]"]);
+
+/**
+ * Rejects any request whose Host is not a loopback name. Without this, a page
+ * that DNS-rebinds its own domain to 127.0.0.1 sends Host and Origin that
+ * agree with each other (`evil.example`), so the Origin check below passes and
+ * it can write files. The editor is only ever opened on this machine, so LAN
+ * addresses are refused too.
+ */
+export function rejectForeignHost(req: Request): GuardFailure | null {
+  const host = (req.headers.get("host") || "").toLowerCase();
+  let hostname: string;
+  try {
+    hostname = new URL(`http://${host}`).hostname;
+  } catch {
+    return { error: "Host not allowed", status: 403 };
+  }
+  if (!LOOPBACK_HOSTNAMES.has(hostname) && !hostname.endsWith(".localhost")) {
+    return { error: "Host not allowed", status: 403 };
+  }
+  return null;
+}
+
 /**
  * Returns a failure to respond with, or null when the request is allowed.
  * Call at the top of every route handler that writes to disk.
  */
 export function rejectCrossSiteWrite(req: Request): GuardFailure | null {
+  const foreign = rejectForeignHost(req);
+  if (foreign) return foreign;
+
   // 1. Content-Type must be application/json. Not CORS-simple, so a
   //    cross-origin caller is forced into a preflight that fails.
   const contentType = req.headers.get("content-type") || "";

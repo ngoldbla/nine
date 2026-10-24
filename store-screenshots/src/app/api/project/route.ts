@@ -3,7 +3,7 @@ import path from "node:path";
 import { createHash, randomUUID } from "node:crypto";
 import { NextResponse } from "next/server";
 import { projectValidationError } from "@/lib/project-validation";
-import { rejectCrossSiteWrite } from "@/lib/request-guard";
+import { rejectCrossSiteWrite, rejectForeignHost } from "@/lib/request-guard";
 import { readJsonBody } from "@/lib/request-body";
 
 export const dynamic = "force-dynamic";
@@ -17,7 +17,9 @@ function filePath() {
 const revision = (raw: string | null) => `"${raw === null ? "missing" : createHash("sha256").update(raw).digest("hex")}"`;
 let writes: Promise<unknown> = Promise.resolve();
 
-export async function GET() {
+export async function GET(req: Request) {
+  const blocked = rejectForeignHost(req);
+  if (blocked) return NextResponse.json({ ok: false, error: blocked.error }, { status: blocked.status });
   try {
     const raw = await fs.readFile(filePath(), "utf8");
     const parsed = JSON.parse(raw);
