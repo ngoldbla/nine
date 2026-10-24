@@ -5,6 +5,18 @@
       "comment": "A difficulty name in the Shortcuts picker. Must match this language's word for the same band elsewhere in the app.",
       "extractionState": "manual",
       "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "هادئ"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Rolig"
+          }
+        },
         "de": {
           "stringUnit": {
             "state": "needs_review",
@@ -23,10 +35,22 @@
             "value": "Suave"
           }
         },
+        "fi": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Rauhallinen"
+          }
+        },
         "fr": {
           "stringUnit": {
             "state": "needs_review",
             "value": "Doux"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "עדין"
           }
         },
         "it": {
@@ -47,6 +71,12 @@
             "value": "순한"
           }
         },
+        "nb": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Rolig"
+          }
+        },
         "nl": {
           "stringUnit": {
             "state": "needs_review",
@@ -59,10 +89,22 @@
             "value": "Suave"
           }
         },
+        "sv": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Lugn"
+          }
+        },
         "zh-Hans": {
           "stringUnit": {
             "state": "needs_review",
             "value": "轻柔"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "溫和"
           }
         }
       }
@@ -71,6 +113,18 @@
       "comment": "A difficulty name in the Shortcuts picker. Must match this language's word for the same band elsewhere in the app.",
       "extractionState": "manual",
       "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "حاد"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Skarp"
+          }
+        },
         "de": {
           "stringUnit": {
             "state": "needs_review",
@@ -89,10 +143,22 @@
             "value": "Agudo"
           }
         },
+        "fi": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Terävä"
+          }
+        },
         "fr": {
           "stringUnit": {
             "state": "needs_review",
             "value": "Aiguisé"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "חד"
           }
         },
         "it": {
@@ -113,6 +179,12 @@
             "value": "예리한"
           }
         },
+        "nb": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Skarp"
+          }
+        },
         "nl": {
           "stringUnit": {
             "state": "needs_review",
@@ -125,10 +197,22 @@
             "value": "Afiado"
           }
         },
+        "sv": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Skarp"
+          }
+        },
         "zh-Hans": {
           "stringUnit": {
             "state": "needs_review",
             "value": "锐利"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "銳利"
           }
         }
       }
@@ -137,6 +221,18 @@
       "comment": "A difficulty name in the Shortcuts picker. Must match this language's word for the same band elsewhere in the app.",
       "extractionState": "manual",
       "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "ثابت"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Jævn"
+          }
+        },
         "de": {
           "stringUnit": {
             "state": "needs_review",
@@ -155,10 +251,22 @@
             "value": "Constante"
           }
         },
+        "fi": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Tasainen"
+          }
+        },
         "fr": {
           "stringUnit": {
             "state": "needs_review",
             "value": "Régulier"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "יציב"
           }
         },
         "it": {
@@ -179,6 +287,12 @@
             "value": "꾸준한"
           }
         },
+        "nb": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Jevn"
+          }
+        },
         "nl": {
           "stringUnit": {
             "state": "needs_review",
@@ -191,10 +305,22 @@
             "value": "Constante"
           }
         },
+        "sv": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Stadig"
+          }
+        },
         "zh-Hans": {
           "stringUnit": {
             "state": "needs_review",
             "value": "平稳"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "平穩"
           }
         }
       }
@@ -203,6 +329,18 @@
       "comment": "Label of the difficulty parameter in the Shortcuts app. One word.",
       "extractionState": "manual",
       "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "مستوى الصعوبة"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Sværhedsgrad"
+          }
+        },
         "de": {
           "stringUnit": {
             "state": "needs_review",
@@ -221,10 +359,22 @@
             "value": "Dificultad"
           }
         },
+        "fi": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Vaikeustaso"
+          }
+        },
         "fr": {
           "stringUnit": {
             "state": "needs_review",
             "value": "Difficulté"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "רמת קושי"
           }
         },
         "it": {
@@ -245,6 +395,12 @@
             "value": "난이도"
           }
         },
+        "nb": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Vanskelighetsgrad"
+          }
+        },
         "nl": {
           "stringUnit": {
             "state": "needs_review",
@@ -257,10 +413,22 @@
             "value": "Dificuldade"
           }
         },
+        "sv": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Svårighetsgrad"
+          }
+        },
         "zh-Hans": {
           "stringUnit": {
             "state": "needs_review",
             "value": "难度"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "難度"
           }
         }
       }
@@ -269,6 +437,18 @@
       "comment": "One sentence in the widget-configuration sheet. Sentence case.",
       "extractionState": "manual",
       "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "لغز اليوم، لمسة واحدة في كل مرة."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Dagens opgave, ét tryk ad gangen."
+          }
+        },
         "de": {
           "stringUnit": {
             "state": "needs_review",
@@ -287,10 +467,22 @@
             "value": "El puzle de hoy, un toque a la vez."
           }
         },
+        "fi": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Päivän pulma, yksi napautus kerrallaan."
+          }
+        },
         "fr": {
           "stringUnit": {
             "state": "needs_review",
             "value": "La grille du jour, un geste à la fois."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "החידה של היום, הקשה אחת בכל פעם."
           }
         },
         "it": {
@@ -311,6 +503,12 @@
             "value": "오늘의 퍼즐을 한 번에 한 번씩."
           }
         },
+        "nb": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Dagens puslespill, ett trykk om gangen."
+          }
+        },
         "nl": {
           "stringUnit": {
             "state": "needs_review",
@@ -323,10 +521,22 @@
             "value": "O puzzle de hoje, um toque por vez."
           }
         },
+        "sv": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Dagens pussel, ett tryck i taget."
+          }
+        },
         "zh-Hans": {
           "stringUnit": {
             "state": "needs_review",
             "value": "今天的谜题，一次一下。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "今天的謎題，一次一下。"
           }
         }
       }
@@ -335,6 +545,18 @@
       "comment": "Name of the playable board widget in the widget-configuration sheet. Two words.",
       "extractionState": "manual",
       "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "أداة اللوحة"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Brætwidget"
+          }
+        },
         "de": {
           "stringUnit": {
             "state": "needs_review",
@@ -353,10 +575,22 @@
             "value": "Widget del tablero"
           }
         },
+        "fi": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Ruudukkovidgetti"
+          }
+        },
         "fr": {
           "stringUnit": {
             "state": "needs_review",
             "value": "Widget de grille"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "ווידג'ט לוח"
           }
         },
         "it": {
@@ -377,6 +611,12 @@
             "value": "보드 위젯"
           }
         },
+        "nb": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Brettwidget"
+          }
+        },
         "nl": {
           "stringUnit": {
             "state": "needs_review",
@@ -389,10 +629,22 @@
             "value": "Widget do tabuleiro"
           }
         },
+        "sv": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Brädwidget"
+          }
+        },
         "zh-Hans": {
           "stringUnit": {
             "state": "needs_review",
             "value": "棋盘小组件"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "棋盤小工具"
           }
         }
       }
@@ -401,6 +653,18 @@
       "comment": "One sentence under the action name. Sentence case.",
       "extractionState": "manual",
       "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "يعيد فتح اللوحة التي كنت تلعبها آخر مرة."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Åbner det bræt, du sidst spillede."
+          }
+        },
         "de": {
           "stringUnit": {
             "state": "needs_review",
@@ -419,10 +683,22 @@
             "value": "Vuelve a abrir el tablero que estabas jugando."
           }
         },
+        "fi": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Avaa ruudukon, jota pelasit viimeksi."
+          }
+        },
         "fr": {
           "stringUnit": {
             "state": "needs_review",
             "value": "Rouvre la grille sur laquelle vous jouiez."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "פותח מחדש את הלוח ששיחקת בו לאחרונה."
           }
         },
         "it": {
@@ -443,6 +719,12 @@
             "value": "마지막으로 하던 보드를 다시 엽니다."
           }
         },
+        "nb": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Åpner brettet du spilte sist."
+          }
+        },
         "nl": {
           "stringUnit": {
             "state": "needs_review",
@@ -455,10 +737,22 @@
             "value": "Reabre o tabuleiro em que você estava jogando."
           }
         },
+        "sv": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Öppnar brädet du spelade senast igen."
+          }
+        },
         "zh-Hans": {
           "stringUnit": {
             "state": "needs_review",
             "value": "重新打开你上次在玩的棋盘。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "重新開啟你上次在玩的棋盤。"
           }
         }
       }
@@ -467,6 +761,18 @@
       "comment": "Short name for the same action. One or two words; reuse this language's word for Continue.",
       "extractionState": "manual",
       "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "متابعة"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Fortsæt"
+          }
+        },
         "de": {
           "stringUnit": {
             "state": "needs_review",
@@ -485,10 +791,22 @@
             "value": "Continuar"
           }
         },
+        "fi": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Jatka"
+          }
+        },
         "fr": {
           "stringUnit": {
             "state": "needs_review",
             "value": "Reprendre"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "המשך"
           }
         },
         "it": {
@@ -509,6 +827,12 @@
             "value": "이어하기"
           }
         },
+        "nb": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Fortsett"
+          }
+        },
         "nl": {
           "stringUnit": {
             "state": "needs_review",
@@ -521,10 +845,22 @@
             "value": "Continuar"
           }
         },
+        "sv": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Fortsätt"
+          }
+        },
         "zh-Hans": {
           "stringUnit": {
             "state": "needs_review",
             "value": "继续"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "繼續"
           }
         }
       }
@@ -533,6 +869,18 @@
       "comment": "Shortcuts action name. Reopens whichever board the player last had in progress.",
       "extractionState": "manual",
       "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "تابع لوحتي"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Fortsæt mit bræt"
+          }
+        },
         "de": {
           "stringUnit": {
             "state": "needs_review",
@@ -551,10 +899,22 @@
             "value": "Continuar mi tablero"
           }
         },
+        "fi": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Jatka ruudukkoani"
+          }
+        },
         "fr": {
           "stringUnit": {
             "state": "needs_review",
             "value": "Reprendre ma grille"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "המשך את הלוח שלי"
           }
         },
         "it": {
@@ -575,6 +935,12 @@
             "value": "내 보드 이어하기"
           }
         },
+        "nb": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Fortsett brettet mitt"
+          }
+        },
         "nl": {
           "stringUnit": {
             "state": "needs_review",
@@ -587,10 +953,22 @@
             "value": "Continuar meu tabuleiro"
           }
         },
+        "sv": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Fortsätt mitt bräde"
+          }
+        },
         "zh-Hans": {
           "stringUnit": {
             "state": "needs_review",
             "value": "继续我的棋盘"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "繼續我的棋盤"
           }
         }
       }
@@ -599,6 +977,18 @@
       "comment": "The other choice: the leading edge. Use the system's own word.",
       "extractionState": "manual",
       "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "البداية"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Begyndelsen"
+          }
+        },
         "de": {
           "stringUnit": {
             "state": "needs_review",
@@ -617,10 +1007,22 @@
             "value": "Inicio"
           }
         },
+        "fi": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Alku"
+          }
+        },
         "fr": {
           "stringUnit": {
             "state": "needs_review",
             "value": "Début"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "תחילה"
           }
         },
         "it": {
@@ -641,6 +1043,12 @@
             "value": "앞쪽"
           }
         },
+        "nb": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Begynnelsen"
+          }
+        },
         "nl": {
           "stringUnit": {
             "state": "needs_review",
@@ -653,10 +1061,22 @@
             "value": "Início"
           }
         },
+        "sv": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Början"
+          }
+        },
         "zh-Hans": {
           "stringUnit": {
             "state": "needs_review",
             "value": "起始端"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "前端"
           }
         }
       }
@@ -665,6 +1085,18 @@
       "comment": "Label of the widget's one setting: which side the row of digits sits on. Sentence case.",
       "extractionState": "manual",
       "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "الأرقام على"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Cifre på"
+          }
+        },
         "de": {
           "stringUnit": {
             "state": "needs_review",
@@ -683,10 +1115,22 @@
             "value": "Dígitos a la"
           }
         },
+        "fi": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Numerot puolella"
+          }
+        },
         "fr": {
           "stringUnit": {
             "state": "needs_review",
             "value": "Chiffres à"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "ספרות בצד"
           }
         },
         "it": {
@@ -707,6 +1151,12 @@
             "value": "숫자 위치"
           }
         },
+        "nb": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Siffer på"
+          }
+        },
         "nl": {
           "stringUnit": {
             "state": "needs_review",
@@ -719,10 +1169,22 @@
             "value": "Dígitos à"
           }
         },
+        "sv": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Siffror på"
+          }
+        },
         "zh-Hans": {
           "stringUnit": {
             "state": "needs_review",
             "value": "数字位置"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "數字位置"
           }
         }
       }
@@ -731,6 +1193,18 @@
       "comment": "One of two choices for the setting above: the side a right-to-left language would call the left. Use the system's own word for the trailing edge.",
       "extractionState": "manual",
       "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "النهاية"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Slutningen"
+          }
+        },
         "de": {
           "stringUnit": {
             "state": "needs_review",
@@ -749,10 +1223,22 @@
             "value": "Final"
           }
         },
+        "fi": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Loppu"
+          }
+        },
         "fr": {
           "stringUnit": {
             "state": "needs_review",
             "value": "Fin"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "סוף"
           }
         },
         "it": {
@@ -773,6 +1259,12 @@
             "value": "뒤쪽"
           }
         },
+        "nb": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Slutten"
+          }
+        },
         "nl": {
           "stringUnit": {
             "state": "needs_review",
@@ -785,10 +1277,22 @@
             "value": "Fim"
           }
         },
+        "sv": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Slutet"
+          }
+        },
         "zh-Hans": {
           "stringUnit": {
             "state": "needs_review",
             "value": "末端"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "尾端"
           }
         }
       }
@@ -797,6 +1301,18 @@
       "comment": "One sentence under the action name. Sentence case.",
       "extractionState": "manual",
       "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "يبدأ لغزًا جديدًا بمستوى الصعوبة الذي تختاره."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Starter en ny opgave med den sværhedsgrad, du vælger."
+          }
+        },
         "de": {
           "stringUnit": {
             "state": "needs_review",
@@ -815,10 +1331,22 @@
             "value": "Empieza un puzle nuevo en la dificultad que elijas."
           }
         },
+        "fi": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Aloittaa uuden pulman valitsemallasi vaikeustasolla."
+          }
+        },
         "fr": {
           "stringUnit": {
             "state": "needs_review",
             "value": "Commence une nouvelle grille dans la difficulté choisie."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "מתחיל חידה חדשה ברמת הקושי שתבחר."
           }
         },
         "it": {
@@ -839,6 +1367,12 @@
             "value": "선택한 난이도로 새 퍼즐을 시작합니다."
           }
         },
+        "nb": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Starter et nytt puslespill med vanskelighetsgraden du velger."
+          }
+        },
         "nl": {
           "stringUnit": {
             "state": "needs_review",
@@ -851,10 +1385,22 @@
             "value": "Começa um puzzle novo na dificuldade escolhida."
           }
         },
+        "sv": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Startar ett nytt pussel med den svårighetsgrad du väljer."
+          }
+        },
         "zh-Hans": {
           "stringUnit": {
             "state": "needs_review",
             "value": "以你选择的难度开始一局新谜题。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "以你選擇的難度開始一局新謎題。"
           }
         }
       }
@@ -863,6 +1409,18 @@
       "comment": "Short name for the same action. Two words.",
       "extractionState": "manual",
       "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "لوحة جديدة"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Nyt bræt"
+          }
+        },
         "de": {
           "stringUnit": {
             "state": "needs_review",
@@ -881,10 +1439,22 @@
             "value": "Tablero nuevo"
           }
         },
+        "fi": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Uusi ruudukko"
+          }
+        },
         "fr": {
           "stringUnit": {
             "state": "needs_review",
             "value": "Nouvelle grille"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "לוח חדש"
           }
         },
         "it": {
@@ -905,6 +1475,12 @@
             "value": "새 보드"
           }
         },
+        "nb": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Nytt brett"
+          }
+        },
         "nl": {
           "stringUnit": {
             "state": "needs_review",
@@ -917,10 +1493,22 @@
             "value": "Novo tabuleiro"
           }
         },
+        "sv": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Nytt bräde"
+          }
+        },
         "zh-Hans": {
           "stringUnit": {
             "state": "needs_review",
             "value": "新棋盘"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "新棋盤"
           }
         }
       }
@@ -929,6 +1517,18 @@
       "comment": "Shortcuts action name. Starts a fresh puzzle; the difficulty is a parameter.",
       "extractionState": "manual",
       "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "ابدأ لوحة"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Start et bræt"
+          }
+        },
         "de": {
           "stringUnit": {
             "state": "needs_review",
@@ -947,10 +1547,22 @@
             "value": "Empezar un tablero"
           }
         },
+        "fi": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Aloita ruudukko"
+          }
+        },
         "fr": {
           "stringUnit": {
             "state": "needs_review",
             "value": "Commencer une grille"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "התחל לוח"
           }
         },
         "it": {
@@ -971,6 +1583,12 @@
             "value": "새 보드 시작"
           }
         },
+        "nb": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Start et brett"
+          }
+        },
         "nl": {
           "stringUnit": {
             "state": "needs_review",
@@ -983,10 +1601,22 @@
             "value": "Começar um tabuleiro"
           }
         },
+        "sv": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Starta ett bräde"
+          }
+        },
         "zh-Hans": {
           "stringUnit": {
             "state": "needs_review",
             "value": "开始一局棋盘"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "開始一局棋盤"
           }
         }
       }
