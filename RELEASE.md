@@ -28,6 +28,26 @@ open 1.3 once its 1.2 review is done. The Vision target's version stays 1.2.
 In the event tvOS 1.2 was withdrawn from review and went up as 1.3, so all three
 platforms were submitted together (2026-10-24).
 
+**After 1.3: seven more languages in the app, ten more store listings.** The app
+gains Traditional Chinese, Arabic, Hebrew, Swedish, Norwegian Bokmål, Danish and
+Finnish (seventeen in all), picked by GDP per capita of the storefronts that
+read those languages and had no listing in their own. The listings are
+`zh-Hant`, `ar-SA`, `he`, `sv`, `no`, `da` and `fi`, plus three regional
+variants of languages the app already had: `fr-CA`, `es-MX` and `pt-PT`
+(`pt-PT` is written for Portugal; the app itself still ships `pt-BR`). All ten
+are machine drafts that nobody on this project reads, like the nine before
+them — the catalog states are `needs_review` for the same reason. Two things
+are open:
+
+- **Names are unchecked.** All ten say "Nine Sudoku", the name the nine
+  non-English listings already use. ASC reserves names per language across
+  accounts, so a name accepted in those is not known to be free in these;
+  confirm each in App Store Connect before the first `store_metadata` run.
+- **No screenshots yet.** A locale with no folder under `screenshots/` shows the
+  primary language's set (the `STORE_SHOT_DIRS` note above), so these ten ship
+  with English images until the image pass. The "Available in …" sentence of
+  the original ten listings now names all seventeen languages.
+
 **App names are reserved per language, across accounts.** "Nine: Sudoku" was
 taken by another developer in de-DE, es-ES, fr-FR and pt-BR, and "Nine Sudoku"
 in en-US. So en-US keeps "Nine: Sudoku" and the other nine are "Nine Sudoku";
