@@ -97,6 +97,13 @@ the number of the build that was tested. Use the number TestFlight shows
 | macOS | Mac | 2880×1800 (or 2560×1600, 1440×900, 1280×800) | `scripts/mac-store-shots.sh` (Release build, seeded state; park the pointer at the left edge first) |
 | tvOS | Apple TV | 1920×1080 (or 3840×2160) | manual, kept in git — `fastlane/screenshots/tvos/en-US/`, driven with `XCUIRemote` from a clean install (see **Apple TV** below) |
 
+**Designed set for the next imagery update.** Captioned iPhone 6.9" and iPhone
+Duo slides in all ten languages are committed as JPEG in
+`fastlane/screenshots/marketing/<locale>/`, made in the editor in
+`store-screenshots/` (its `STORE-ART.md`). No lane uploads them yet — that
+folder's README says what is missing (iPad, Watch, nine locales' listing text)
+and how to wire it in.
+
 **Apple Watch, by hand** (one size is enough; ASC scales it to the others):
 
 ```bash
