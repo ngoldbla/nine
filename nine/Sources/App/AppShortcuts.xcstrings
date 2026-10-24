@@ -11,6 +11,12 @@
             "value": "تابع في ${applicationName}"
           }
         },
+        "ca": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Continua a ${applicationName}"
+          }
+        },
         "da": {
           "stringUnit": {
             "state": "needs_review",
@@ -51,6 +57,18 @@
           "stringUnit": {
             "state": "needs_review",
             "value": "המשך ב-${applicationName}"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Folytatás: ${applicationName}"
+          }
+        },
+        "is": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Halda áfram í ${applicationName}"
           }
         },
         "it": {
@@ -95,6 +113,12 @@
             "value": "Fortsätt i ${applicationName}"
           }
         },
+        "uk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Продовжити в ${applicationName}"
+          }
+        },
         "zh-Hans": {
           "stringUnit": {
             "state": "needs_review",
@@ -117,6 +141,12 @@
           "stringUnit": {
             "state": "needs_review",
             "value": "تابع لوحتي في ${applicationName}"
+          }
+        },
+        "ca": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Continua el meu tauler a ${applicationName}"
           }
         },
         "da": {
@@ -161,6 +191,18 @@
             "value": "המשך את הלוח שלי ב-${applicationName}"
           }
         },
+        "hu": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Táblám folytatása: ${applicationName}"
+          }
+        },
+        "is": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Halda áfram með borðið mitt í ${applicationName}"
+          }
+        },
         "it": {
           "stringUnit": {
             "state": "needs_review",
@@ -203,6 +245,12 @@
             "value": "Fortsätt mitt bräde i ${applicationName}"
           }
         },
+        "uk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Продовжити моє поле в ${applicationName}"
+          }
+        },
         "zh-Hans": {
           "stringUnit": {
             "state": "needs_review",
@@ -225,6 +273,12 @@
           "stringUnit": {
             "state": "needs_review",
             "value": "لعبة ${band} جديدة في ${applicationName}"
+          }
+        },
+        "ca": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Joc ${band} nou a ${applicationName}"
           }
         },
         "da": {
@@ -269,6 +323,18 @@
             "value": "משחק ${band} חדש ב-${applicationName}"
           }
         },
+        "hu": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Új ${band} játék: ${applicationName}"
+          }
+        },
+        "is": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Nýr ${band} leikur í ${applicationName}"
+          }
+        },
         "it": {
           "stringUnit": {
             "state": "needs_review",
@@ -311,6 +377,12 @@
             "value": "Nytt ${band} spel i ${applicationName}"
           }
         },
+        "uk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Нова гра ${band} в ${applicationName}"
+          }
+        },
         "zh-Hans": {
           "stringUnit": {
             "state": "needs_review",
@@ -333,6 +405,12 @@
           "stringUnit": {
             "state": "needs_review",
             "value": "ابدأ لوحة ${band} في ${applicationName}"
+          }
+        },
+        "ca": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Comença un tauler ${band} a ${applicationName}"
           }
         },
         "da": {
@@ -377,6 +455,18 @@
             "value": "התחל לוח ${band} ב-${applicationName}"
           }
         },
+        "hu": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "${band} tábla indítása: ${applicationName}"
+          }
+        },
+        "is": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Byrja ${band} borð í ${applicationName}"
+          }
+        },
         "it": {
           "stringUnit": {
             "state": "needs_review",
@@ -417,6 +507,12 @@
           "stringUnit": {
             "state": "needs_review",
             "value": "Starta ett ${band} bräde i ${applicationName}"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Почати поле ${band} в ${applicationName}"
           }
         },
         "zh-Hans": {

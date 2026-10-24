@@ -11,6 +11,12 @@
             "value": "هادئ"
           }
         },
+        "ca": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Suau"
+          }
+        },
         "da": {
           "stringUnit": {
             "state": "needs_review",
@@ -51,6 +57,18 @@
           "stringUnit": {
             "state": "needs_review",
             "value": "עדין"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Nyugodt"
+          }
+        },
+        "is": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Rólegur"
           }
         },
         "it": {
@@ -95,6 +113,12 @@
             "value": "Lugn"
           }
         },
+        "uk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Спокійний"
+          }
+        },
         "zh-Hans": {
           "stringUnit": {
             "state": "needs_review",
@@ -117,6 +141,12 @@
           "stringUnit": {
             "state": "needs_review",
             "value": "حاد"
+          }
+        },
+        "ca": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Agut"
           }
         },
         "da": {
@@ -161,6 +191,18 @@
             "value": "חד"
           }
         },
+        "hu": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Éles"
+          }
+        },
+        "is": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Beittur"
+          }
+        },
         "it": {
           "stringUnit": {
             "state": "needs_review",
@@ -203,6 +245,12 @@
             "value": "Skarp"
           }
         },
+        "uk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Гострий"
+          }
+        },
         "zh-Hans": {
           "stringUnit": {
             "state": "needs_review",
@@ -225,6 +273,12 @@
           "stringUnit": {
             "state": "needs_review",
             "value": "ثابت"
+          }
+        },
+        "ca": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Constant"
           }
         },
         "da": {
@@ -269,6 +323,18 @@
             "value": "יציב"
           }
         },
+        "hu": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Egyenletes"
+          }
+        },
+        "is": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Stöðugur"
+          }
+        },
         "it": {
           "stringUnit": {
             "state": "needs_review",
@@ -311,6 +377,12 @@
             "value": "Stadig"
           }
         },
+        "uk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Рівний"
+          }
+        },
         "zh-Hans": {
           "stringUnit": {
             "state": "needs_review",
@@ -333,6 +405,12 @@
           "stringUnit": {
             "state": "needs_review",
             "value": "مستوى الصعوبة"
+          }
+        },
+        "ca": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Dificultat"
           }
         },
         "da": {
@@ -377,6 +455,18 @@
             "value": "רמת קושי"
           }
         },
+        "hu": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Nehézség"
+          }
+        },
+        "is": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Erfiðleikastig"
+          }
+        },
         "it": {
           "stringUnit": {
             "state": "needs_review",
@@ -419,6 +509,12 @@
             "value": "Svårighetsgrad"
           }
         },
+        "uk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Складність"
+          }
+        },
         "zh-Hans": {
           "stringUnit": {
             "state": "needs_review",
@@ -441,6 +537,12 @@
           "stringUnit": {
             "state": "needs_review",
             "value": "لغز اليوم، لمسة واحدة في كل مرة."
+          }
+        },
+        "ca": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "El trencaclosques d'avui, un toc cada cop."
           }
         },
         "da": {
@@ -485,6 +587,18 @@
             "value": "החידה של היום, הקשה אחת בכל פעם."
           }
         },
+        "hu": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "A mai feladvány, egyszerre egy koppintással."
+          }
+        },
+        "is": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Þraut dagsins, einn smellur í einu."
+          }
+        },
         "it": {
           "stringUnit": {
             "state": "needs_review",
@@ -527,6 +641,12 @@
             "value": "Dagens pussel, ett tryck i taget."
           }
         },
+        "uk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Сьогоднішня головоломка, одне торкання за раз."
+          }
+        },
         "zh-Hans": {
           "stringUnit": {
             "state": "needs_review",
@@ -549,6 +669,12 @@
           "stringUnit": {
             "state": "needs_review",
             "value": "أداة اللوحة"
+          }
+        },
+        "ca": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Widget de tauler"
           }
         },
         "da": {
@@ -593,6 +719,18 @@
             "value": "ווידג'ט לוח"
           }
         },
+        "hu": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Tábla widget"
+          }
+        },
+        "is": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Borðsmáforrit"
+          }
+        },
         "it": {
           "stringUnit": {
             "state": "needs_review",
@@ -635,6 +773,12 @@
             "value": "Brädwidget"
           }
         },
+        "uk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Віджет поля"
+          }
+        },
         "zh-Hans": {
           "stringUnit": {
             "state": "needs_review",
@@ -657,6 +801,12 @@
           "stringUnit": {
             "state": "needs_review",
             "value": "يعيد فتح اللوحة التي كنت تلعبها آخر مرة."
+          }
+        },
+        "ca": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Torna a obrir el tauler que jugaves per última vegada."
           }
         },
         "da": {
@@ -701,6 +851,18 @@
             "value": "פותח מחדש את הלוח ששיחקת בו לאחרונה."
           }
         },
+        "hu": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Újra megnyitja a legutóbb játszott táblát."
+          }
+        },
+        "is": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Opnar aftur borðið sem þú spilaðir síðast."
+          }
+        },
         "it": {
           "stringUnit": {
             "state": "needs_review",
@@ -743,6 +905,12 @@
             "value": "Öppnar brädet du spelade senast igen."
           }
         },
+        "uk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Знову відкриває поле, у яке ви грали востаннє."
+          }
+        },
         "zh-Hans": {
           "stringUnit": {
             "state": "needs_review",
@@ -765,6 +933,12 @@
           "stringUnit": {
             "state": "needs_review",
             "value": "متابعة"
+          }
+        },
+        "ca": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Continua"
           }
         },
         "da": {
@@ -809,6 +983,18 @@
             "value": "המשך"
           }
         },
+        "hu": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Folytatás"
+          }
+        },
+        "is": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Halda áfram"
+          }
+        },
         "it": {
           "stringUnit": {
             "state": "needs_review",
@@ -851,6 +1037,12 @@
             "value": "Fortsätt"
           }
         },
+        "uk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Продовжити"
+          }
+        },
         "zh-Hans": {
           "stringUnit": {
             "state": "needs_review",
@@ -873,6 +1065,12 @@
           "stringUnit": {
             "state": "needs_review",
             "value": "تابع لوحتي"
+          }
+        },
+        "ca": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Continua el meu tauler"
           }
         },
         "da": {
@@ -917,6 +1115,18 @@
             "value": "המשך את הלוח שלי"
           }
         },
+        "hu": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Táblám folytatása"
+          }
+        },
+        "is": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Halda áfram með borðið mitt"
+          }
+        },
         "it": {
           "stringUnit": {
             "state": "needs_review",
@@ -959,6 +1169,12 @@
             "value": "Fortsätt mitt bräde"
           }
         },
+        "uk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Продовжити моє поле"
+          }
+        },
         "zh-Hans": {
           "stringUnit": {
             "state": "needs_review",
@@ -981,6 +1197,12 @@
           "stringUnit": {
             "state": "needs_review",
             "value": "البداية"
+          }
+        },
+        "ca": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Inici"
           }
         },
         "da": {
@@ -1025,6 +1247,18 @@
             "value": "תחילה"
           }
         },
+        "hu": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Eleje"
+          }
+        },
+        "is": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Upphaf"
+          }
+        },
         "it": {
           "stringUnit": {
             "state": "needs_review",
@@ -1067,6 +1301,12 @@
             "value": "Början"
           }
         },
+        "uk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Початок"
+          }
+        },
         "zh-Hans": {
           "stringUnit": {
             "state": "needs_review",
@@ -1089,6 +1329,12 @@
           "stringUnit": {
             "state": "needs_review",
             "value": "الأرقام على"
+          }
+        },
+        "ca": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Dígits a"
           }
         },
         "da": {
@@ -1133,6 +1379,18 @@
             "value": "ספרות בצד"
           }
         },
+        "hu": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Számjegyek helye"
+          }
+        },
+        "is": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Tölustafir á"
+          }
+        },
         "it": {
           "stringUnit": {
             "state": "needs_review",
@@ -1175,6 +1433,12 @@
             "value": "Siffror på"
           }
         },
+        "uk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Цифри на"
+          }
+        },
         "zh-Hans": {
           "stringUnit": {
             "state": "needs_review",
@@ -1197,6 +1461,12 @@
           "stringUnit": {
             "state": "needs_review",
             "value": "النهاية"
+          }
+        },
+        "ca": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Final"
           }
         },
         "da": {
@@ -1241,6 +1511,18 @@
             "value": "סוף"
           }
         },
+        "hu": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Vége"
+          }
+        },
+        "is": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Endir"
+          }
+        },
         "it": {
           "stringUnit": {
             "state": "needs_review",
@@ -1283,6 +1565,12 @@
             "value": "Slutet"
           }
         },
+        "uk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Кінець"
+          }
+        },
         "zh-Hans": {
           "stringUnit": {
             "state": "needs_review",
@@ -1305,6 +1593,12 @@
           "stringUnit": {
             "state": "needs_review",
             "value": "يبدأ لغزًا جديدًا بمستوى الصعوبة الذي تختاره."
+          }
+        },
+        "ca": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Comença un trencaclosques nou amb la dificultat que triïs."
           }
         },
         "da": {
@@ -1349,6 +1643,18 @@
             "value": "מתחיל חידה חדשה ברמת הקושי שתבחר."
           }
         },
+        "hu": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Új feladványt indít az Ön által választott nehézséggel."
+          }
+        },
+        "is": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Byrjar nýja þraut á erfiðleikastiginu sem þú velur."
+          }
+        },
         "it": {
           "stringUnit": {
             "state": "needs_review",
@@ -1391,6 +1697,12 @@
             "value": "Startar ett nytt pussel med den svårighetsgrad du väljer."
           }
         },
+        "uk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Починає нову головоломку з обраною вами складністю."
+          }
+        },
         "zh-Hans": {
           "stringUnit": {
             "state": "needs_review",
@@ -1413,6 +1725,12 @@
           "stringUnit": {
             "state": "needs_review",
             "value": "لوحة جديدة"
+          }
+        },
+        "ca": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Tauler nou"
           }
         },
         "da": {
@@ -1457,6 +1775,18 @@
             "value": "לוח חדש"
           }
         },
+        "hu": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Új tábla"
+          }
+        },
+        "is": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Nýtt borð"
+          }
+        },
         "it": {
           "stringUnit": {
             "state": "needs_review",
@@ -1499,6 +1829,12 @@
             "value": "Nytt bräde"
           }
         },
+        "uk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Нове поле"
+          }
+        },
         "zh-Hans": {
           "stringUnit": {
             "state": "needs_review",
@@ -1521,6 +1857,12 @@
           "stringUnit": {
             "state": "needs_review",
             "value": "ابدأ لوحة"
+          }
+        },
+        "ca": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Comença un tauler"
           }
         },
         "da": {
@@ -1565,6 +1907,18 @@
             "value": "התחל לוח"
           }
         },
+        "hu": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Tábla indítása"
+          }
+        },
+        "is": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Byrja borð"
+          }
+        },
         "it": {
           "stringUnit": {
             "state": "needs_review",
@@ -1605,6 +1959,12 @@
           "stringUnit": {
             "state": "needs_review",
             "value": "Starta ett bräde"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Почати поле"
           }
         },
         "zh-Hans": {
