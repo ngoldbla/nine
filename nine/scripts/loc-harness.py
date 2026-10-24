@@ -104,7 +104,11 @@ MODES = {
 SPECIFIER = re.compile(r"%[0-9]*\$?[#@a-zA-Z]")
 
 # Petal and cell labels are localized, but the digit inside them is not: `de`,
-# `ja` and `en` all count in Western digits. Nine ships no locale that does not.
+# `ja` and `en` all count in Western digits. That was true of every locale Nine
+# shipped until Arabic: CLDR's default numbering system for `ar` is Arabic-Indic
+# in some regions, so `ar` may print ١٢٣ where the catalog says `%lld`. The
+# modes above have no `ar` entry yet, so nothing here has measured it — run one
+# on a simulator before trusting this regex for Arabic.
 DIGIT = re.compile(r"[1-9]")
 
 

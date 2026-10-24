@@ -69,7 +69,9 @@ the exact command to the user.
   store frame.
 - A new locale is a new folder named with an ASC locale code (`de-DE`, `ja`,
   `pt-BR`, `zh-Hans` …) holding at least `name.txt`, `description.txt`,
-  `keywords.txt`, `support_url.txt`, `privacy_url.txt`.
+  `keywords.txt`, `support_url.txt`, `privacy_url.txt`. ASC's codes are not
+  always the app's: Norwegian is `no` (the bundle's is `nb`), Arabic is `ar-SA`
+  (the bundle's is `ar`), and Traditional Chinese is `zh-Hant`.
 
 ## Support and privacy pages
 

@@ -1,0 +1,15 @@
+Nine Sudoku, published by Aquilops LLC. Effective 13 October 2026.
+
+Nine collects no data. We don't run servers that receive anything from the app, we don't use analytics, advertising or tracking, and we never see your boards, your times or who you are.
+
+What stays on your device: your boards, solve history, statistics and preferences are stored on your device.
+
+iCloud: if you're signed into iCloud, Nine syncs your boards and preferences through your own private iCloud storage so they appear on your other devices. That data lives in your iCloud account, is governed by Apple's privacy policy, and is not accessible to us.
+
+Game Center: if you're signed into Game Center, Nine submits scores and achievements to Apple's Game Center so they appear on leaderboards. Game Center is operated by Apple under Apple's privacy policy; your Game Center nickname and scores may be visible to other players as Game Center describes. Nine works fully without it.
+
+Children: Nine collects no personal information from anyone, including children.
+
+Changes: if this ever changes, we'll update this policy and its effective date before the app does anything different.
+
+Contact: see https://nine-sudoku.ngoldbla.workers.dev/support

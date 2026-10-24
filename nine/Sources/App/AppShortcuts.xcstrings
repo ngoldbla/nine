@@ -5,6 +5,24 @@
       "comment": "A shorter, more casual way to say the same. Must contain ${applicationName}.",
       "extractionState": "manual",
       "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "تابع في ${applicationName}"
+          }
+        },
+        "ca": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Continua a ${applicationName}"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Fortsæt i ${applicationName}"
+          }
+        },
         "de": {
           "stringUnit": {
             "state": "needs_review",
@@ -23,10 +41,34 @@
             "value": "Seguir en ${applicationName}"
           }
         },
+        "fi": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Jatka sovelluksessa ${applicationName}"
+          }
+        },
         "fr": {
           "stringUnit": {
             "state": "needs_review",
             "value": "Continuer dans ${applicationName}"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "המשך ב-${applicationName}"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Folytatás: ${applicationName}"
+          }
+        },
+        "is": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Halda áfram í ${applicationName}"
           }
         },
         "it": {
@@ -47,6 +89,12 @@
             "value": "${applicationName} 계속하기"
           }
         },
+        "nb": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Fortsett i ${applicationName}"
+          }
+        },
         "nl": {
           "stringUnit": {
             "state": "needs_review",
@@ -59,10 +107,28 @@
             "value": "Continuar no ${applicationName}"
           }
         },
+        "sv": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Fortsätt i ${applicationName}"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Продовжити в ${applicationName}"
+          }
+        },
         "zh-Hans": {
           "stringUnit": {
             "state": "needs_review",
             "value": "在 ${applicationName} 中继续"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "在 ${applicationName} 中繼續"
           }
         }
       }
@@ -71,6 +137,24 @@
       "comment": "A spoken phrase that reopens whichever puzzle the player last had in progress. Must contain ${applicationName}.",
       "extractionState": "manual",
       "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "تابع لوحتي في ${applicationName}"
+          }
+        },
+        "ca": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Continua el meu tauler a ${applicationName}"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Fortsæt mit bræt i ${applicationName}"
+          }
+        },
         "de": {
           "stringUnit": {
             "state": "needs_review",
@@ -89,10 +173,34 @@
             "value": "Continuar mi tablero en ${applicationName}"
           }
         },
+        "fi": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Jatka ruudukkoani sovelluksessa ${applicationName}"
+          }
+        },
         "fr": {
           "stringUnit": {
             "state": "needs_review",
             "value": "Reprendre ma grille dans ${applicationName}"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "המשך את הלוח שלי ב-${applicationName}"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Táblám folytatása: ${applicationName}"
+          }
+        },
+        "is": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Halda áfram með borðið mitt í ${applicationName}"
           }
         },
         "it": {
@@ -113,6 +221,12 @@
             "value": "${applicationName} 에서 내 보드 이어하기"
           }
         },
+        "nb": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Fortsett brettet mitt i ${applicationName}"
+          }
+        },
         "nl": {
           "stringUnit": {
             "state": "needs_review",
@@ -125,10 +239,28 @@
             "value": "Continuar meu tabuleiro no ${applicationName}"
           }
         },
+        "sv": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Fortsätt mitt bräde i ${applicationName}"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Продовжити моє поле в ${applicationName}"
+          }
+        },
         "zh-Hans": {
           "stringUnit": {
             "state": "needs_review",
             "value": "在 ${applicationName} 中继续我的棋盘"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "在 ${applicationName} 中繼續我的棋盤"
           }
         }
       }
@@ -137,6 +269,24 @@
       "comment": "A second way to say the same. ${band} is a difficulty name; keep the placeholder. Must also contain ${applicationName}.",
       "extractionState": "manual",
       "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "لعبة ${band} جديدة في ${applicationName}"
+          }
+        },
+        "ca": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Joc ${band} nou a ${applicationName}"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Nyt ${band} spil i ${applicationName}"
+          }
+        },
         "de": {
           "stringUnit": {
             "state": "needs_review",
@@ -155,10 +305,34 @@
             "value": "Nueva partida ${band} en ${applicationName}"
           }
         },
+        "fi": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Uusi ${band} peli sovelluksessa ${applicationName}"
+          }
+        },
         "fr": {
           "stringUnit": {
             "state": "needs_review",
             "value": "Nouvelle partie ${band} dans ${applicationName}"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "משחק ${band} חדש ב-${applicationName}"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Új ${band} játék: ${applicationName}"
+          }
+        },
+        "is": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Nýr ${band} leikur í ${applicationName}"
           }
         },
         "it": {
@@ -179,6 +353,12 @@
             "value": "${applicationName} 에서 새 ${band} 게임"
           }
         },
+        "nb": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Nytt ${band} spill i ${applicationName}"
+          }
+        },
         "nl": {
           "stringUnit": {
             "state": "needs_review",
@@ -191,10 +371,28 @@
             "value": "Novo jogo ${band} no ${applicationName}"
           }
         },
+        "sv": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Nytt ${band} spel i ${applicationName}"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Нова гра ${band} в ${applicationName}"
+          }
+        },
         "zh-Hans": {
           "stringUnit": {
             "state": "needs_review",
             "value": "在 ${applicationName} 中开始 ${band} 新游戏"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "在 ${applicationName} 中開始 ${band} 新遊戲"
           }
         }
       }
@@ -203,6 +401,24 @@
       "comment": "A spoken phrase that starts a fresh puzzle. ${band} is replaced by a difficulty name (Gentle, Steady, Sharp, Nocturne, Tempest, Abyss) — keep it as a placeholder and put it where a difficulty word naturally goes in this language. Must also contain ${applicationName}.",
       "extractionState": "manual",
       "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "ابدأ لوحة ${band} في ${applicationName}"
+          }
+        },
+        "ca": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Comença un tauler ${band} a ${applicationName}"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Start et ${band} bræt i ${applicationName}"
+          }
+        },
         "de": {
           "stringUnit": {
             "state": "needs_review",
@@ -221,10 +437,34 @@
             "value": "Empezar un tablero ${band} en ${applicationName}"
           }
         },
+        "fi": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Aloita ${band} ruudukko sovelluksessa ${applicationName}"
+          }
+        },
         "fr": {
           "stringUnit": {
             "state": "needs_review",
             "value": "Commencer une grille ${band} dans ${applicationName}"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "התחל לוח ${band} ב-${applicationName}"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "${band} tábla indítása: ${applicationName}"
+          }
+        },
+        "is": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Byrja ${band} borð í ${applicationName}"
           }
         },
         "it": {
@@ -245,6 +485,12 @@
             "value": "${applicationName} 에서 ${band} 보드 시작"
           }
         },
+        "nb": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Start et ${band} brett i ${applicationName}"
+          }
+        },
         "nl": {
           "stringUnit": {
             "state": "needs_review",
@@ -257,10 +503,28 @@
             "value": "Começar um tabuleiro ${band} no ${applicationName}"
           }
         },
+        "sv": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Starta ett ${band} bräde i ${applicationName}"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Почати поле ${band} в ${applicationName}"
+          }
+        },
         "zh-Hans": {
           "stringUnit": {
             "state": "needs_review",
             "value": "在 ${applicationName} 中开始 ${band} 棋盘"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "在 ${applicationName} 中開始 ${band} 棋盤"
           }
         }
       }

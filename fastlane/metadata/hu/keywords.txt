@@ -1,0 +1,1 @@
+sudoku,rejtvény,logika,számok,agytorna,tippek,technikák,shareplay,variánsok,mac

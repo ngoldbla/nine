@@ -294,8 +294,9 @@ final class CatalogTests: XCTestCase {
     /// failure message says which is which, because a reviewer told to expect
     /// `(null)` and shown a plural form will conclude the gate is broken.
     ///
-    /// The categories below are the CLDR **cardinal** rules for the nine launch
-    /// locales plus the source language, and they are the categories a
+    /// The categories below are the CLDR **cardinal** rules for the launch
+    /// locales (the nine of PRD-20 and the eleven added after them) plus the
+    /// source language, and they are the categories a
     /// translation MUST carry — not the ones it may. A locale is allowed to
     /// carry more (a translator who writes `few` for a language whose rules
     /// never select it is harmless); it is never allowed to carry fewer.
@@ -347,6 +348,55 @@ final class CatalogTests: XCTestCase {
         "ja": ["other"],
         "ko": ["other"],
         "zh-Hans": ["other"],
+
+        // The seven that followed the launch nine, read out of the same babel
+        // 2.18.0 over the same counts (`0...29, 100, 1000, 10^6, 2×10^6, 10^7,
+        // 10^9`), not remembered:
+        //
+        //     zh_Hant  ['other']
+        //     ar       ['few', 'many', 'one', 'other', 'two', 'zero']
+        //     he       ['one', 'other', 'two']
+        //     sv nb da fi   ['one', 'other']
+        //
+        // Hebrew's `many` is not in the list: CLDR 42 dropped it, and babel
+        // 2.18.0 agrees. A catalog that still carries one is harmless — a locale
+        // may carry more than it requires.
+        //
+        // **Arabic is the first locale here with more than three categories**,
+        // which is the trigger `BoardSpeech.digitNoun` named for itself. It did
+        // not need the conversion that comment predicted, because the one
+        // sentence that takes its output — `board.announce.remaining` — is
+        // written in Arabic and Hebrew as a label ("remaining of sevens: three")
+        // that agrees with nothing, so the `n == 1` ternary cannot select a form
+        // the sentence cannot use. A sentence that *did* have to agree would
+        // bring the conversion back.
+        "zh-Hant": ["other"],
+        "ar": ["zero", "one", "two", "few", "many", "other"],
+        "he": ["one", "two", "other"],
+        "sv": ["one", "other"],
+        "nb": ["one", "other"],
+        "da": ["one", "other"],
+        "fi": ["one", "other"],
+
+        // Then Catalan, Hungarian, Ukrainian and Icelandic, read the same way:
+        //
+        //     ca  ['many', 'one', 'other']        (`many` at 10^6, like es/fr/it)
+        //     hu  ['one', 'other']
+        //     uk  ['few', 'many', 'one']          (+ `other`, below)
+        //     is  ['one', 'other']                (`one` is 1, 21, 31 …, not only 1)
+        //
+        // Ukrainian's integers never select `other` — only fractions do — but a
+        // missing `other` goes blank (see above), so it is required anyway.
+        // Icelandic's `one` reaching 21 and 31 is why its plural rows are written
+        // as labels ("Tómir reitir: 21") rather than as counted nouns: there is
+        // no `n == 1` shortcut that gets "21 reitur" right by accident.
+        //
+        // The two requested Nordic languages that are NOT here — Faroese and
+        // Greenlandic — were left out on purpose, not forgotten. See RELEASE.md.
+        "ca": ["one", "many", "other"],
+        "hu": ["one", "other"],
+        "uk": ["one", "few", "many", "other"],
+        "is": ["one", "other"],
     ]
 
     /// Every locale carries the same *shape* English does.

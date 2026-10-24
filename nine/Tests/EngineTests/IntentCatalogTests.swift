@@ -34,8 +34,15 @@ final class IntentCatalogTests: XCTestCase {
         .deletingLastPathComponent()   // Tests
         .deletingLastPathComponent()   // nine
 
-    /// The nine launch locales, in `CatalogTests`'s order.
-    static let launchLocales = ["ja", "de", "fr", "es", "it", "pt-BR", "ko", "zh-Hans", "nl"]
+    /// Every locale the catalogs carry besides English: the nine PRD-20
+    /// launched with, then the eleven added after them. `CatalogTests` derives
+    /// its own list from its CLDR table; this one is written out, so adding a
+    /// locale to the catalogs without adding it here fails
+    /// `testEveryIntentRowCarriesEveryLaunchLocaleAndAComment` rather than
+    /// shipping Shortcuts rows that are English in one language.
+    static let launchLocales = ["ja", "de", "fr", "es", "it", "pt-BR", "ko", "zh-Hans", "nl",
+                                "zh-Hant", "ar", "he", "sv", "nb", "da", "fi",
+                                "ca", "hu", "uk", "is"]
 
     // MARK: Reading
 

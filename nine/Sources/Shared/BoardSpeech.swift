@@ -401,7 +401,23 @@ public enum BoardSpeech {
     /// (`zero`, `two`, `few`, `many`), Welsh (six). At that point
     /// `board.announce.remaining` has to become a plural entry keyed on the
     /// count with the digit noun folded into each category, and `digitNoun`
-    /// goes away. **Adding a tenth locale is the trigger; nothing smaller is.**
+    /// goes away. **Adding a tenth locale was the trigger; nothing smaller was.**
+    ///
+    /// **It was pulled, and the conversion did not happen** — Arabic and Hebrew
+    /// shipped (with sv, nb, da, fi and zh-Hant, then ca, hu, uk and is) and
+    /// this function is unchanged. The reason is specific to one sentence:
+    /// `board.announce.remaining` is the only caller of this ternary, and in
+    /// the locales that would otherwise need agreement it is written as a label
+    /// that agrees with nothing — `ar` "المتبقي من %2$@: %1$@", `he`
+    /// "%2$@ שנותרו: %1$@", `uk` "%2$@ — залишилось: %1$@" (Ukrainian `few`
+    /// and `many` take different noun forms), `hu` "Hátralévő %2$@: %1$@"
+    /// (a Hungarian noun stays singular after a numeral) — so a
+    /// singular noun beside a count of one and a plural beside the rest are
+    /// both grammatical there. Arabic's `zero`/`two`/`few`/`many` still exist
+    /// in the catalog's real plurals, which select by count through Foundation
+    /// rather than through this branch. **A sentence that must agree with the
+    /// count — "three sevens remain" with a verb or an adjective that inflects —
+    /// is what would bring the conversion back,** in any of the twenty.
     ///
     /// Note what is NOT a trigger: the `many` that it, es, fr and pt-BR all
     /// select at multiples of 1,000,000. `remaining` is `0...9` by

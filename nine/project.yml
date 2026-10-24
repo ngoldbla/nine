@@ -176,10 +176,24 @@ targets:
         # locale nobody declared. "Remember to flip it later" is not a mechanism.
         #
         # Order here is preference order, not a set: English first, then the
-        # nine in PRD-20's launch order. The test compares sorted, so this
-        # ordering is free.
+        # nine in PRD-20's launch order, then the seven that followed them
+        # (Traditional Chinese, Arabic, Hebrew, Swedish, Norwegian Bokmål,
+        # Danish, Finnish). The test compares sorted, so this ordering is free.
+        #
+        # The last seven were chosen by GDP per capita of the App Store
+        # storefronts that read them and had no listing in their own language.
+        # `ar` and `he` are right-to-left; `ar` selects six CLDR plural
+        # categories, which is why `board.announce.remaining` is written to
+        # agree with nothing (see `BoardSpeech.digitNoun`).
+        #
+        # Catalan, Hungarian, Ukrainian and Icelandic came after those seven.
+        # `ca`, `hu` and `uk` have App Store Connect localizations; `is` does
+        # not, and iOS has no Icelandic system language, so it is reachable
+        # only through whatever per-app language list the OS builds. Faroese
+        # and Greenlandic were asked for and deliberately not written; see
+        # RELEASE.md.
         CFBundleDevelopmentRegion: en
-        CFBundleLocalizations: [en, ja, de, fr, es, it, pt-BR, ko, zh-Hans, nl]
+        CFBundleLocalizations: [en, ja, de, fr, es, it, pt-BR, ko, zh-Hans, nl, zh-Hant, ar, he, sv, nb, da, fi, ca, hu, uk, is]
         ITSAppUsesNonExemptEncryption: false
         # Required for the Mac App Store (.pkg upload rejects without it, error
         # 90242); harmless/valid on iOS too, ignored by tvOS. Nine is a sudoku.
@@ -307,7 +321,7 @@ targets:
         # widget declaring fewer locales than the app it ships inside is an
         # English Home Screen on a Japanese phone with everything else translated.
         CFBundleDevelopmentRegion: en
-        CFBundleLocalizations: [en, ja, de, fr, es, it, pt-BR, ko, zh-Hans, nl]
+        CFBundleLocalizations: [en, ja, de, fr, es, it, pt-BR, ko, zh-Hans, nl, zh-Hant, ar, he, sv, nb, da, fi, ca, hu, uk, is]
         NSExtension:
           NSExtensionPointIdentifier: com.apple.widgetkit-extension
 
@@ -379,7 +393,7 @@ targets:
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         CFBundleDevelopmentRegion: en
-        CFBundleLocalizations: [en, ja, de, fr, es, it, pt-BR, ko, zh-Hans, nl]
+        CFBundleLocalizations: [en, ja, de, fr, es, it, pt-BR, ko, zh-Hans, nl, zh-Hant, ar, he, sv, nb, da, fi, ca, hu, uk, is]
         # The modern single-target marker. Without it the bundle is treated as
         # a legacy WatchKit app and refuses to launch.
         WKApplication: true
@@ -466,7 +480,7 @@ targets:
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         CFBundleDevelopmentRegion: en
-        CFBundleLocalizations: [en, ja, de, fr, es, it, pt-BR, ko, zh-Hans, nl]
+        CFBundleLocalizations: [en, ja, de, fr, es, it, pt-BR, ko, zh-Hans, nl, zh-Hant, ar, he, sv, nb, da, fi, ca, hu, uk, is]
         ITSAppUsesNonExemptEncryption: false
         LSApplicationCategoryType: public.app-category.puzzle-games
         # Launch into the Shared Space as one window: the board sits beside

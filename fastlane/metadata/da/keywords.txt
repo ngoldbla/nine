@@ -1,0 +1,1 @@
+sudoku,opgaver,logik,tal,hjernetræning,hints,teknikker,shareplay,varianter,mac,ipad,watch
