@@ -18,27 +18,37 @@ emphasised word (`paintText` in `slide-canvas.tsx`, `.kenten` in
 | Path | What |
 |---|---|
 | `copy/store-copy.json` | Every label, headline and list row, in ten languages |
-| `scripts/build-decks.py` | Writes both decks into `app-store-screenshots.json` from the copy |
-| `scripts/capture-iphone.py` | Captures the eight iPhone frames per language |
+| `scripts/build-decks.py` | Writes the four decks (iPhone, iPad, Watch, Duo) into `app-store-screenshots.json` from the copy |
+| `scripts/capture-ios.py` | Captures the iPhone or iPad frames per language (`--device ipad`) |
+| `scripts/capture-watch.py` | Captures the four Watch frames per language from a seeded save slot |
+| `scripts/capture-duo.py` | Captures the four open-Duo frames per language (Device Hub set to Open by hand) |
 | `scripts/capture-mac.sh` | The Mac board mid-solve, for slide 05 |
 | `scripts/place-captures.sh` | Flattens captures into `public/screenshots/apple/` |
 | `scripts/publish.py` | Turns export zips into the committed JPEG set |
 | `public/screenshots/apple/devices`, `gamecenter` | Mac, TV, Watch captures and the achievement badges |
 
-Raw captures (`public/screenshots/apple/iphone`, `duo-*`) and `exports/` are
-regenerated, not committed.
+Raw captures (`public/screenshots/apple/iphone`, `ipad`, `watch`, `duo-*`) and
+`exports/` are regenerated, not committed.
 
 ## Rebuild
 
 ```bash
 bun install
-python3 scripts/capture-iphone.py /tmp/shots     # needs a Debug build on Nine-Store-iPhone
-zsh scripts/place-captures.sh /tmp/shots
-python3 scripts/build-decks.py --device iphone
-bun dev -- -p 3077                               # Export bundle, per device
-python3 scripts/build-decks.py --device duo-inner-landscape   # reload, Export bundle
-python3 scripts/publish.py <iphone.zip> <duo.zip>
+python3 scripts/capture-ios.py /tmp/shots/iphone         # Debug build on Nine-Store-iPhone
+NINE_KILLER_STATE=/tmp/shots/iphone/killer \
+  python3 scripts/capture-ios.py --device ipad /tmp/shots/ipad   # Debug build on Nine-Store-iPad
+python3 scripts/capture-watch.py /tmp/shots/watch        # NineWatch on Nine-Store-Watch
+DEVELOPER_DIR=/Applications/Xcode-27.1.app/Contents/Developer \
+  python3 scripts/capture-duo.py /tmp/shots/duo          # iOS 27.1 SDK build; Duo set to Open
+zsh scripts/place-captures.sh /tmp/shots/iphone          # then: ipad, watch, duo
+bun dev -- -p 3077
+python3 scripts/build-decks.py --device iphone           # reload, Export bundle; repeat per deck
+python3 scripts/publish.py --iphone <zip> --ipad <zip> --watch <zip> --duo <zip>
 ```
+
+`publish.py` replaces only the devices it is given, so one deck can be
+re-exported alone. `NINE_ONLY=3,10` makes `capture-ios.py` retake just those
+frames.
 
 ## Things that bit
 
@@ -47,8 +57,20 @@ python3 scripts/publish.py <iphone.zip> <duo.zip>
   bundled iPhone 18 Pro Max bezel.
 - **Accessibility labels are localised.** Tap targets come from
   `Localizable.xcstrings`. The Killer tier tile ignores taps in ja, ko and
-  zh-Hans, so the Killer board is opened once in English and its library is
-  seeded into every locale.
+  zh-Hans, and on the iPad in every language, so the Killer board is opened
+  once on the iPhone in English and seeded everywhere else.
+- **A channel board is two blobs.** The library holds the board; its cages are
+  in `nine.channelRules`. Seed only the library and the board opens titled
+  "Killer" with no cages drawn, as the first iPad run did; `capture-ios.py`
+  now saves and seeds both (`killer/`).
+- **The iPad shelf is mostly empty glass**, so the iPad languages slide shows
+  each locale's Technique School (frame 10) instead of its home screen.
+- **The Duo needs an iOS 27.1 SDK build.** A 27.0-SDK build runs letterboxed on
+  the open Duo: no spread, and the Debug surfaces do not open. Device Hub's
+  posture must be Open and *not* turned.
+- **The watch marks mistakes whatever the phone's setting**, so
+  `capture-watch.py` corrects the fixture's deliberate wrong digit, and
+  `simctl status_bar` does nothing on watchOS: the watch clock is real.
 - **SharePlay** cannot be called between simulators: slide 06 is Nine's
   Debug-only `-parlor-demo` session (two simulated players), the same screen a
   real call shows.

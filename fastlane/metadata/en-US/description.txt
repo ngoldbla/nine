@@ -12,6 +12,9 @@ Turn the page from classic sudoku to Thermo, where digits climb along each therm
 A COACH THAT EXPLAINS
 Stuck? Ask why a cell must be a seven and Nine walks you through the reasoning instead of just filling it in. The Technique School teaches each method on boards built to show it.
 
+SOLVE IT TOGETHER
+Start a board on a FaceTime call and everyone gets the same puzzle through SharePlay. A soft dot shows how far each friend has got, and nobody sees a time until everyone has finished.
+
 YOUR SOLVE, REPLAYED
 Finish a board and watch it play back as a comet across the grid, with a debrief of where you flew and where you slowed down. Your history keeps every solve.
 
@@ -23,7 +26,10 @@ MADE FOR EVERY SCREEN
 • Apple TV: a full-screen board across the room, with settings beside it rather than on top of it, played on the Siri Remote or a game controller.
 • Home Screen widget with a board you can play.
 
+MAKE IT YOURS
+Ten accent colors, dark-first, with light mode on iPhone, iPad and Mac.
+
 QUIET BY DESIGN
-No ads. No in-app purchases. No account. No tracking. Nothing blinks at you while you think. Dark-first, with light mode on iPhone, iPad and Mac.
+No ads. No in-app purchases. No account. No tracking. Nothing blinks at you while you think.
 
 Game Center leaderboards and achievements, iCloud sync across your devices, and full support for VoiceOver and Dynamic Type. Available in English, German, Spanish, French, Italian, Japanese, Korean, Dutch, Brazilian Portuguese and Simplified Chinese.

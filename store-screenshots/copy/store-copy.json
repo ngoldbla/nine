@@ -1,5 +1,5 @@
 {
-  "_comment": "Store screenshot copy, one block per slide, per locale. *word* marks the one emphasised word (drawn in the accent colour). \\n is an intentional line break. Feature names follow Nine's own string catalog (Thermo = Termo in es/it/pt-BR, Technique School = Technikschule, テクニック教室, …). Duo headlines stay on one line.",
+  "_comment": "Store screenshot copy, one block per slide, per locale. *word* marks the one emphasised word (drawn in the accent colour). \\n is an intentional line break. Feature names follow Nine's own string catalog (Thermo = Termo in es/it/pt-BR, Technique School = Technikschule, テクニック教室, …). Duo headlines stay on one line. The iPad deck reuses the iPhone block; Watch slides have no label line (too small at 422x514).",
   "iphone": {
     "hero": {
       "en": ["SUDOKU FOR EVERY APPLE DEVICE", "Sudoku, made\n*beautiful*."],
@@ -165,11 +165,62 @@
       "es": ["ESCUELA DE TÉCNICAS", "Aprende cada *técnica*."],
       "fr": ["ÉCOLE DES TECHNIQUES", "Apprenez chaque *technique*."],
       "it": ["SCUOLA DELLE TECNICHE", "Impara ogni *tecnica*."],
-      "ja": ["テクニック教室", "すべての*テクニック*を学ぼう。"],
+      "ja": ["テクニック教室", "*テクニック*を学ぼう。"],
       "ko": ["기법 교실", "모든 *기법*을 배우세요."],
       "nl": ["TECHNIEKSCHOOL", "Leer elke *techniek*."],
       "pt-BR": ["ESCOLA DE TÉCNICAS", "Aprenda cada *técnica*."],
       "zh-Hans": ["技巧学堂", "掌握每一种*技巧*。"]
+    }
+  }
+,
+  "watch": {
+    "hero": {
+      "en": ["", "Sudoku on\nyour *wrist*."],
+      "de": ["", "Sudoku am\n*Handgelenk*."],
+      "es": ["", "Sudoku en\ntu *muñeca*."],
+      "fr": ["", "Le sudoku à\nvotre *poignet*."],
+      "it": ["", "Sudoku\nal *polso*."],
+      "ja": ["", "*手首*で\n数独。"],
+      "ko": ["", "*손목* 위의\n스도쿠."],
+      "nl": ["", "Sudoku om\nje *pols*."],
+      "pt-BR": ["", "Sudoku no\nseu *pulso*."],
+      "zh-Hans": ["", "*手腕*上的\n数独。"]
+    },
+    "box": {
+      "en": ["", "One box\nat a *time*."],
+      "de": ["", "Block für\n*Block*."],
+      "es": ["", "Caja a\n*caja*."],
+      "fr": ["", "Bloc par\n*bloc*."],
+      "it": ["", "Blocco per\n*blocco*."],
+      "ja": ["", "*ボックス*\nごとに解く。"],
+      "ko": ["", "*박스*\n하나씩."],
+      "nl": ["", "Blok voor\n*blok*."],
+      "pt-BR": ["", "Bloco a\n*bloco*."],
+      "zh-Hans": ["", "一次一个\n*区块*。"]
+    },
+    "solved": {
+      "en": ["", "Celebrate\nevery *win*."],
+      "de": ["", "Feiere jeden\n*Erfolg*."],
+      "es": ["", "Celebra cada\n*victoria*."],
+      "fr": ["", "Fêtez chaque\n*victoire*."],
+      "it": ["", "Festeggia ogni\n*vittoria*."],
+      "ja": ["", "すべての勝利を\n*祝おう*。"],
+      "ko": ["", "모든 승리를\n*축하하세요*."],
+      "nl": ["", "Vier elke\n*overwinning*."],
+      "pt-BR": ["", "Comemore cada\n*vitória*."],
+      "zh-Hans": ["", "为每次胜利\n*庆祝*。"]
+    },
+    "home": {
+      "en": ["", "Pick up\n*anytime*."],
+      "de": ["", "Jederzeit\n*weiterspielen*."],
+      "es": ["", "Sigue cuando\n*quieras*."],
+      "fr": ["", "Reprenez à\ntout *moment*."],
+      "it": ["", "Riprendi\nquando *vuoi*."],
+      "ja": ["", "*いつでも*\n続きから。"],
+      "ko": ["", "*언제든*\n이어서."],
+      "nl": ["", "Speel *altijd*\nverder."],
+      "pt-BR": ["", "Continue\nquando *quiser*."],
+      "zh-Hans": ["", "*随时*\n接着玩。"]
     }
   }
 }

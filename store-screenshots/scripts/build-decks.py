@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 """Write Nine's store decks into app-store-screenshots.json from copy/store-copy.json.
 
-    python3 scripts/build-decks.py [--device iphone|duo-inner-landscape]
+    python3 scripts/build-decks.py [--device iphone|ipad|watchos|duo-inner-landscape]
 
-Two decks, ten locales each:
+Four decks, ten locales each:
   iphone               9 slides, 1320x2868 (the 6.9" set; ASC scales the rest)
+  ipad                 the same 9 slides, 2064x2752 (13" iPad)
+  watchos              4 slides, 422x514 (Apple Watch Ultra 3; ASC scales the rest)
   duo-inner-landscape  4 slides, 2853x2007 (iPhone Duo, open)
 
 Copy lives in copy/store-copy.json; this file owns layout only. `--device`
@@ -21,7 +23,9 @@ LOCALES = ["en", "de", "es", "fr", "it", "ja", "ko", "nl", "pt-BR", "zh-Hans"]
 
 A = "/screenshots/apple/"
 SHOT = A + "iphone/{locale}/%02d.png"
-OPEN = A + "duo-inner/landscape/%02d.png"      # English only: see README
+IPAD = A + "ipad/{locale}/%02d.png"
+WATCH = A + "watch/{locale}/%02d.png"
+OPEN = A + "duo-inner/landscape/{locale}/%02d.png"   # scripts/capture-duo.py
 FOLDED = A + "duo-outer/portrait/%02d.png"
 
 
@@ -55,38 +59,79 @@ def framed(id, shot, frame, fw, fh, screen, x, y, width, z):
             img(id + "-frame", "/frames/%s.png" % frame, x, y, round(width), round(fh * k), z=z + 1)]
 
 
+BADGES = ["achievement-solve-first", "achievement-solve-ten", "achievement-solve-fifty",
+          "achievement-sharp-first", "achievement-swift", "leaderboard-points"]
+
+
+def closer_rows(x, y0, width, pitch, scale=1.0):
+    """The closing slide's list: a glacier key over a white value, per row."""
+    rows = COPY["closerRows"]
+    text = []
+    for i in range(len(rows["en"])):
+        y = y0 + i * pitch
+        text.append({"id": "k%d" % i, "text": {l: rows[l][i][0] for l in LOCALES},
+                     "transform": t(x, y, width, round(50 * scale)), "fontSize": round(34 * scale),
+                     "fontWeight": 600, "color": "#54ADFA", "align": "center"})
+        text.append({"id": "v%d" % i, "text": {l: rows[l][i][1] for l in LOCALES},
+                     "transform": t(x, y + round(54 * scale), width, round(90 * scale)),
+                     "fontSize": round(64 * scale), "fontWeight": 500, "color": "#F5F5F7",
+                     "align": "center"})
+    return text
+
+
+def extra(transforms, key):
+    return {"transforms": transforms[key]} if transforms and key in transforms else {}
+
+
+def ios_deck(shot, devices, badge_imgs, text, top, languages=(7, 8), transforms=None):
+    """The nine iPhone slides; the iPad deck is the same story in its own captures."""
+    return [
+        slide("iphone", "hero", "hero", shot % 1),
+        slide("iphone", "coach", "device-bottom", shot % 2, **extra(transforms, "coach")),
+        slide("iphone", "variants", "hero", shot % 3),
+        slide("iphone", "colors", "two-devices", shot % 4, screenshotSecondary=shot % 5, inverted=True),
+        slide("iphone", "devices", "no-device", transforms={"caption": top}, imageElements=devices),
+        # Two players on one puzzle: Nine's -parlor-demo session, dark and light.
+        slide("iphone", "together", "two-devices", shot % 6, screenshotSecondary=shot % 9),
+        slide("iphone", "gamecenter", "no-device", transforms={"caption": top}, imageElements=badge_imgs),
+        # The locale's own screen in front of another language's.
+        slide("iphone", "languages", "two-devices", shot % languages[0],
+              screenshotSecondary=shot % languages[1]),
+        slide("iphone", "closer", "no-device", transforms={"caption": top}, textElements=text),
+    ]
+
+
 def iphone_deck():
     devices = (framed("mac", "devices/mac.png", "mac", 3540, 2300, (329, 218, 2880, 1864), 40, 880, 1240, 1)
                + framed("tv", "devices/tv.png", "tv", 4300, 2780, (103, 119, 3840, 2160), 40, 1760, 1000, 3)
                + framed("watch", "devices/watch.png", "watch", 600, 960, (89, 223, 422, 514), 900, 2060, 400, 5))
-    badges = ["achievement-solve-first", "achievement-solve-ten", "achievement-solve-fifty",
-              "achievement-sharp-first", "achievement-swift", "leaderboard-points"]
     badge_imgs = [img("b%d" % i, A + "gamecenter/%s.png" % b,
-                      150 + (i % 2) * 540, 900 + (i // 2) * 560, 480, 480) for i, b in enumerate(badges)]
-    rows = COPY["closerRows"]
-    text = []
-    for i in range(len(rows["en"])):
-        y = 1000 + i * 225
-        text.append({"id": "k%d" % i, "text": {l: rows[l][i][0] for l in LOCALES},
-                     "transform": t(120, y, 1080, 50), "fontSize": 34, "fontWeight": 600,
-                     "color": "#54ADFA", "align": "center"})
-        text.append({"id": "v%d" % i, "text": {l: rows[l][i][1] for l in LOCALES},
-                     "transform": t(120, y + 54, 1080, 90), "fontSize": 64, "fontWeight": 500,
-                     "color": "#F5F5F7", "align": "center"})
-    top = t(100, 260, 1120, 560)
-    return [
-        slide("iphone", "hero", "hero", SHOT % 1),
-        slide("iphone", "coach", "device-bottom", SHOT % 2),
-        slide("iphone", "variants", "hero", SHOT % 3),
-        slide("iphone", "colors", "two-devices", SHOT % 4, screenshotSecondary=SHOT % 5, inverted=True),
-        slide("iphone", "devices", "no-device", transforms={"caption": top}, imageElements=devices),
-        # Two players on one puzzle: Nine's -parlor-demo session, dark and light.
-        slide("iphone", "together", "two-devices", SHOT % 6, screenshotSecondary=SHOT % 9),
-        slide("iphone", "gamecenter", "no-device", transforms={"caption": top}, imageElements=badge_imgs),
-        # The locale's own home screen in front of another language's (08).
-        slide("iphone", "languages", "two-devices", SHOT % 7, screenshotSecondary=SHOT % 8),
-        slide("iphone", "closer", "no-device", transforms={"caption": top}, textElements=text),
-    ]
+                      150 + (i % 2) * 540, 900 + (i // 2) * 560, 480, 480) for i, b in enumerate(BADGES)]
+    return ios_deck(SHOT, devices, badge_imgs, closer_rows(120, 1000, 1080, 225),
+                    t(100, 260, 1120, 560))
+
+
+def ipad_deck():
+    """2064x2752: wider than the phone, so the badges go three abreast."""
+    devices = (framed("mac", "devices/mac.png", "mac", 3540, 2300, (329, 218, 2880, 1864), 100, 820, 1500, 1)
+               + framed("tv", "devices/tv.png", "tv", 4300, 2780, (103, 119, 3840, 2160), 560, 1660, 1400, 3)
+               + framed("watch", "devices/watch.png", "watch", 600, 960, (89, 223, 422, 514), 1500, 760, 460, 5))
+    badge_imgs = [img("b%d" % i, A + "gamecenter/%s.png" % b,
+                      192 + (i % 3) * 590, 1000 + (i // 3) * 640, 500, 500) for i, b in enumerate(BADGES)]
+    # Coach: the iPad drops below the two-line headline instead of covering it.
+    coach = {"device": t(232, 900, 1600, 2133, z=2)}
+    return ios_deck(IPAD, devices, badge_imgs, closer_rows(132, 860, 1800, 262, scale=1.45),
+                    t(160, 200, 1744, 560), languages=(10, 11), transforms={"coach": coach})
+
+
+def watch_deck():
+    """422x514. No label line: at watch size the headline is all the room there is.
+
+    The watch is drawn large, its lower band running off the bottom edge, so the
+    screen gets half the canvas width and the board's digits stay legible."""
+    big = {"device": t(66, 150, 290, 464, z=2)}
+    return [slide("watch", key, "hero", WATCH % n, transforms=big)
+            for n, key in enumerate(("hero", "box", "solved", "home"), 1)]
 
 
 def duo_deck():
@@ -100,7 +145,7 @@ def duo_deck():
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--device", default="iphone", choices=("iphone", "duo-inner-landscape"))
+    parser.add_argument("--device", default="iphone", choices=("iphone", "ipad", "watchos", "duo-inner-landscape"))
     args = parser.parse_args()
     state = json.load(open(PROJECT))
     state.update(appName="Nine", themeId="nine-glass", fontId="system-sans",
@@ -111,8 +156,10 @@ def main():
                             tilt=0, headlineWeight=600, headlineScale=1.25, headlineCase="as-typed",
                             captionAlign="auto"))
     state["slidesByDevice"]["iphone"] = iphone_deck()
+    state["slidesByDevice"]["ipad"] = ipad_deck()
+    state["slidesByDevice"]["watchos"] = watch_deck()
     state["slidesByDevice"]["duo-inner-landscape"] = duo_deck()
-    for deck in ("iphone", "duo-inner-landscape"):
+    for deck in ("iphone", "ipad", "watchos", "duo-inner-landscape"):
         state.setdefault("crossScreenMockupsByDevice", {})[deck] = []
     with open(PROJECT, "w") as handle:
         json.dump(state, handle, indent=2, ensure_ascii=False)

@@ -18,10 +18,15 @@ public/fonts/imported/*
 .e2e/
 
 
-# Nine: raw simulator captures are regenerated (scripts/capture-iphone.py,
+# Nine: raw simulator captures are regenerated (scripts/capture-ios.py, capture-watch.py,
 # scripts/place-captures.sh), and the upload-ready set is committed as JPEG in
 # ../fastlane/screenshots/marketing — neither belongs here as PNG.
 public/screenshots/apple/iphone/
+public/screenshots/apple/ipad/
+public/screenshots/apple/watch/
 public/screenshots/apple/duo-inner/
 public/screenshots/apple/duo-outer/
 exports/
+
+# Python bytecode from the scripts
+__pycache__/

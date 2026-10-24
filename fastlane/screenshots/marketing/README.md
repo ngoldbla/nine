@@ -1,69 +1,71 @@
 # Store screenshots — designed set (Nine 1.3 imagery)
 
-The advertising screenshots for the next App Store update: captioned slides
-built in the editor in `store-screenshots/`, one folder per App Store Connect
-locale. Unlike `screenshots/ios/`, which `store_screenshots_capture` empties and
-refills with plain simulator frames, this folder is committed and only changes
-when `store-screenshots/scripts/publish.py` rewrites it.
+The iOS App Store screenshots: captioned slides built in the editor in
+`store-screenshots/`, one folder per App Store Connect locale. This is what
+deliver uploads for iOS (`STORE_SHOT_DIRS` in the Fastfile); the plain frames
+`store_screenshots_capture` leaves in `screenshots/ios/` no longer go up. The
+folder is committed and only changes when `store-screenshots/scripts/publish.py`
+rewrites it.
 
 | Files | Display | Size |
 |---|---|---|
 | `01-iphone-hero.jpg` … `09-iphone-closer.jpg` | 6.9" iPhone (`APP_IPHONE_67`) | 1320×2868 |
-| `21-duo-*.jpg` | iPhone Duo, open (`APP_IPHONE_DUO`) | 2853×2007 |
+| `11-ipad-hero.jpg` … `19-ipad-closer.jpg` | 13" iPad (`APP_IPAD_PRO_3GEN_129`) | 2064×2752 |
+| `21-duo-hero.jpg` … `24-duo-school.jpg` | iPhone Duo, open (`APP_IPHONE_DUO`) | 2853×2007 |
+| `31-watch-hero.jpg` … `34-watch-home.jpg` | Apple Watch Ultra (`APP_WATCH_ULTRA`) | 422×514 |
 
 JPEG at quality 92 rather than PNG (App Store Connect takes both): the PNGs
 are ~1.4 MB a slide, and this repository's history cannot be rewritten to drop
-them later. App Store Connect scales the 6.9" set to the smaller iPhones.
+them later. App Store Connect scales each set to the smaller sizes of its display.
 
 ## The slides
 
 | # | Feature | en-US headline |
 |---|---|---|
-| 01 | The board | Sudoku, made **beautiful**. |
-| 02 | Coaching | You've got **this**. |
-| 03 | Classic, Thermo, Killer | Three ways to **play**. |
-| 04 | Ten accent colours | Make it **yours**. |
-| 05 | iPhone, iPad, Mac, Apple TV, Watch | At home on **every** screen. |
-| 06 | SharePlay on FaceTime | Solve it **together**. |
-| 07 | Game Center achievements | Celebrate every **win**. |
-| 08 | Ten languages | Speaks **your** language. |
-| 09 | Everything, as a list | Everything you'll **love**. |
+| 01 / 11 | The board | Sudoku, made **beautiful**. |
+| 02 / 12 | Coaching | You've got **this**. |
+| 03 / 13 | Classic, Thermo, Killer | Three ways to **play**. |
+| 04 / 14 | Ten accent colours | Make it **yours**. |
+| 05 / 15 | iPhone, iPad, Mac, Apple TV, Watch | At home on **every** screen. |
+| 06 / 16 | SharePlay on FaceTime | Solve it **together**. |
+| 07 / 17 | Game Center achievements | Celebrate every **win**. |
+| 08 / 18 | Ten languages | Speaks **your** language. |
+| 09 / 19 | Everything, as a list | Everything you'll **love**. |
 | 21 | Duo: the board | Sudoku, made **beautiful**. |
-| 22 | Duo: coaching *(en-US only)* | You've got **this**. |
+| 22 | Duo: coaching | You've got **this**. |
 | 23 | Duo: folded and open | One board, **both** screens. |
-| 24 | Duo: Technique School *(en-US only)* | Learn every **technique**. |
+| 24 | Duo: Technique School | Learn every **technique**. |
+| 31 | Watch: the board | Sudoku on your **wrist**. |
+| 32 | Watch: one box under the lens | One box at a **time**. |
+| 33 | Watch: solved | Celebrate every **win**. |
+| 34 | Watch: home | Pick up **anytime**. |
 
-Copy for all ten languages is in `store-screenshots/copy/store-copy.json`.
+The iPad tells the iPhone's story in iPad captures (`11`–`19` reuse the iPhone
+copy). Copy for all ten languages is in `store-screenshots/copy/store-copy.json`.
 
 ## What is and is not localised
 
-- **iPhone (01–09):** every app screen was captured in that language, except
-  slide 05's Mac, Apple TV and Watch, which are the English captures
-  (nearly all digits) and slide 07's Game Center badges (no text).
-- **Duo (21–24):** headlines are localised; the screens are the English
-  captures in `screenshots/ios-duo/`, because no tool can unfold the Duo
-  simulator. So 22 and 24, whose screens are English text, ship for en-US only,
-  and the Duo frames still show mistake marking (a red 7). Reshoot with the
-  posture set to Open and re-run the pipeline below to fix both.
-- The Duo board header ("Steady") and Japanese/German home screens on slide 08
-  are real app text in the app's own translations.
-
-## Not here yet
-
-- iPad 13" and Apple Watch sets, which `store_check` requires for iOS.
-- Store listing text for the nine other locales: `metadata/` has en-US only.
-- Uploading: nothing points deliver at this folder yet. Either upload these by
-  hand in App Store Connect, or add `marketing` to `COMMITTED_SHOT_DIRS` in the
-  Fastfile in place of the plain `ios` capture (and drop `ios-duo`, whose
-  frames these replace).
+- **iPhone and iPad:** every app screen was captured in that language, except
+  the Mac, Apple TV and Watch on the devices slide, which are the English
+  captures (nearly all digits), and the Game Center badges (no text). The
+  iPhone languages slide shows the locale's home screen in front of another
+  language's; the iPad's shows each one's Technique School, because the iPad
+  shelf is mostly empty glass.
+- **Duo:** the open frames were captured in each language with mistake marking
+  off. The folded board on slide 23 is the committed English frame in
+  `screenshots/ios-duo/` (it shows no text).
+- **Watch:** every frame in its language; the watch clock is the real time,
+  because `simctl status_bar` does nothing on watchOS.
 
 ## Rebuilding
 
-From `store-screenshots/` (see its `STORE-ART.md`):
+See `store-screenshots/STORE-ART.md`. In short: capture with
+`capture-ios.py` (iPhone, then `--device ipad`), `capture-watch.py` and
+`capture-duo.py`, file each with `place-captures.sh`, export each deck from the
+editor, then
 
 ```bash
-python3 scripts/capture-iphone.py /tmp/shots         # ~35 min, all ten languages
-zsh scripts/place-captures.sh /tmp/shots
-python3 scripts/build-decks.py --device iphone        # then export in the editor
-python3 scripts/publish.py <iphone.zip> <duo.zip>
+python3 scripts/publish.py --iphone <zip> --ipad <zip> --watch <zip> --duo <zip>
 ```
+
+Any one device can be republished alone.
