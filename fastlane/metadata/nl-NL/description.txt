@@ -32,4 +32,4 @@ Tien accentkleuren, donker voorop, met lichte modus op iPhone, iPad en Mac.
 RUSTIG ONTWORPEN
 Geen advertenties. Geen in-app-aankopen. Geen account. Geen tracking. Niets knippert terwijl je nadenkt.
 
-Game Center-ranglijsten en -prestaties, iCloud-synchronisatie tussen je apparaten en volledige ondersteuning voor VoiceOver en dynamische tekst. Beschikbaar in het Nederlands, Engels, Duits, Spaans, Frans, Italiaans, Japans, Koreaans, Braziliaans-Portugees, vereenvoudigd Chinees, traditioneel Chinees, Arabisch, Hebreeuws, Zweeds, Noors, Deens en Fins.
+Game Center-ranglijsten en -prestaties, iCloud-synchronisatie tussen je apparaten en volledige ondersteuning voor VoiceOver en dynamische tekst. Beschikbaar in het Nederlands, Engels, Duits, Spaans, Frans, Italiaans, Japans, Koreaans, Braziliaans-Portugees, vereenvoudigd Chinees, traditioneel Chinees, Arabisch, Hebreeuws, Zweeds, Noors, Deens, Fins, Catalaans, Hongaars en Oekraïens.

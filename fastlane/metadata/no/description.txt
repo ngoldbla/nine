@@ -32,4 +32,4 @@ Ti aksentfarger, mørkt først, med lys modus på iPhone, iPad og Mac.
 STILLE VED DESIGN
 Ingen annonser. Ingen kjøp i appen. Ingen konto. Ingen sporing. Ingenting blinker mens du tenker.
 
-Ledertavler og prestasjoner i Game Center, iCloud-synkronisering mellom enhetene dine og full støtte for VoiceOver og dynamisk tekst. Tilgjengelig på norsk bokmål, engelsk, tysk, spansk, fransk, italiensk, japansk, koreansk, nederlandsk, brasiliansk portugisisk, forenklet kinesisk, tradisjonell kinesisk, arabisk, hebraisk, svensk, dansk og finsk.
+Ledertavler og prestasjoner i Game Center, iCloud-synkronisering mellom enhetene dine og full støtte for VoiceOver og dynamisk tekst. Tilgjengelig på norsk bokmål, engelsk, tysk, spansk, fransk, italiensk, japansk, koreansk, nederlandsk, brasiliansk portugisisk, forenklet kinesisk, tradisjonell kinesisk, arabisk, hebraisk, svensk, dansk, finsk, katalansk, ungarsk og ukrainsk.

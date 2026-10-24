@@ -32,4 +32,4 @@ Ti accentfarver, mørkt først, med lys tilstand på iPhone, iPad og Mac.
 STILLE FRA DESIGNETS HÅND
 Ingen reklamer. Ingen køb i appen. Ingen konto. Ingen sporing. Intet blinker ad dig, mens du tænker.
 
-Ranglister og præstationer i Game Center, iCloud-synkronisering mellem dine enheder og fuld understøttelse af VoiceOver og dynamisk tekst. Fås på dansk, engelsk, tysk, spansk, fransk, italiensk, japansk, koreansk, hollandsk, brasiliansk portugisisk, forenklet kinesisk, traditionelt kinesisk, arabisk, hebraisk, svensk, norsk og finsk.
+Ranglister og præstationer i Game Center, iCloud-synkronisering mellem dine enheder og fuld understøttelse af VoiceOver og dynamisk tekst. Fås på dansk, engelsk, tysk, spansk, fransk, italiensk, japansk, koreansk, hollandsk, brasiliansk portugisisk, forenklet kinesisk, traditionelt kinesisk, arabisk, hebraisk, svensk, norsk, finsk, catalansk, ungarsk og ukrainsk.

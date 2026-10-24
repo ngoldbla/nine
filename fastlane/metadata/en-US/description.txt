@@ -32,4 +32,4 @@ Ten accent colors, dark-first, with light mode on iPhone, iPad and Mac.
 QUIET BY DESIGN
 No ads. No in-app purchases. No account. No tracking. Nothing blinks at you while you think.
 
-Game Center leaderboards and achievements, iCloud sync across your devices, and full support for VoiceOver and Dynamic Type. Available in English, German, Spanish, French, Italian, Japanese, Korean, Dutch, Brazilian Portuguese, Simplified Chinese, Traditional Chinese, Arabic, Hebrew, Swedish, Norwegian, Danish and Finnish.
+Game Center leaderboards and achievements, iCloud sync across your devices, and full support for VoiceOver and Dynamic Type. Available in English, German, Spanish, French, Italian, Japanese, Korean, Dutch, Brazilian Portuguese, Simplified Chinese, Traditional Chinese, Arabic, Hebrew, Swedish, Norwegian, Danish, Finnish, Catalan, Hungarian and Ukrainian.

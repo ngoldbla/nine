@@ -32,4 +32,4 @@ Dieci colori d’accento, scuro per primo, con la modalità chiara su iPhone, iP
 TRANQUILLO PER SCELTA
 Niente pubblicità. Niente acquisti in-app. Nessun account. Nessun tracciamento. Niente lampeggia mentre pensi.
 
-Classifiche e obiettivi di Game Center, sincronizzazione iCloud tra i tuoi dispositivi e pieno supporto per VoiceOver e testo dinamico. Disponibile in italiano, inglese, tedesco, spagnolo, francese, giapponese, coreano, olandese, portoghese brasiliano, cinese semplificato, cinese tradizionale, arabo, ebraico, svedese, norvegese, danese e finlandese.
+Classifiche e obiettivi di Game Center, sincronizzazione iCloud tra i tuoi dispositivi e pieno supporto per VoiceOver e testo dinamico. Disponibile in italiano, inglese, tedesco, spagnolo, francese, giapponese, coreano, olandese, portoghese brasiliano, cinese semplificato, cinese tradizionale, arabo, ebraico, svedese, norvegese, danese, finlandese, catalano, ungherese e ucraino.

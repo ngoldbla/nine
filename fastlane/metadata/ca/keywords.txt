@@ -1,0 +1,1 @@
+sudoku,trencaclosques,lògica,números,cervell,pistes,tècniques,shareplay,variants,mac

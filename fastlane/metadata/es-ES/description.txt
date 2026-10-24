@@ -32,4 +32,4 @@ Diez colores de acento, oscuro por defecto, con modo claro en iPhone, iPad y Mac
 TRANQUILO POR DISEÑO
 Sin anuncios. Sin compras dentro de la app. Sin cuenta. Sin rastreo. Nada parpadea mientras piensas.
 
-Clasificaciones y logros de Game Center, sincronización con iCloud entre tus dispositivos y compatibilidad total con VoiceOver y Texto dinámico. Disponible en español, inglés, alemán, francés, italiano, japonés, coreano, neerlandés, portugués de Brasil, chino simplificado, chino tradicional, árabe, hebreo, sueco, noruego, danés y finés.
+Clasificaciones y logros de Game Center, sincronización con iCloud entre tus dispositivos y compatibilidad total con VoiceOver y Texto dinámico. Disponible en español, inglés, alemán, francés, italiano, japonés, coreano, neerlandés, portugués de Brasil, chino simplificado, chino tradicional, árabe, hebreo, sueco, noruego, danés, finés, catalán, húngaro y ucraniano.

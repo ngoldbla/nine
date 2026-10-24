@@ -32,4 +32,4 @@ Tio accentfärger, mörkt först, med ljust läge på iPhone, iPad och Mac.
 TYST I SIN DESIGN
 Inga annonser. Inga köp i appen. Inget konto. Ingen spårning. Ingenting blinkar åt dig medan du tänker.
 
-Topplistor och prestationer i Game Center, iCloud-synkronisering mellan dina enheter och fullt stöd för VoiceOver och dynamisk text. Finns på svenska, engelska, tyska, spanska, franska, italienska, japanska, koreanska, nederländska, brasiliansk portugisiska, förenklad kinesiska, traditionell kinesiska, arabiska, hebreiska, norska, danska och finska.
+Topplistor och prestationer i Game Center, iCloud-synkronisering mellan dina enheter och fullt stöd för VoiceOver och dynamisk text. Finns på svenska, engelska, tyska, spanska, franska, italienska, japanska, koreanska, nederländska, brasiliansk portugisiska, förenklad kinesiska, traditionell kinesiska, arabiska, hebreiska, norska, danska, finska, katalanska, ungerska och ukrainska.
