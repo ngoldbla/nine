@@ -70,14 +70,18 @@ public enum CloudEntitlement {
     /// Whether the running executable is entitled to build a `CKContainer`.
     /// Read once: a binary's entitlements cannot change under it.
     public static let thisProcessGrantsCloudKit: Bool = {
-        #if canImport(MachO)
+        #if canImport(MachO) && !os(watchOS)
         return executableEntitlements().contains(where: grantsCloudKit(plist:))
         #else
         return false
         #endif
     }()
 
-    #if canImport(MachO)
+    // Not on watchOS: an Apple Watch is arm64_32, where `getsectiondata` takes a
+    // 32-bit `mach_header`, so this 64-bit reader does not compile for the
+    // device (the watch simulator is arm64 and does). The watch never builds a
+    // `CKContainer` anyway: AppModel is kept off its target.
+    #if canImport(MachO) && !os(watchOS)
     /// Every entitlements plist the main executable carries: the simulator
     /// section first, then the code signature's.
     static func executableEntitlements() -> [Data] {
