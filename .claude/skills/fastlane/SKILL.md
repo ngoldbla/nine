@@ -13,8 +13,12 @@ Two documents are the source of truth; read the one you need before acting:
 
 **Current scope:** iOS + macOS at $4.99 since 1.1, with the watch app embedded
 in the iOS app; **Apple TV joins the App Store with 1.2** (owner, 2026-10-23),
-and iOS 1.2 ships the iPhone Duo set. `RELEASE_PLATFORMS` is `ios tvos mac`.
-Store copy may describe Apple TV and the Duo; the Parlor stays unadvertised.
+and iOS 1.2 ships the iPhone Duo set. **1.3** (owner, 2026-10-24) ships the
+store in ten languages on all three; Vision Pro is not in it. `RELEASE_PLATFORMS`
+is `ios tvos mac`.
+Store copy may describe Apple TV, the Duo and, since the owner's call of
+2026-10-24, the Parlor (SharePlay, "Play together"). The listing is in ten
+locales (`fastlane/metadata/<locale>/`).
 
 Lanes live in `fastlane/Fastfile` under `platform :ios`, so they are invoked as
 `bundle exec fastlane ios <lane>`. Every lane takes `platform:tvos|ios|mac`.
@@ -48,14 +52,16 @@ the exact command to the user.
 
 ## Editing the store listing
 
-- Copy is in `fastlane/metadata/en-US/*.txt`; app-wide fields in
+- Copy is in `fastlane/metadata/<locale>/*.txt`, en-US first and the other
+  nine translated from it in Nine's own terms (`Localizable.xcstrings`); app-wide fields in
   `fastlane/metadata/*.txt`. Limits: name and subtitle 30, promotional text 170,
   description and release notes 4000, keywords 100 **bytes**, comma-separated
   with no spaces, no words already in the name. `store_check` enforces them.
 - Copy must describe the build being shipped. The daily, the streak, the weekly
   table and the daily widgets were removed in #58 — never advertise them. The
-  Parlor (PRD-28) is merge-blocked on provisioning — do not advertise it until
-  it ships. When unsure whether a feature is live, check `nine/PROGRAM-2.0.md`'s
+  Parlor (PRD-28) ships with the Group Activities entitlement and is advertised
+  (owner, 2026-10-24); say what it does (same board, a dot per friend, no times
+  until all finish), not more. When unsure whether a feature is live, check `nine/PROGRAM-2.0.md`'s
   status column and `nine/DEVIATIONS.md`, not a PRD's intent.
 - Art direction applies to screenshots too: dark-first, the board owns the
   frame, no transient chrome. Captures come from the seeded `ninestate.py`
@@ -77,15 +83,22 @@ purpose.
 
 ## Screenshots
 
+**What iOS uploads is the designed set** in `fastlane/screenshots/marketing/`
+(captioned iPhone, iPad, Watch and Duo slides, ten locales, committed as JPEG):
+`STORE_SHOT_DIRS` in the Fastfile points deliver at it. It is made in the
+editor in `store-screenshots/`; that folder's `STORE-ART.md` and the marketing
+README say how to rebuild it. tvOS and Mac upload theirs from `marketing-tvos/`
+and `marketing-mac/`; `store_check` lets a locale without a folder fall back to
+en-US as ASC does.
+
 `store_screenshots_capture` (macOS) runs `nine/scripts/shotlist.py` with its
 `iphone-store` / `ipad-store` devices and copies the frames named in
-`STORE_SHOTS` into `fastlane/screenshots/ios/en-US/` as `NN-device-scene-appearance.png`.
-To change what the page shows, edit `STORE_SHOTS`; to add a scene, add it to
-`SCENES` in `shotlist.py` (it is the critic lane's list too). tvOS, Mac and Watch
-sets are manual — sizes and tools are in `RELEASE.md`. PNGs are gitignored, except the
-iPhone Duo set in `fastlane/screenshots/ios-duo/en-US/` — committed because
-posture needs a person, and kept out of `ios/` because deliver has no Duo
-display type yet (`RELEASE.md`, "iPhone Duo").
+`STORE_SHOTS` into `fastlane/screenshots/ios/en-US/` as `NN-device-scene-appearance.png`:
+plain frames, no longer uploaded, kept as raw material and a quick check. To add
+a scene, add it to `SCENES` in `shotlist.py` (it is the critic lane's list too).
+tvOS and Mac sets are manual — sizes and tools are in `RELEASE.md`. PNGs are
+gitignored, except the English iPhone Duo frames in `fastlane/screenshots/ios-duo/en-US/`
+(posture needs a person) and the tvOS set.
 
 ## Traps
 

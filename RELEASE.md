@@ -18,6 +18,14 @@ iPhone Duo spread (PRD-37) with its own screenshot set. `RELEASE_PLATFORMS` is
 `ios tvos mac`. The tvOS record's first version goes up as 1.2, to match the
 binary; ASC takes no release notes on a first version and deliver skips them.
 
+**1.3 (owner decision 2026-10-24): the store in ten languages.** iOS, tvOS and
+Mac ship the layered icon, the KVS-merge sync fixes and the designed screenshot
+sets for every platform in all ten locales, with listing text in each.
+Vision Pro is not in it (not ready). On 2026-10-24 ASC held iOS 1.2 Ready for
+Sale, tvOS 1.2 Waiting for Review and Mac **1.1** Ready for Sale, so the Mac
+goes from 1.1 to 1.3 and its release notes say what 1.2 brought; tvOS can only
+open 1.3 once its 1.2 review is done. The Vision target's version stays 1.2.
+
 The binary never goes through these lanes. `beta` uploads it; `release` attaches
 it **by build number**, so the only pipeline that signs is the one already
 proven by TestFlight.
@@ -90,37 +98,33 @@ the number of the build that was tested. Use the number TestFlight shows
 
 | Platform | Required set | Pixel size | How it is made |
 |---|---|---|---|
-| iOS | 6.9" iPhone | 1320×2868 | `store_screenshots_capture` (iPhone 17 Pro Max simulator) |
-| iOS | 13" iPad | 2064×2752 | `store_screenshots_capture` (iPad Pro 13-inch (M5) simulator) |
-| iOS | Apple Watch | 422×514 (Ultra 3, 49mm) or 416×496 (Series 11, 46mm) | manual — see below |
-| *with Duo support* iOS | iPhone Duo, open (inner) + folded (outer) | 2853×2007 + 1398×2034 | manual, kept in git — `fastlane/screenshots/ios-duo/en-US/`, see **iPhone Duo** below |
-| macOS | Mac | 2880×1800 (or 2560×1600, 1440×900, 1280×800) | `scripts/mac-store-shots.sh` (Release build, seeded state; park the pointer at the left edge first) |
-| tvOS | Apple TV | 1920×1080 (or 3840×2160) | manual, kept in git — `fastlane/screenshots/tvos/en-US/`, driven with `XCUIRemote` from a clean install (see **Apple TV** below) |
+| iOS | 6.9" iPhone | 1320×2868 | designed set, `fastlane/screenshots/marketing/` — see below |
+| iOS | 13" iPad | 2064×2752 | designed set, as above |
+| iOS | Apple Watch | 422×514 (Ultra 3, 49mm) | designed set, as above |
+| *with Duo support* iOS | iPhone Duo, open (inner) | 2853×2007 | designed set, as above; raw open frames need a person at Device Hub (**iPhone Duo** below) |
+| macOS | Mac | 2880×1800 | designed set, `fastlane/screenshots/marketing-mac/`; raw frames from `scripts/mac-store-shots.sh --out` (Release build, seeded state, a 2× screen; the pointer off the window) |
+| tvOS | Apple TV | 1920×1080 | designed set, `fastlane/screenshots/marketing-tvos/`; raw frames from `store-screenshots/scripts/capture-tv.py` (seeded, driven by the Debug `-NineRemoteInjector`) |
 
-**Apple Watch, by hand** (one size is enough; ASC scales it to the others):
-
-```bash
-cd nine && xcodegen generate
-xcrun simctl create Nine-Store-Watch "Apple Watch Ultra 3 (49mm)"   # once; prints a udid
-xcrun simctl boot Nine-Store-Watch && open -a Simulator
-xcodebuild -project Nine.xcodeproj -scheme NineWatch \
-  -destination 'platform=watchOS Simulator,name=Nine-Store-Watch' \
-  -derivedDataPath .build/watch build CODE_SIGNING_ALLOWED=NO
-xcrun simctl install Nine-Store-Watch "$(find .build/watch/Build/Products -name 'NineWatch.app' -maxdepth 3 | head -1)"
-xcrun simctl launch Nine-Store-Watch com.couchsuite.nine.watchkitapp
-# drive it in the Simulator window, then for each frame:
-xcrun simctl io Nine-Store-Watch screenshot ../fastlane/screenshots/ios/en-US/20-watch-board.png
-```
+**iOS uploads the designed set.** Captioned iPhone 6.9", 13" iPad, Apple Watch
+and iPhone Duo slides in all ten languages are committed as JPEG in
+`fastlane/screenshots/marketing/<locale>/`, made in the editor in
+`store-screenshots/` (its `STORE-ART.md`; the folder's README has the rebuild).
+`STORE_SHOT_DIRS` in the Fastfile points deliver at that folder alone, so the
+plain `store_screenshots_capture` frames in `screenshots/ios/` no longer go up.
+The Watch frames come from `store-screenshots/scripts/capture-watch.py`, which
+seeds the watch's save slot rather than driving the Crown, on a
+`Nine-Store-Watch` made once with
+`xcrun simctl create Nine-Store-Watch "Apple Watch Ultra 3 (49mm)"` and a
+NineWatch Debug build installed (`xcodebuild -scheme NineWatch -destination
+'platform=watchOS Simulator,name=Nine-Store-Watch' … CODE_SIGNING_ALLOWED=NO`).
 
 The store simulators need `com.apple.gamed` if they are `simslim`-slimmed:
 Nine waits on Game Center authentication at launch, and a slim simulator
 without it shows a white screen for over three minutes
 (`simslim on <udid> --keep com.apple.gamed`).
 
-Four frames tell the story: the home list, a board mid-solve, one box zoomed
-in with the Crown dial turning, and the solve celebration. In the Simulator,
-the Crown is the scroll wheel / two-finger scroll over the watch face. Number
-the files `20-…` onward so they sort after the phone and iPad sets.
+Four Watch frames tell the story: the board, one box under the lens, the
+solved board and the home list.
 
 **Apple TV** (1.2). Five frames, committed like the Duo's because nothing seeds
 a tvOS state: the shelf on Gentle and on Sharp, a fresh board, the digit ring,
@@ -136,10 +140,12 @@ and Technique School dark plus board light, once per posture — live in
 the only committed store PNGs (a `.gitignore` exception), because a reshoot
 needs a person: nothing scriptable sets the Duo's posture (PRD-37 §1.6).
 
-They stay in `screenshots/ios-duo/` (committed) rather than moving into the
-regenerated `screenshots/ios/`, which `store_screenshots_capture` empties. The
-Fastfile's `COMMITTED_SHOT_DIRS` merges them into the iOS set at upload, via
-`fastlane/.store-shots/ios`. fastlane 2.237.0 had no display type for 2853×2007
+They are raw material now: what uploads is the designed Duo slides in
+`screenshots/marketing/`, whose open frames are retaken in all ten languages by
+`store-screenshots/scripts/capture-duo.py` (one press of Open in Device Hub
+covers the run; the build must target the **iOS 27.1 SDK**, or the app runs
+letterboxed on the open Duo and draws no spread). The folded English frame here
+still serves the "both screens" slide. fastlane 2.237.0 had no display type for 2853×2007
 or 1398×2034; 2.241.1 (the Gemfile pin since 1.2) maps both postures to
 `APP_IPHONE_DUO`, which `store_screenshot_problems` now requires on iOS.
 

@@ -96,8 +96,13 @@ struct TVSidePanel<Settings: View>: View {
         switch panel {
         case .settings:
             HStack(alignment: .center, spacing: 14) {
+                // One line, shrinking before it breaks: beside the two guide
+                // buttons, "Einstellungen" and "Instellingen" wrapped mid-word.
                 Text(TVPanelPhrase.settings)
                     .couchText(CouchTypography.heading)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.6)
+                    .layoutPriority(1)
                 Spacer(minLength: 8)
                 // The way into the guides, at the top where a player looking
                 // for "how do I…" will land. Same row style as every setting.

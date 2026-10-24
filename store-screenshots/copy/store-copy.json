@@ -1,0 +1,241 @@
+{
+  "_comment": "Store screenshot copy, one block per slide, per locale. *word* marks the one emphasised word (drawn in the accent colour). \\n is an intentional line break. Feature names follow Nine's own string catalog (Thermo = Termo in es/it/pt-BR, Technique School = Technikschule, テクニック教室, …). Duo headlines stay on one line. The iPad deck reuses the iPhone block; Watch slides have no label line (too small at 422x514). The Mac and Apple TV decks reuse iPhone and Watch blocks; `tv` holds the one line they lack.",
+  "iphone": {
+    "hero": {
+      "en": ["SUDOKU FOR EVERY APPLE DEVICE", "Sudoku, made\n*beautiful*."],
+      "de": ["SUDOKU FÜR JEDES APPLE-GERÄT", "Sudoku,\n*wunderschön*."],
+      "es": ["SUDOKU PARA TODOS TUS DISPOSITIVOS APPLE", "El sudoku más\n*bonito*."],
+      "fr": ["LE SUDOKU POUR TOUS VOS APPAREILS APPLE", "Le sudoku,\nen *beauté*."],
+      "it": ["IL SUDOKU PER OGNI DISPOSITIVO APPLE", "Sudoku,\n*bellissimo*."],
+      "ja": ["すべてのAPPLEデバイスで", "*美しい*\n数独。"],
+      "ko": ["모든 APPLE 기기를 위한 스도쿠", "*아름다운*\n스도쿠."],
+      "nl": ["SUDOKU VOOR ELK APPLE-APPARAAT", "Sudoku, op\nz'n *mooist*."],
+      "pt-BR": ["SUDOKU PARA TODO DISPOSITIVO APPLE", "Sudoku,\n*lindo* de ver."],
+      "zh-Hans": ["适用于所有 APPLE 设备", "数独，\n从未如此*美*。"]
+    },
+    "coach": {
+      "en": ["A COACH THAT EXPLAINS EVERY HINT", "You've got\n*this*."],
+      "de": ["EIN COACH, DER JEDEN HINWEIS ERKLÄRT", "Du schaffst\n*das*."],
+      "es": ["UN COACH QUE EXPLICA CADA PISTA", "Tú\n*puedes*."],
+      "fr": ["UN COACH QUI EXPLIQUE CHAQUE INDICE", "Vous allez\n*y arriver*."],
+      "it": ["UN COACH CHE SPIEGA OGNI SUGGERIMENTO", "Ce la puoi\n*fare*."],
+      "ja": ["すべてのヒントを解説するコーチ", "あなたなら\n*できる*。"],
+      "ko": ["모든 힌트를 설명해 주는 코치", "충분히\n*할 수 있어요*."],
+      "nl": ["EEN COACH DIE ELKE HINT UITLEGT", "Jij kunt\n*dit*."],
+      "pt-BR": ["UM TREINADOR QUE EXPLICA CADA DICA", "Você\n*consegue*."],
+      "zh-Hans": ["每条提示都有讲解的教练", "相信自己，\n你*能行*。"]
+    },
+    "variants": {
+      "en": ["CLASSIC · THERMO · KILLER", "Three ways\nto *play*."],
+      "de": ["KLASSISCH · THERMO · KILLER", "Drei Arten\nzu *spielen*."],
+      "es": ["CLÁSICO · TERMO · KILLER", "Tres formas\nde *jugar*."],
+      "fr": ["CLASSIQUE · THERMO · KILLER", "Trois façons\nde *jouer*."],
+      "it": ["CLASSICO · TERMO · KILLER", "Tre modi\nper *giocare*."],
+      "ja": ["クラシック・サーモ・キラー", "遊び方は\n*3つ*。"],
+      "ko": ["클래식 · 서모 · 킬러", "세 가지\n*플레이* 방식."],
+      "nl": ["KLASSIEK · THERMO · KILLER", "Drie manieren\nom te *spelen*."],
+      "pt-BR": ["CLÁSSICO · TERMO · KILLER", "Três jeitos\nde *jogar*."],
+      "zh-Hans": ["经典 · 温度计 · 杀手", "*三种*\n玩法。"]
+    },
+    "colors": {
+      "en": ["TEN ACCENT COLORS", "Make it\n*yours*."],
+      "de": ["ZEHN AKZENTFARBEN", "Ganz\n*deins*."],
+      "es": ["DIEZ COLORES DE ACENTO", "Hazlo\n*tuyo*."],
+      "fr": ["DIX COULEURS D’ACCENTUATION", "Faites-le\n*vôtre*."],
+      "it": ["DIECI COLORI DI RISALTO", "Rendilo\n*tuo*."],
+      "ja": ["10色のアクセントカラー", "*自分*\nらしく。"],
+      "ko": ["10가지 강조 색상", "*나만의*\n스타일로."],
+      "nl": ["TIEN ACCENTKLEUREN", "Helemaal\n*van jou*."],
+      "pt-BR": ["DEZ CORES DE DESTAQUE", "Do *seu*\njeito."],
+      "zh-Hans": ["十种强调色", "*你的*\n专属风格。"]
+    },
+    "devices": {
+      "en": ["IPHONE · IPAD · MAC · APPLE TV · WATCH", "At home on\n*every* screen."],
+      "de": ["IPHONE · IPAD · MAC · APPLE TV · WATCH", "Überall\n*zu Hause*."],
+      "es": ["IPHONE · IPAD · MAC · APPLE TV · WATCH", "En *todas*\ntus pantallas."],
+      "fr": ["IPHONE · IPAD · MAC · APPLE TV · WATCH", "Chez lui sur\n*chaque* écran."],
+      "it": ["IPHONE · IPAD · MAC · APPLE TV · WATCH", "A casa su\n*ogni* schermo."],
+      "ja": ["IPHONE・IPAD・MAC・APPLE TV・WATCH", "*どの*画面でも\n心地よく。"],
+      "ko": ["IPHONE · IPAD · MAC · APPLE TV · WATCH", "*모든* 화면에서\n자연스럽게."],
+      "nl": ["IPHONE · IPAD · MAC · APPLE TV · WATCH", "Thuis op\n*elk* scherm."],
+      "pt-BR": ["IPHONE · IPAD · MAC · APPLE TV · WATCH", "Em casa em\n*qualquer* tela."],
+      "zh-Hans": ["IPHONE · IPAD · MAC · APPLE TV · WATCH", "*每块*屏幕\n都是主场。"]
+    },
+    "together": {
+      "en": ["SHAREPLAY ON FACETIME", "Solve it\n*together*."],
+      "de": ["SHAREPLAY ÜBER FACETIME", "Gemeinsam\n*rätseln*."],
+      "es": ["SHAREPLAY EN FACETIME", "Resuélvelo\n*juntos*."],
+      "fr": ["SHAREPLAY SUR FACETIME", "Résolvez-le\n*ensemble*."],
+      "it": ["SHAREPLAY SU FACETIME", "Risolvilo\n*insieme*."],
+      "ja": ["FACETIMEでSHAREPLAY", "*一緒に*\n解こう。"],
+      "ko": ["FACETIME으로 SHAREPLAY", "*함께*\n풀어요."],
+      "nl": ["SHAREPLAY VIA FACETIME", "Samen\n*puzzelen*."],
+      "pt-BR": ["SHAREPLAY NO FACETIME", "Resolvam\n*juntos*."],
+      "zh-Hans": ["通过 FACETIME 使用 SHAREPLAY", "*一起*\n来解题。"]
+    },
+    "gamecenter": {
+      "en": ["GAME CENTER ACHIEVEMENTS", "Celebrate\nevery *win*."],
+      "de": ["GAME CENTER-ERFOLGE", "Feiere jeden\n*Erfolg*."],
+      "es": ["LOGROS DE GAME CENTER", "Celebra cada\n*victoria*."],
+      "fr": ["SUCCÈS GAME CENTER", "Fêtez chaque\n*victoire*."],
+      "it": ["OBIETTIVI DI GAME CENTER", "Festeggia ogni\n*vittoria*."],
+      "ja": ["GAME CENTERの達成項目", "すべての勝利を\n*祝おう*。"],
+      "ko": ["GAME CENTER 도전 과제", "모든 승리를\n*축하하세요*."],
+      "nl": ["GAME CENTER-PRESTATIES", "Vier elke\n*overwinning*."],
+      "pt-BR": ["CONQUISTAS DO GAME CENTER", "Comemore cada\n*vitória*."],
+      "zh-Hans": ["GAME CENTER 成就", "为每次胜利\n*庆祝*。"]
+    },
+    "languages": {
+      "en": ["TEN LANGUAGES", "Speaks *your*\nlanguage."],
+      "de": ["ZEHN SPRACHEN", "Spricht\n*deine* Sprache."],
+      "es": ["DIEZ IDIOMAS", "Habla *tu*\nidioma."],
+      "fr": ["DIX LANGUES", "Parle *votre*\nlangue."],
+      "it": ["DIECI LINGUE", "Parla la *tua*\nlingua."],
+      "ja": ["10の言語に対応", "*あなた*の\n言葉で。"],
+      "ko": ["10개 언어 지원", "*당신의*\n언어로."],
+      "nl": ["TIEN TALEN", "Spreekt *jouw*\ntaal."],
+      "pt-BR": ["DEZ IDIOMAS", "Fala o *seu*\nidioma."],
+      "zh-Hans": ["支持十种语言", "说*你的*\n语言。"]
+    },
+    "closer": {
+      "en": ["NINE", "Everything\nyou'll *love*."],
+      "de": ["NINE", "Alles, was du\n*liebst*."],
+      "es": ["NINE", "Todo lo que\nvas a *amar*."],
+      "fr": ["NINE", "Tout ce\nque vous *aimez*."],
+      "it": ["NINE", "Tutto ciò\nche *amerai*."],
+      "ja": ["NINE", "*好き*が\n詰まってる。"],
+      "ko": ["NINE", "마음에 들\n*모든 것*."],
+      "nl": ["NINE", "Alles waar je\n*van houdt*."],
+      "pt-BR": ["NINE", "Tudo o que\nvocê vai *amar*."],
+      "zh-Hans": ["NINE", "*喜欢*的一切，\n都在这里。"]
+    }
+  },
+  "closerRows": {
+    "en": [["VARIANTS", "Classic, Thermo and Killer"], ["COACHING", "Every hint explained"], ["COLORS", "Ten accents to choose from"], ["DEVICES", "iPhone, iPad, Mac, TV, Watch"], ["TOGETHER", "SharePlay on FaceTime"], ["LANGUAGES", "Ten, from Japanese to German"], ["GAME CENTER", "Achievements and leaderboards"]],
+    "de": [["VARIANTEN", "Klassisch, Thermo und Killer"], ["COACHING", "Jeder Hinweis erklärt"], ["FARBEN", "Zehn Akzentfarben zur Wahl"], ["GERÄTE", "iPhone, iPad, Mac, TV, Watch"], ["GEMEINSAM", "SharePlay über FaceTime"], ["SPRACHEN", "Zehn, von Japanisch bis Deutsch"], ["GAME CENTER", "Erfolge und Bestenlisten"]],
+    "es": [["VARIANTES", "Clásico, Termo y Killer"], ["COACH", "Cada pista, explicada"], ["COLORES", "Diez colores de acento"], ["DISPOSITIVOS", "iPhone, iPad, Mac, TV, Watch"], ["JUNTOS", "SharePlay en FaceTime"], ["IDIOMAS", "Diez, del japonés al alemán"], ["GAME CENTER", "Logros y clasificaciones"]],
+    "fr": [["VARIANTES", "Classique, Thermo et Killer"], ["COACHING", "Chaque indice expliqué"], ["COULEURS", "Dix couleurs au choix"], ["APPAREILS", "iPhone, iPad, Mac, TV, Watch"], ["ENSEMBLE", "SharePlay sur FaceTime"], ["LANGUES", "Dix, du japonais à l’allemand"], ["GAME CENTER", "Succès et classements"]],
+    "it": [["VARIANTI", "Classico, Termo e Killer"], ["COACH", "Ogni suggerimento spiegato"], ["COLORI", "Dieci colori tra cui scegliere"], ["DISPOSITIVI", "iPhone, iPad, Mac, TV, Watch"], ["INSIEME", "SharePlay su FaceTime"], ["LINGUE", "Dieci, dal giapponese al tedesco"], ["GAME CENTER", "Obiettivi e classifiche"]],
+    "ja": [["バリエーション", "クラシック、サーモ、キラー"], ["コーチ", "ヒントはすべて解説付き"], ["カラー", "10色から選べるアクセント"], ["デバイス", "iPhone、iPad、Mac、TV、Watch"], ["みんなで", "FaceTimeでSharePlay"], ["言語", "日本語からドイツ語まで10言語"], ["GAME CENTER", "達成項目とランキング"]],
+    "ko": [["변형", "클래식, 서모, 킬러"], ["코치", "모든 힌트를 설명"], ["색상", "10가지 강조 색상"], ["기기", "iPhone, iPad, Mac, TV, Watch"], ["함께", "FaceTime에서 SharePlay"], ["언어", "일본어부터 독일어까지 10개"], ["GAME CENTER", "도전 과제와 순위표"]],
+    "nl": [["VARIANTEN", "Klassiek, Thermo en Killer"], ["COACHING", "Elke hint uitgelegd"], ["KLEUREN", "Tien accentkleuren"], ["APPARATEN", "iPhone, iPad, Mac, TV, Watch"], ["SAMEN", "SharePlay via FaceTime"], ["TALEN", "Tien, van Japans tot Duits"], ["GAME CENTER", "Prestaties en ranglijsten"]],
+    "pt-BR": [["VARIANTES", "Clássico, Termo e Killer"], ["TREINADOR", "Cada dica explicada"], ["CORES", "Dez cores de destaque"], ["DISPOSITIVOS", "iPhone, iPad, Mac, TV, Watch"], ["JUNTOS", "SharePlay no FaceTime"], ["IDIOMAS", "Dez, do japonês ao alemão"], ["GAME CENTER", "Conquistas e rankings"]],
+    "zh-Hans": [["玩法", "经典、温度计、杀手"], ["教练", "每条提示都有讲解"], ["颜色", "十种强调色可选"], ["设备", "iPhone、iPad、Mac、TV、Watch"], ["一起玩", "FaceTime 上的 SharePlay"], ["语言", "从日语到德语，共十种"], ["GAME CENTER", "成就与排行榜"]]
+  },
+  "duo": {
+    "hero": {
+      "en": ["BUILT FOR IPHONE DUO", "Sudoku, made *beautiful*."],
+      "de": ["GEMACHT FÜR IPHONE DUO", "Sudoku, *wunderschön*."],
+      "es": ["CREADO PARA IPHONE DUO", "El sudoku más *bonito*."],
+      "fr": ["CONÇU POUR L’IPHONE DUO", "Le sudoku, en *beauté*."],
+      "it": ["PENSATO PER IPHONE DUO", "Sudoku, *bellissimo*."],
+      "ja": ["IPHONE DUOのために", "*美しい*数独。"],
+      "ko": ["IPHONE DUO를 위해 만든", "*아름다운* 스도쿠."],
+      "nl": ["GEMAAKT VOOR IPHONE DUO", "Sudoku, op z'n *mooist*."],
+      "pt-BR": ["FEITO PARA O IPHONE DUO", "Sudoku, *lindo* de ver."],
+      "zh-Hans": ["专为 IPHONE DUO 打造", "数独，从未如此*美*。"]
+    },
+    "coach": {
+      "en": ["A COACH THAT EXPLAINS EVERY HINT", "You've got *this*."],
+      "de": ["EIN COACH, DER JEDEN HINWEIS ERKLÄRT", "Du schaffst *das*."],
+      "es": ["UN COACH QUE EXPLICA CADA PISTA", "Tú *puedes*."],
+      "fr": ["UN COACH QUI EXPLIQUE CHAQUE INDICE", "Vous allez *y arriver*."],
+      "it": ["UN COACH CHE SPIEGA OGNI SUGGERIMENTO", "Ce la puoi *fare*."],
+      "ja": ["すべてのヒントを解説するコーチ", "あなたなら*できる*。"],
+      "ko": ["모든 힌트를 설명해 주는 코치", "충분히 *할 수 있어요*."],
+      "nl": ["EEN COACH DIE ELKE HINT UITLEGT", "Jij kunt *dit*."],
+      "pt-BR": ["UM TREINADOR QUE EXPLICA CADA DICA", "Você *consegue*."],
+      "zh-Hans": ["每条提示都有讲解的教练", "相信自己，你*能行*。"]
+    },
+    "both": {
+      "en": ["FOLDED OR OPEN", "One board, *both* screens."],
+      "de": ["GEFALTET ODER OFFEN", "Ein Brett, *beide* Displays."],
+      "es": ["PLEGADO O ABIERTO", "Un tablero, *dos* pantallas."],
+      "fr": ["PLIÉ OU OUVERT", "Une grille, *deux* écrans."],
+      "it": ["CHIUSO O APERTO", "Una griglia, *due* schermi."],
+      "ja": ["閉じても、開いても", "*同じ*盤面を、どちらでも。"],
+      "ko": ["접어도, 펼쳐도", "*하나*의 보드, 두 개의 화면."],
+      "nl": ["GEVOUWEN OF OPEN", "Eén bord, *twee* schermen."],
+      "pt-BR": ["FECHADO OU ABERTO", "Um tabuleiro, *duas* telas."],
+      "zh-Hans": ["折叠或展开", "*一个*棋盘，两块屏幕。"]
+    },
+    "school": {
+      "en": ["TECHNIQUE SCHOOL", "Learn every *technique*."],
+      "de": ["TECHNIKSCHULE", "Lerne jede *Technik*."],
+      "es": ["ESCUELA DE TÉCNICAS", "Aprende cada *técnica*."],
+      "fr": ["ÉCOLE DES TECHNIQUES", "Apprenez chaque *technique*."],
+      "it": ["SCUOLA DELLE TECNICHE", "Impara ogni *tecnica*."],
+      "ja": ["テクニック教室", "*テクニック*を学ぼう。"],
+      "ko": ["기법 교실", "모든 *기법*을 배우세요."],
+      "nl": ["TECHNIEKSCHOOL", "Leer elke *techniek*."],
+      "pt-BR": ["ESCOLA DE TÉCNICAS", "Aprenda cada *técnica*."],
+      "zh-Hans": ["技巧学堂", "掌握每一种*技巧*。"]
+    }
+  }
+,
+  "watch": {
+    "hero": {
+      "en": ["", "Sudoku on\nyour *wrist*."],
+      "de": ["", "Sudoku am\n*Handgelenk*."],
+      "es": ["", "Sudoku en\ntu *muñeca*."],
+      "fr": ["", "Le sudoku à\nvotre *poignet*."],
+      "it": ["", "Sudoku\nal *polso*."],
+      "ja": ["", "*手首*で\n数独。"],
+      "ko": ["", "*손목* 위의\n스도쿠."],
+      "nl": ["", "Sudoku om\nje *pols*."],
+      "pt-BR": ["", "Sudoku no\nseu *pulso*."],
+      "zh-Hans": ["", "*手腕*上的\n数独。"]
+    },
+    "box": {
+      "en": ["", "One box\nat a *time*."],
+      "de": ["", "Block für\n*Block*."],
+      "es": ["", "Caja a\n*caja*."],
+      "fr": ["", "Bloc par\n*bloc*."],
+      "it": ["", "Blocco per\n*blocco*."],
+      "ja": ["", "*ボックス*\nごとに解く。"],
+      "ko": ["", "*박스*\n하나씩."],
+      "nl": ["", "Blok voor\n*blok*."],
+      "pt-BR": ["", "Bloco a\n*bloco*."],
+      "zh-Hans": ["", "一次一个\n*区块*。"]
+    },
+    "solved": {
+      "en": ["", "Celebrate\nevery *win*."],
+      "de": ["", "Feiere jeden\n*Erfolg*."],
+      "es": ["", "Celebra cada\n*victoria*."],
+      "fr": ["", "Fêtez chaque\n*victoire*."],
+      "it": ["", "Festeggia ogni\n*vittoria*."],
+      "ja": ["", "すべての勝利を\n*祝おう*。"],
+      "ko": ["", "모든 승리를\n*축하하세요*."],
+      "nl": ["", "Vier elke\n*overwinning*."],
+      "pt-BR": ["", "Comemore cada\n*vitória*."],
+      "zh-Hans": ["", "为每次胜利\n*庆祝*。"]
+    },
+    "home": {
+      "en": ["", "Pick up\n*anytime*."],
+      "de": ["", "Jederzeit\n*weiterspielen*."],
+      "es": ["", "Sigue cuando\n*quieras*."],
+      "fr": ["", "Reprenez à\ntout *moment*."],
+      "it": ["", "Riprendi\nquando *vuoi*."],
+      "ja": ["", "*いつでも*\n続きから。"],
+      "ko": ["", "*언제든*\n이어서."],
+      "nl": ["", "Speel *altijd*\nverder."],
+      "pt-BR": ["", "Continue\nquando *quiser*."],
+      "zh-Hans": ["", "*随时*\n接着玩。"]
+    }
+  }
+,
+  "tv": {
+    "ring": {
+      "en": ["SIRI REMOTE OR GAME CONTROLLER", "Play from\nthe *couch*."],
+      "de": ["SIRI REMOTE ODER GAMECONTROLLER", "Spielen vom\n*Sofa* aus."],
+      "es": ["SIRI REMOTE O MANDO", "Juega desde\nel *sofá*."],
+      "fr": ["SIRI REMOTE OU MANETTE", "Jouez depuis\nle *canapé*."],
+      "it": ["SIRI REMOTE O CONTROLLER", "Gioca dal\n*divano*."],
+      "ja": ["SIRI REMOTEまたはゲームコントローラ", "*ソファ*から\n遊ぼう。"],
+      "ko": ["SIRI REMOTE 또는 게임 컨트롤러", "*소파*에서\n즐기세요."],
+      "nl": ["SIRI REMOTE OF GAMECONTROLLER", "Speel vanaf\nde *bank*."],
+      "pt-BR": ["SIRI REMOTE OU CONTROLE", "Jogue do\n*sofá*."],
+      "zh-Hans": ["SIRI REMOTE 或游戏手柄", "窝在*沙发*里\n轻松玩。"]
+    }
+  }
+}

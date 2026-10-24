@@ -1,0 +1,34 @@
+node_modules
+.next
+out
+.DS_Store
+*.tsbuildinfo
+next-env.d.ts
+.env*.local
+
+# Uploaded screenshots belong to the generated project: commit them alongside
+# app-store-screenshots.json so decks remain reproducible after cloning.
+
+# Fonts imported from the editor toolbar are user assets too (and font licences
+# often forbid redistributing them), so keep them out of the template as well.
+public/fonts/imported/*
+!public/fonts/imported/.gitkeep
+
+# Tester Army output
+.e2e/
+
+
+# Nine: raw simulator captures are regenerated (scripts/capture-ios.py, capture-watch.py,
+# scripts/place-captures.sh), and the upload-ready set is committed as JPEG in
+# ../fastlane/screenshots/marketing — neither belongs here as PNG.
+public/screenshots/apple/iphone/
+public/screenshots/apple/ipad/
+public/screenshots/apple/watch/
+public/screenshots/apple/mac/
+public/screenshots/apple/tv/
+public/screenshots/apple/duo-inner/
+public/screenshots/apple/duo-outer/
+exports/
+
+# Python bytecode from the scripts
+__pycache__/

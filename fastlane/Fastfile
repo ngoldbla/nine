@@ -71,12 +71,17 @@ STORE_PLATFORMS = { "ios" => "ios", "tvos" => "appletvos", "mac" => "osx" }.free
 RELEASE_PLATFORMS = %w[ios tvos mac].freeze
 STORE_DIR = File.expand_path(".", __dir__)
 
-# Screenshot sets that are committed rather than regenerated, kept in their own
-# folder and merged into the platform's set at upload. The iPhone Duo frames
-# need a person in Device Hub to reshoot (no tool sets the posture). (The Apple
-# TV set is committed too, but in place — `screenshots/tvos/` is the whole
-# platform set, so it needs no merge; see `.gitignore`.)
-COMMITTED_SHOT_DIRS = { "ios" => %w[ios-duo] }.freeze
+# The folders under screenshots/ that make up a platform's uploaded set; a
+# platform not listed uploads its own folder. iOS uploads the designed, captioned
+# set in `marketing/` (iPhone, iPad, Watch and iPhone Duo, all ten locales,
+# committed as JPEG; its README says how it is rebuilt) in place of the plain
+# frames `store_screenshots_capture` leaves in `ios/` and the Duo frames in
+# `ios-duo/`, which are now only that set's raw material. tvOS and Mac upload
+# their own designed sets beside it, one folder each because deliver takes one
+# per platform; `screenshots/tvos/` and `screenshots/mac/` are raw frames now.
+STORE_SHOT_DIRS = {
+  "ios" => %w[marketing], "tvos" => %w[marketing-tvos], "mac" => %w[marketing-mac]
+}.freeze
 
 # App Store Connect's limits, checked here so a too-long field fails on the
 # laptop instead of halfway through an upload. Keywords are bytes, not
@@ -91,8 +96,11 @@ STORE_REQUIRED = %w[name.txt description.txt keywords.txt support_url.txt privac
 # `nine/scripts/shotlist.py` scene in one appearance. Dark-first (README rule
 # 5), with one light frame so the page admits light mode exists.
 #
-# No `home` frame: the iOS home shelf carries the Parlor's "Play together"
-# card, and the Parlor is not advertised until the owner says it ships.
+# These plain frames no longer reach the store (iOS uploads `marketing/`, see
+# STORE_SHOT_DIRS); the lane keeps them as raw material and a quick check. No
+# `home` frame here only because the designed set already shows the shelf.
+# The Parlor (SharePlay, "Play together") is advertised since the owner's call
+# of 2026-10-24: iPhone slide 06 of the designed set and the store copy.
 STORE_SHOTS = [
   %w[game dark], %w[rose dark], %w[channel dark],
   %w[school dark], %w[game light]
@@ -133,16 +141,15 @@ def store_options(plat)
   }
 end
 
-# The folder deliver uploads for a platform: its own set, plus any committed
-# set beside it (`COMMITTED_SHOT_DIRS`), copied together into
-# `.store-shots/<platform>` so one `overwrite_screenshots` replaces them all.
+# The folder deliver uploads for a platform: its own folder, or the folders
+# `STORE_SHOT_DIRS` names copied together into `.store-shots/<platform>`, so
+# one `overwrite_screenshots` replaces everything on ASC with exactly that set.
 def store_screenshots_root(plat)
-  base = File.join(STORE_DIR, "screenshots", plat)
-  extras = COMMITTED_SHOT_DIRS.fetch(plat, [])
-  return base if extras.empty?
+  dirs = STORE_SHOT_DIRS.fetch(plat, [plat])
+  return File.join(STORE_DIR, "screenshots", plat) if dirs == [plat]
   staged = File.join(STORE_DIR, ".store-shots", plat)
   FileUtils.rm_rf(staged)
-  ([plat] + extras).each do |dir|
+  dirs.each do |dir|
     Dir[File.join(STORE_DIR, "screenshots", dir, "*")].select { |d| File.directory?(d) }.each do |loc_dir|
       dest = File.join(staged, File.basename(loc_dir))
       FileUtils.mkdir_p(dest)
@@ -256,7 +263,7 @@ def store_metadata_problems
     dir = File.join(meta, loc)
     STORE_REQUIRED.each do |f|
       path = File.join(dir, f)
-      problems << "#{loc}/#{f}: missing or empty" unless File.exist?(path) && !File.read(path).strip.empty?
+      problems << "#{loc}/#{f}: missing or empty" unless File.exist?(path) && !File.read(path, encoding: "UTF-8").strip.empty?
     end
     STORE_LIMITS.each do |f, max|
       path = File.join(dir, f)
@@ -273,7 +280,7 @@ def store_metadata_problems
     %w[support_url.txt privacy_url.txt marketing_url.txt].each do |f|
       path = File.join(dir, f)
       next unless File.exist?(path)
-      url = File.read(path).strip
+      url = File.read(path, encoding: "UTF-8").strip
       problems << "#{loc}/#{f}: not an https URL (#{url})" unless url.empty? || url.start_with?("https://")
     end
   end
@@ -306,7 +313,12 @@ def store_screenshot_problems(plat)
     "tvos" => %w[APP_APPLE_TV],
     "mac" => %w[APP_DESKTOP]
   }.fetch(plat)
+  # A locale with no screenshot folder at all shows the primary language's set
+  # on the store, as ASC does for any localization without its own; deliver
+  # leaves it untouched. So only en-US must exist, and a folder that does exist
+  # must be a whole set (tvOS and Mac are English-only while metadata is not).
   locales.each do |loc|
+    next if loc != "en-US" && !File.directory?(File.join(shots_root, loc))
     pngs = Dir[File.join(shots_root, loc, "*.{png,jpg,jpeg}")].sort
     found = Hash.new(0)
     pngs.each do |path|
