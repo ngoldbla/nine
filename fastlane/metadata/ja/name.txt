@@ -1,1 +1,1 @@
-Nine: 数独
+Nine Sudoku
